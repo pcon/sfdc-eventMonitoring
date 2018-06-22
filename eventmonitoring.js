@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 var Q = require('q');
 
 var config = require('./src/lib/config.js');
