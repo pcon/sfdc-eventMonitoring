@@ -60,9 +60,10 @@ var generateAveragesForName = function (logs, name) {
     var averages = {
             name: name,
             count: lo.size(logs),
-            exec: 0
         },
         deferred = Q.defer();
+
+    averages = report.initializeAverages(averages, DATA_MAP);
 
     lo.forEach(logs, function (log) {
         lo.forEach(DATA_MAP, function (value, key) {

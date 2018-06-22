@@ -85,15 +85,11 @@ var groupByPage = function (logs) {
 var generateAveragesForUri = function (logs, uri) {
     var averages = {
             uri: uri,
-            count: lo.size(logs),
-            cpu: 0,
-            run: 0,
-            response: 0,
-            view: 0,
-            dbcpu: 0,
-            dbtotal: 0
+            count: lo.size(logs)
         },
         deferred = Q.defer();
+
+    averages = report.initializeAverages(averages, DATA_MAP);
 
     lo.forEach(logs, function (log) {
         lo.forEach(DATA_MAP, function (value, key) {

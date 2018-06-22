@@ -35,6 +35,14 @@ var limitAverages = function (data) {
     return deferred.promise;
 };
 
+var initializeAverages = function (data, data_map) {
+    lo.forEach(lo.keys(data_map), function (key) {
+        data[key] = 0;
+    });
+
+    return data;
+};
+
 var sortAverages = function (data) {
     var deferred = Q.defer();
 
@@ -55,6 +63,7 @@ var sortAverages = function (data) {
 var report = {
     generateTableData: generateTableData,
     limitAverages: limitAverages,
+    initializeAverages: initializeAverages,
     sortAverages: sortAverages
 };
 

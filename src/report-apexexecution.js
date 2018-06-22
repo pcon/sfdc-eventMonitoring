@@ -11,24 +11,28 @@ var sfdc = require('./lib/sfdc.js');
 var queries = require('./lib/queries');
 
 var COLUMNS = [
-    'name',
+    'entry',
     'count',
     'cpu',
     'run',
-    'limit',
-    'dbtotal'
+    'exec',
+    'dbtotal',
+    'callout',
+    'soql'
 ];
 
 var DATA_MAP = {
     'cpu': 'CPU_TIME',
     'run': 'RUN_TIME',
-    'limit': 'LIMIT_USAGE_PERCENT',
-    'dbtotal': 'DB_TOTAL_TIME'
+    'exec': 'EXEC_TIME',
+    'dbtotal': 'DB_TOTAL_TIME',
+    'callout': 'CALLOUT_TIME',
+    'soql': 'NUMBER_SOQL_QUERIES'
 };
 
 var OUTPUT_INFO = {
-    'name': {
-        header: 'Name',
+    'entry': {
+        header: 'Entry Point',
         formatter: formatter.noop
     },
     'count': {
@@ -43,21 +47,29 @@ var OUTPUT_INFO = {
         header: 'Run Time',
         formatter: formatter.prettyms
     },
-    'limit': {
-        header: 'Usage Percent Limit',
-        formatter: formatter.percent
+    'exec': {
+        header: 'Execution Time',
+        formatter: formatter.prettyms
     },
     'dbtotal': {
         header: 'DB Total Time',
         formatter: formatter.nanoToMsToPretty
+    },
+    'callout': {
+        header: 'Callout Time',
+        formatter: formatter.prettyms
+    },
+    'soql': {
+        header: 'SOQL Count',
+        formatter: formatter.noop
     }
 };
 
 function generateName(log) {
-    return log.CLASS_NAME + '.' + log.METHOD_NAME;
+    return log.ENTRY_POINT;
 }
 
-var groupByMethod = function (logs) {
+var groupByEntryPoint = function (logs) {
     var grouping = {},
         deferred = Q.defer();
 
@@ -76,8 +88,8 @@ var groupByMethod = function (logs) {
 
 var generateAveragesForName = function (logs, name) {
     var averages = {
-            name: name,
-            count: lo.size(logs),
+            entry: name,
+            count: lo.size(logs)
         },
         deferred = Q.defer();
 
@@ -139,7 +151,7 @@ var printAverages = function (data) {
 var run = function () {
     'use strict';
 
-    sfdc.query(queries.report.apexsoap())
+    sfdc.query(queries.report.apexexecution())
         .then(function (event_log_files) {
             var deferred = Q.defer();
 
@@ -156,7 +168,7 @@ var run = function () {
                 })
 
             return deferred.promise;
-        }).then(groupByMethod)
+        }).then(groupByEntryPoint)
         .then(generateAverages)
         .then(report.sortAverages)
         .then(report.limitAverages)

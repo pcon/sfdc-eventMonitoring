@@ -5,11 +5,13 @@ var conf = require('./lib/config.js');
 var errorCodes = require('./lib/errorCodes.js');
 var sfdc = require('./lib/sfdc.js');
 
+var apexexecution = require('./report-apexexecution.js');
 var apexsoap = require('./report-apexsoap.js');
 var apextrigger = require('./report-apextrigger.js');
 var visualforce = require('./report-visualforce.js');
 
 var handlers = {
+    apexexecution: apexexecution.run,
     apexsoap: apexsoap.run,
     apextrigger: apextrigger.run,
     visualforce: visualforce.run
@@ -21,11 +23,7 @@ function config(yargs) {
     yargs.positional('type', {
         type: 'string',
         describe: 'The type of report to run',
-        choices: [
-            'apexsoap',
-            'apextrigger',
-            'visualforce'
-        ]
+        choices: lo.keys(handlers)
     }).options({
         'format': {
             default: 'table',
