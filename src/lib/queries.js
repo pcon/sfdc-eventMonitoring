@@ -50,17 +50,22 @@ function report(type) {
     return buildSimpleQuery(EVENT_LOG_FILE_FIELDS, EVENT_LOG_FILE, criteria, 'LogDate desc', 1);
 };
 
-var reportVisualforce = function () {
-    return report('VisualforceRequest');
-};
-
 var reportApexSoap = function () {
     return report('ApexSoap');
+};
+
+var reportApexTrigger = function () {
+    return report('ApexTrigger');
+};
+
+var reportVisualforce = function () {
+    return report('VisualforceRequest');
 };
 
 var queries = {
     report: {
         apexsoap: reportApexSoap,
+        apextrigger: reportApexTrigger,
         visualforce: reportVisualforce
     }
 };
