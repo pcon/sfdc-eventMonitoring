@@ -2,10 +2,12 @@ var chalk = require('chalk');
 var lo = require('lodash');
 var prettyms = require('pretty-ms');
 var prettybytes = require('pretty-bytes');
+var process = require('process');
 var Q = require('q');
 
 const { table } = require('table');
 
+var errorCodes = require('./lib/errorCodes.js');
 var sfdc = require('./lib/sfdc.js');
 var queries = require('./lib/queries');
 
@@ -211,6 +213,11 @@ var run = function () {
     sfdc.query(queries.report.visualforce())
         .then(function (event_log_files) {
             var deferred = Q.defer();
+
+            if (lo.isEmpty(event_log_files)) {
+                global.logger.error('Unable to find log files');
+                process.exit(errorCodes.NO_LOGFILES);
+            }
 
             sfdc.fetchConvertFile(event_log_files[0].LogFile)
                 .then(function (data) {
