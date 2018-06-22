@@ -6,7 +6,6 @@ var Q = require('q');
 
 const { table } = require('table');
 
-var logger = require('./lib/logger.js');
 var sfdc = require('./lib/sfdc.js');
 var queries = require('./lib/queries');
 
@@ -145,11 +144,11 @@ var generateAverages = function (grouping) {
 var sortAverages = function (data) {
     var deferred = Q.defer();
 
-    logger.debug('Sorting by ' + global.config.sort);
+    global.logger.debug('Sorting by ' + global.config.sort);
     data.averages = lo.sortBy(data.averages, lo.split(global.config.sort, ',')).reverse();
 
     if (global.config.asc) {
-        logger.debug('Ascending');
+        global.logger.debug('Ascending');
 
         data.averages = data.averages.reverse();
     }
@@ -163,7 +162,7 @@ var limitAverages = function (data) {
     var deferred = Q.defer();
 
     if (global.config.limit !== undefined) {
-        logger.debug('Limiting to ' + global.config.limit);
+        global.logger.debug('Limiting to ' + global.config.limit);
         data.averages = lo.slice(data.averages, 0, global.config.limit);
     }
 
@@ -196,9 +195,9 @@ var printAverages = function (data) {
     var deferred = Q.defer();
 
     if (global.config.format === 'json') {
-        logger.log(data);
+        global.logger.log(data);
     } else if (global.config.format === 'table') {
-        logger.log(table(generateTableData(data.averages)));
+        global.logger.log(table(generateTableData(data.averages)));
     }
 
     deferred.resolve();
@@ -227,7 +226,7 @@ var run = function () {
         .then(limitAverages)
         .then(printAverages)
         .catch(function (error) {
-            logger.error(error);
+            global.logger.error(error);
         });
 };
 

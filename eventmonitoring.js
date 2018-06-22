@@ -8,6 +8,8 @@ global.config = {
     url: undefined
 };
 
+global.logger = require('./src/lib/logger.js');
+
 var run = function () {
     var deferred = Q.defer();
 
@@ -65,5 +67,5 @@ var run = function () {
 config.loadConfig()
     .then(run)
     .catch(function (error) {
-        console.log(error);
+        global.logger.error(error);
     });

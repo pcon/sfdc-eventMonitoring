@@ -6,7 +6,7 @@ var process = require('process');
 var request = require('request');
 
 var conf = require('./config.js');
-var logger = require('./logger.js');
+var errorCodes = require('./errorCodes.js');
 var utils = require('./utils.js');
 
 var login = function () {
@@ -16,11 +16,11 @@ var login = function () {
 
     if (global.config.solenopsis) {
         if (global.config.env === undefined) {
-            logger.error('Environment specified');
-            process.exit(-1);
+            global.logger.error('No environment specified');
+            process.exit(errorCodes.NO_ENVIRONMENT);
         }
 
-        logger.debug('Loading solenopsis config for ' + global.config.env);
+        global.logger.debug('Loading solenopsis config for ' + global.config.env);
         conf.loadSolenopsisCredentials(global.config.env);
     }
 
@@ -29,8 +29,8 @@ var login = function () {
         global.config.password === undefined ||
         global.config.url === undefined
     ) {
-        logger.error('Unable to login.  Incomplete credentials');
-        process.exit(-1);
+        global.logger.error('Unable to login.  Incomplete credentials');
+        process.exit(errorCodes.INCOMPLETE_CREDS);
     }
 
     var deferred = Q.defer();
@@ -64,8 +64,8 @@ var query = function (query_string) {
     var deferred = Q.defer();
 
     if (global.sfdc_conn === undefined) {
-        logger.error('No valid connection');
-        process.exit(-1);
+        global.logger.error('No valid connection');
+        process.exit(NO_CONNECTION_QUERY);
     }
 
     global.sfdc_conn.query(query_string, function (error, results) {
@@ -77,8 +77,8 @@ var query = function (query_string) {
 
 var fetchConvertFile = function (file_path) {
     if (global.sfdc_conn === undefined) {
-        logger.error('No valid connection');
-        process.exit(-1);
+        global.logger.error('No valid connection');
+        process.exit(NO_CONNECTION_FETCH);
     }
 
     var options = {

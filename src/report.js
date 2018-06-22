@@ -2,6 +2,7 @@ var lo = require('lodash');
 var Q = require('q');
 
 var conf = require('./lib/config.js');
+var errorCodes = require('./lib/errorCodes.js');
 var sfdc = require('./lib/sfdc.js');
 var visualforce = require('./report-visualforce.js');
 
@@ -62,8 +63,8 @@ function run(args) {
         !lo.has(handlers, global.config.type) ||
         lo.get(handlers, global.config.type) === undefined
     ) {
-        console.log(global.config.type + ' does not have a supported report handler');
-        return;
+        global.logger.error(global.config.type + ' does not have a supported report handler');
+        process.exit(errorCodes.UNSUPPORTED_HANDLER);
     }
 
     sfdc.login()
