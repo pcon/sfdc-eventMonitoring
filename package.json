@@ -1,8 +1,11 @@
 {
   "name": "sfdc-eventmonitoring",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Command line tools surrounding event monitoring",
   "main": "eventmonitoring.js",
+  "bin": {
+    "eventmonitoring": "eventmonitoring.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
