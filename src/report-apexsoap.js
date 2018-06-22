@@ -11,28 +11,24 @@ var sfdc = require('./lib/sfdc.js');
 var queries = require('./lib/queries');
 
 var COLUMNS = [
-    'uri',
+    'name',
     'count',
     'cpu',
     'run',
-    'view',
-    'response',
-    'dbcpu',
+    'limit',
     'dbtotal'
 ];
 
 var DATA_MAP = {
     'cpu': 'CPU_TIME',
     'run': 'RUN_TIME',
-    'response': 'RESPONSE_SIZE',
-    'view': 'VIEW_STATE_SIZE',
-    'dbcpu': 'DB_CPU_TIME',
+    'limit': 'LIMIT_USAGE_PERCENT',
     'dbtotal': 'DB_TOTAL_TIME'
 };
 
 var OUTPUT_INFO = {
-    'uri': {
-        header: 'URI',
+    'name': {
+        header: 'Name',
         formatter: formatter.noop
     },
     'count': {
@@ -47,17 +43,9 @@ var OUTPUT_INFO = {
         header: 'Run Time',
         formatter: formatter.prettyms
     },
-    'view': {
-        header: 'View State Size',
-        formatter: formatter.prettybytes
-    },
-    'response': {
-        header: 'Response Size',
-        formatter: formatter.prettybytes
-    },
-    'dbcpu': {
-        header: 'DB CPU Time',
-        formatter: formatter.prettyms
+    'limit': {
+        header: 'Usage Percent Limit',
+        formatter: formatter.percent
     },
     'dbtotal': {
         header: 'DB Total Time',
@@ -65,16 +53,20 @@ var OUTPUT_INFO = {
     }
 };
 
-var groupByPage = function (logs) {
+function generateName(log) {
+    return log.CLASS_NAME + '.' + log.METHOD_NAME;
+}
+
+var groupByMethod = function (logs) {
     var grouping = {},
         deferred = Q.defer();
 
     lo.forEach(logs, function (log) {
-        if (!lo.has(grouping, log.URI)) {
-            grouping[log.URI] = [];
+        if (!lo.has(grouping, generateName(log))) {
+            grouping[generateName(log)] = [];
         }
 
-        grouping[log.URI].push(log);
+        grouping[generateName(log)].push(log);
     });
 
     deferred.resolve(grouping);
@@ -82,15 +74,13 @@ var groupByPage = function (logs) {
     return deferred.promise;
 };
 
-var generateAveragesForUri = function (logs, uri) {
+var generateAveragesForName = function (logs, name) {
     var averages = {
-            uri: uri,
+            name: name,
             count: lo.size(logs),
             cpu: 0,
             run: 0,
-            response: 0,
-            view: 0,
-            dbcpu: 0,
+            limit: 0,
             dbtotal: 0
         },
         deferred = Q.defer();
@@ -117,7 +107,7 @@ var generateAverages = function (grouping) {
         deferred = Q.defer();
 
     lo.forEach(grouping, function (value, key) {
-        promises.push(generateAveragesForUri(value, key));
+        promises.push(generateAveragesForName(value, key));
     });
 
     Q.allSettled(promises)
@@ -151,7 +141,7 @@ var printAverages = function (data) {
 var run = function () {
     'use strict';
 
-    sfdc.query(queries.report.visualforce())
+    sfdc.query(queries.report.apexsoap())
         .then(function (event_log_files) {
             var deferred = Q.defer();
 
@@ -168,7 +158,7 @@ var run = function () {
                 })
 
             return deferred.promise;
-        }).then(groupByPage)
+        }).then(groupByMethod)
         .then(generateAverages)
         .then(report.sortAverages)
         .then(report.limitAverages)

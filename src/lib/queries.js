@@ -39,18 +39,28 @@ function buildSimpleQuery(fields, object_name, criteria, order_by, limit) {
     return query;
 }
 
-var reportVisualforce = function () {
+function report(type) {
+
     var criteria = [
         (lo.toLower(global.config.interval) === 'hourly') ? 'LogDate = TODAY' : 'LogDate = YESTERDAY',
         'Interval = ' + stringEscape(lo.upperFirst(global.config.interval)),
-        'EventType = \'VisualforceRequest\''
+        'EventType = ' + stringEscape(type)
     ];
 
     return buildSimpleQuery(EVENT_LOG_FILE_FIELDS, EVENT_LOG_FILE, criteria, 'LogDate desc', 1);
 };
 
+var reportVisualforce = function () {
+    return report('VisualforceRequest');
+};
+
+var reportApexSoap = function () {
+    return report('ApexSoap');
+};
+
 var queries = {
     report: {
+        apexsoap: reportApexSoap,
         visualforce: reportVisualforce
     }
 };

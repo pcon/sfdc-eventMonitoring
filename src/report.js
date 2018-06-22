@@ -4,10 +4,12 @@ var Q = require('q');
 var conf = require('./lib/config.js');
 var errorCodes = require('./lib/errorCodes.js');
 var sfdc = require('./lib/sfdc.js');
+
+var apexsoap = require('./report-apexsoap.js');
 var visualforce = require('./report-visualforce.js');
 
 var handlers = {
-    apexsoap: undefined,
+    apexsoap: apexsoap.run,
     visualforce: visualforce.run
 }
 
@@ -18,6 +20,7 @@ function config(yargs) {
         type: 'string',
         describe: 'The type of report to run',
         choices: [
+            'apexsoap',
             'visualforce'
         ]
     }).options({
