@@ -40,7 +40,7 @@ function buildSimpleQuery(fields, object_name, criteria, order_by, limit) {
 }
 
 function getLogDate() {
-    return (lo.toLower(global.config.interval) === 'hourly') ? 'LogDate = TODAY' : 'LogDate = YESTERDAY';
+    return (lo.toLower(global.config.interval) === 'hourly') ? 'LogDate = TODAY' : 'LogDate = LAST_N_DAYS:2';
 }
 
 function getInterval() {
