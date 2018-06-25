@@ -126,6 +126,23 @@ eventmonitoring login apiversion --maxversion 30
 ╚═════════╧══════════════════════════════════════════════╧═══════╝
 ```
 
+### Failed Login
+Report based on failed logins
+
+```bash
+eventmonitoring login failed
+```
+
+```text
+╔═════════════════════╤═══════╤══════════════════════════════╗
+║ Username            │ Count │ Error Message                ║
+╟─────────────────────┼───────┼──────────────────────────────╢
+║ user1@example.com   │ 1     │ Failed: InResponseTo Invalid ║
+╟─────────────────────┼───────┼──────────────────────────────╢
+║ user2@example.com   │ 1     │ Failed: InResponseTo Invalid ║
+╚═════════════════════╧═══════╧══════════════════════════════╝
+```
+
 ## Report
 This sub command is used to report on Event Monitoring data
 
