@@ -134,7 +134,7 @@ var printAverages = function (data) {
     var deferred = Q.defer();
 
     if (global.config.format === 'json') {
-        global.logger.log(data);
+        global.logger.log(data.averages);
     } else if (global.config.format === 'table') {
         global.logger.log(table(report.generateTableData(data.averages, COLUMNS, OUTPUT_INFO)));
     }

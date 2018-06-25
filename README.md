@@ -59,6 +59,73 @@ You can also store these values in the `$HOME/.eventmonitoring` config file
 }
 ```
 
+## Login
+This sub command is used around Login data
+
+**Flags**
+* **--format [format]** - json, table - The format the output should be displayed in
+* **--interval [interval]** - hourly, daily - The interval to use for the data
+* **--asc** - Sort the data in ascending order
+* **--sort** - The field to sort the data by.  This will vary from report type to report type.
+* **--limit [limit]** - The number of results to limit to
+* **--maxversion** - The max API version.  Only used with apiversion
+* **--summary** - Summerize the results.  Only used with apiversion
+
+### APIVersion
+Report based on the API Version.
+
+The summary mode is useful to see if you have API clients using older versions of the API
+
+```bash
+eventmonitoring login apiversion --summary
+```
+
+```text
+╔═════════╤═══════╗
+║ Version │ Count ║
+╟─────────┼───────╢
+║ 8       │ 60    ║
+╟─────────┼───────╢
+║ 19      │ 228   ║
+╟─────────┼───────╢
+║ 29      │ 61    ║
+╟─────────┼───────╢
+║ 30      │ 11    ║
+╟─────────┼───────╢
+║ 32      │ 74    ║
+╟─────────┼───────╢
+║ 33      │ 1     ║
+╟─────────┼───────╢
+║ 35      │ 5     ║
+╟─────────┼───────╢
+║ 37      │ 11    ║
+╟─────────┼───────╢
+║ 39      │ 35    ║
+╟─────────┼───────╢
+║ 40      │ 20    ║
+╚═════════╧═══════╝
+```
+
+Without the summary flag, it will group by username.  Most likely, you'll want to apply the max version flag to limit it to only older versions of the API to "blame" users
+
+```bash
+eventmonitoring login apiversion --maxversion 30
+```
+
+```text
+╔═════════╤══════════════════════════════════════════════╤═══════╗
+║ Version │ Username                                     │ Count ║
+╟─────────┼──────────────────────────────────────────────┼───────╢
+║ 8       │ utility@api.example.com                      │ 60    ║
+╟─────────┼──────────────────────────────────────────────┼───────╢
+║ 19      │ automationuser@example.com                   │ 228   ║
+╟─────────┼──────────────────────────────────────────────┼───────╢
+║ 29      │ scriptkiddie@api.example.com                 │ 60    ║
+╟─────────┼──────────────────────────────────────────────┼───────╢
+║ 29      │ anotherautomationuser@example.com            │ 1     ║
+╚═════════╧══════════════════════════════════════════════╧═══════╝
+```
+
 ## Report
 This sub command is used to report on Event Monitoring data
 

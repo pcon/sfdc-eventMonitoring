@@ -2,6 +2,8 @@ var chalk = require('chalk');
 var lo = require('lodash');
 var Q = require('q');
 
+var utils = require('./utils.js');
+
 var generateTableData = function (rows, columns, output_info) {
     var drow = [], data = [];
 
@@ -23,16 +25,7 @@ var generateTableData = function (rows, columns, output_info) {
 };
 
 var limitAverages = function (data) {
-    var deferred = Q.defer();
-
-    if (global.config.limit !== undefined) {
-        global.logger.debug('Limiting to ' + global.config.limit);
-        data.averages = lo.slice(data.averages, 0, global.config.limit);
-    }
-
-    deferred.resolve(data);
-
-    return deferred.promise;
+    return utils.limitResults(data, 'averages');
 };
 
 var initializeAverages = function (data, data_map) {
@@ -44,20 +37,7 @@ var initializeAverages = function (data, data_map) {
 };
 
 var sortAverages = function (data) {
-    var deferred = Q.defer();
-
-    global.logger.debug('Sorting by ' + global.config.sort);
-    data.averages = lo.sortBy(data.averages, lo.split(global.config.sort, ',')).reverse();
-
-    if (global.config.asc) {
-        global.logger.debug('Ascending');
-
-        data.averages = data.averages.reverse();
-    }
-
-    deferred.resolve(data);
-
-    return deferred.promise;
+    return utils.sortResults(data, 'averages');
 };
 
 var report = {

@@ -6,67 +6,64 @@ const { table } = require('table');
 
 var errorCodes = require('./lib/errorCodes.js');
 var formatter = require('./lib/formatter.js');
+var login = require('./lib/login.js');
 var report = require('./lib/report.js');
 var sfdc = require('./lib/sfdc.js');
+var static = require('./lib/static.js');
 var queries = require('./lib/queries');
 
 var COLUMNS = [
-    'name',
+    'username',
     'count',
-    'cpu',
-    'run',
-    'limit',
-    'dbtotal'
+    'message'
 ];
 
-var DATA_MAP = {
-    'cpu': 'CPU_TIME',
-    'run': 'RUN_TIME',
-    'limit': 'LIMIT_USAGE_PERCENT',
-    'dbtotal': 'DB_TOTAL_TIME'
-};
 
 var OUTPUT_INFO = {
-    'name': {
-        header: 'Name',
+    'username': {
+        header: 'Username',
         formatter: formatter.noop
     },
     'count': {
         header: 'Count',
         formatter: formatter.noop
     },
-    'cpu': {
-        header: 'CPU Time',
-        formatter: formatter.prettyms
-    },
-    'run': {
-        header: 'Run Time',
-        formatter: formatter.prettyms
-    },
-    'limit': {
-        header: 'Usage Percent Limit',
-        formatter: formatter.percent
-    },
-    'dbtotal': {
-        header: 'DB Total Time',
-        formatter: formatter.nanoToMsToPretty
+    'message': {
+        header: 'Error Message',
+        formatter: static.getMessage
     }
 };
 
 function generateName(log) {
-    return log.CLASS_NAME + '.' + log.METHOD_NAME;
+    return log.USER_NAME;
 }
 
-var groupByMethod = function (logs) {
-    var grouping = {},
+function generateMessageKey(log) {
+    return log.LOGIN_STATUS;
+}
+
+var groupByUsernameAndLoginStatus = function (logs) {
+    var name,
+        grouping = {},
         deferred = Q.defer();
 
     lo.forEach(logs, function (log) {
-        if (!lo.has(grouping, generateName(log))) {
-            grouping[generateName(log)] = [];
+        name = generateName(log);
+        key = generateMessageKey(log);
+
+        if (login.wasSuccessful(key)) {
+            return;
         }
 
-        grouping[generateName(log)].push(log);
+        if (!lo.has(grouping, name)) {
+            grouping[name] = {};
+        }
+
+        if (!lo.has(grouping[name], key)) {
+            grouping[name][key] = [];
+        }
+
+        grouping[name][key].push(log);
     });
 
     deferred.resolve(grouping);
@@ -74,61 +71,56 @@ var groupByMethod = function (logs) {
     return deferred.promise;
 };
 
-var generateAveragesForName = function (logs, name) {
-    var averages = {
-            name: name,
+var generateCountsForUsernameAndLoginStatus = function (logs, username, messageKey) {
+    var counts = {
+            username: username,
             count: lo.size(logs),
+            message: messageKey
         },
         deferred = Q.defer();
 
-    averages = report.initializeAverages(averages, DATA_MAP);
-
-    lo.forEach(logs, function (log) {
-        lo.forEach(DATA_MAP, function (value, key) {
-            averages[key] += parseInt(log[value]);
-        });
-    });
-
-    lo.forEach(DATA_MAP, function (value, key) {
-        averages[key] /= lo.size(logs);
-        averages[key] = Number(averages[key].toFixed(2));
-    });
-
-    deferred.resolve(averages);
+    deferred.resolve(counts);
 
     return deferred.promise;
 };
 
-var generateAverages = function (grouping) {
+var generateCounts = function (grouping) {
     var promises = [],
-        averages = [],
+        counts = [],
         deferred = Q.defer();
 
-    lo.forEach(grouping, function (value, key) {
-        promises.push(generateAveragesForName(value, key));
+    lo.forEach(grouping, function (subgrouping, username) {
+        lo.forEach(subgrouping, function (logs, messageKey) {
+            promises.push(generateCountsForUsernameAndLoginStatus(logs, username, messageKey));
+        });
     });
 
     Q.allSettled(promises)
         .then(function (results) {
             lo.forEach(results, function (result) {
                 if (result.state === 'fulfilled') {
-                    averages.push(result.value);
+                    counts.push(result.value);
                 }
             });
 
-            deferred.resolve({grouping: grouping, averages: averages})
+            deferred.resolve({grouping: grouping, counts: counts})
         });
 
     return deferred.promise;
 };
 
-var printAverages = function (data) {
+var printCounts = function (data) {
     var deferred = Q.defer();
 
     if (global.config.format === 'json') {
-        global.logger.log(data.averages);
+        global.logger.log(data.counts);
     } else if (global.config.format === 'table') {
-        global.logger.log(table(report.generateTableData(data.averages, COLUMNS, OUTPUT_INFO)));
+        if (lo.isEmpty(data.counts)) {
+            logger.error('No Failed Logins');
+            process.exit(0);
+        }
+
+        global.logger.log(table(report.generateTableData(data.counts, COLUMNS, OUTPUT_INFO)));
     }
 
     deferred.resolve();
@@ -139,7 +131,7 @@ var printAverages = function (data) {
 var run = function () {
     'use strict';
 
-    sfdc.query(queries.report.apexsoap())
+    sfdc.query(queries.login())
         .then(function (event_log_files) {
             var deferred = Q.defer();
 
@@ -156,11 +148,11 @@ var run = function () {
                 })
 
             return deferred.promise;
-        }).then(groupByMethod)
-        .then(generateAverages)
-        .then(report.sortAverages)
-        .then(report.limitAverages)
-        .then(printAverages)
+        }).then(groupByUsernameAndLoginStatus)
+        .then(generateCounts)
+        .then(login.sortCounts)
+        .then(login.limitCounts)
+        .then(printCounts)
         .catch(function (error) {
             global.logger.error(error);
         });

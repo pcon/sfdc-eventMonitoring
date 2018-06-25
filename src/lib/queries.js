@@ -39,34 +39,47 @@ function buildSimpleQuery(fields, object_name, criteria, order_by, limit) {
     return query;
 }
 
-function report(type) {
+function getLogDate() {
+    return (lo.toLower(global.config.interval) === 'hourly') ? 'LogDate = TODAY' : 'LogDate = YESTERDAY';
+}
+
+function getInterval() {
+    return 'Interval = ' + stringEscape(lo.upperFirst(global.config.interval));
+}
+
+function getLogsByType(type) {
 
     var criteria = [
-        (lo.toLower(global.config.interval) === 'hourly') ? 'LogDate = TODAY' : 'LogDate = YESTERDAY',
-        'Interval = ' + stringEscape(lo.upperFirst(global.config.interval)),
+        getLogDate(),
+        getInterval(),
         'EventType = ' + stringEscape(type)
     ];
 
     return buildSimpleQuery(EVENT_LOG_FILE_FIELDS, EVENT_LOG_FILE, criteria, 'LogDate desc', 1);
-};
+}
+
+var login = function () {
+    return getLogsByType('Login');
+}
 
 var reportApexExecution = function () {
-    return report('ApexExecution');
+    return getLogsByType('ApexExecution');
 };
 
 var reportApexSoap = function () {
-    return report('ApexSoap');
+    return getLogsByType('ApexSoap');
 };
 
 var reportApexTrigger = function () {
-    return report('ApexTrigger');
+    return getLogsByType('ApexTrigger');
 };
 
 var reportVisualforce = function () {
-    return report('VisualforceRequest');
+    return getLogsByType('VisualforceRequest');
 };
 
 var queries = {
+    login: login,
     report: {
         apexexecution: reportApexExecution,
         apexsoap: reportApexSoap,

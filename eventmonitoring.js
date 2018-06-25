@@ -2,8 +2,11 @@
 
 var Q = require('q');
 
-var config = require('./src/lib/config.js');
 var pkg = require('./package.json');
+
+var config = require('./src/lib/config.js');
+
+var login = require('./src/login.js');
 var report = require('./src/report.js');
 
 global.config = {
@@ -59,6 +62,7 @@ var run = function () {
         })
         .version(pkg.version)
         .command('report [type]', 'Display a report', report.config, report.run)
+        .command('login [type]', 'Login information', login.config, login.run)
         .argv;
 
     deferred.resolve();
