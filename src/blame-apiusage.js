@@ -13,7 +13,6 @@ var login = require('./lib/login.js');
 var report = require('./lib/report.js');
 var sfdc = require('./lib/sfdc.js');
 var static = require('./lib/static.js');
-var summary = require('./login-apiversion-summary.js');
 var queries = require('./lib/queries.js');
 var utils = require('./lib/utils.js');
 
@@ -28,6 +27,32 @@ var OUTPUT_INFO = {
         formatter: formatter.noop
     },
     'count': {
+        header: 'Count',
+        formatter: formatter.noop
+    }
+};
+
+var SUMMARY_COLUMNS = [
+    '_name',
+    '_username',
+    '_user_id',
+    '_count'
+];
+
+var SUMMARY_OUTPUT_INFO = {
+    '_name': {
+        header: 'Name',
+        formatter: formatter.noop
+    },
+    '_username': {
+        header: 'Username',
+        formatter: formatter.noop
+    },
+    '_user_id': {
+        header: 'Id',
+        formatter: formatter.noop
+    },
+    '_count': {
         header: 'Count',
         formatter: formatter.noop
     }
@@ -173,6 +198,7 @@ var enrichCounts = function (data) {
 
         lo.set(data.grouping, [user_id, '_name'], name);
         lo.set(data.grouping, [user_id, '_username'], username);
+        lo.set(data.grouping, [user_id, '_user_id'], user_id);
         lo.set(data.grouping, [user_id, '_count'], count);
     });
 
@@ -229,10 +255,14 @@ var printCounts = function (data) {
     if (global.config.format === 'json') {
         global.logger.log(JSON.stringify(data.grouping));
     } else if (global.config.format === 'table') {
-        lo.forEach(data.grouping, function (group, user_id) {
-            global.logger.log(formatGroupInfo(group));
-            global.logger.log(formatEndpointData(group));
-        });
+        if (global.config.summary) {
+            global.logger.log(table(report.generateTableData(data.grouping, SUMMARY_COLUMNS, SUMMARY_OUTPUT_INFO)));
+        } else {
+            lo.forEach(data.grouping, function (group, user_id) {
+                global.logger.log(formatGroupInfo(group));
+                global.logger.log(formatEndpointData(group));
+            });
+        }
     }
 
     deferred.resolve();
@@ -243,23 +273,19 @@ var printCounts = function (data) {
 var run = function () {
     'use strict';
 
-    if (global.config.summary) {
-        summary.run();
-    } else {
-        sfdc.query(queries.blame.apiusage())
-            .then(downloadLogFiles)
-            .then(groupByUserIdAndName)
-            .then(fetchUsernames)
-            .then(enrichCounts)
-            .then(sortCounts)
-            .then(limitCounts)
-            .then(subSortCounts)
-            .then(subLimitCounts)
-            .then(printCounts)
-            .catch(function (error) {
-                global.logger.error(error);
-            });
-    }
+    sfdc.query(queries.blame.apiusage())
+        .then(downloadLogFiles)
+        .then(groupByUserIdAndName)
+        .then(fetchUsernames)
+        .then(enrichCounts)
+        .then(sortCounts)
+        .then(limitCounts)
+        .then(subSortCounts)
+        .then(subLimitCounts)
+        .then(printCounts)
+        .catch(function (error) {
+            global.logger.error(error);
+        });
 };
 
 var cli = {

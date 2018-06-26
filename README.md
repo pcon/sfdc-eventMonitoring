@@ -74,6 +74,28 @@ This sub command "blames" users for doing things
 ### API Usage
 Data around users and API usage
 
+The summary mode can be useful for getting an idea of the overal usage of your API
+
+```bash
+eventmonitoring blame apiusage --summary
+```
+
+```text
+╔══════════════════════╤══════════════════════════════════════════════╤═════════════════╤════════╗
+║ Name                 │ Username                                     │ Id              │ Count  ║
+╟──────────────────────┼──────────────────────────────────────────────┼─────────────────┼────────╢
+║ Integration User     │ integrationuser@example.com                  │ 005A000000abcde │ 238084 ║
+╟──────────────────────┼──────────────────────────────────────────────┼─────────────────┼────────╢
+║ Utility User         │ utility@api.example.com                      │ 005A000000abcdf │ 11081  ║
+╟──────────────────────┼──────────────────────────────────────────────┼─────────────────┼────────╢
+║ Script Kiddie        │ scriptkiddie@example.com                     │ 005A000000abcdg │ 7168   ║
+╟──────────────────────┼──────────────────────────────────────────────┼─────────────────┼────────╢
+║ Another User         │ anotherautomationuser@example.com            │ 005A000000abcdh │ 2037   ║
+╚══════════════════════╧══════════════════════════════════════════════╧═════════════════╧════════╝
+```
+
+For more information you can get a breakdown per user per endpoint
+
 ```bash
 eventmonitoring blame apiusage --limit 3 --sublimit 4
 ```
@@ -107,7 +129,7 @@ Total API Calls: 19,974
 ║ AccountAPI.getContactsForAccount │ 1738  ║
 ╚══════════════════════════════════╧═══════╝
 
-User: Script Kiddie - scriptkiddie@example.com - 005A0000007cUTe
+User: Script Kiddie - scriptkiddie@example.com - 005A000000abcdg
 Total API Calls: 2,084
 ╔═════════════════════════════════╤═══════╗
 ║ Endpoint                        │ Count ║
