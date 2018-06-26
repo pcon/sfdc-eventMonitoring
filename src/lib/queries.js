@@ -1,11 +1,20 @@
 var lo = require('lodash');
 
+var utils = require('./utils.js');
+
 var EVENT_LOG_FILE = 'EventLogFile';
 var EVENT_LOG_FILE_FIELDS = [
     'EventType',
     'LogFile',
     'LogDate',
     'LogFileLength'
+];
+
+var USER = 'User';
+var USER_FIELDS = [
+    'Id',
+    'Name',
+    'Username'
 ];
 
 var stringEscape = function (element) {
@@ -47,20 +56,59 @@ function getInterval() {
     return 'Interval = ' + stringEscape(lo.upperFirst(global.config.interval));
 }
 
-function getLogsByType(type) {
+function getEventTypeCriteria(types) {
+    var event_types = [];
 
+    if (!lo.isArray(types)) {
+       return 'EventType = ' + stringEscape(types);
+    }
+
+    lo.forEach(types, function (type) {
+        event_types.push(stringEscape(type));
+    });
+
+    return 'EventType in (' + event_types + ')';
+}
+
+function getLogsByType(types) {
     var criteria = [
-        getLogDate(),
-        getInterval(),
-        'EventType = ' + stringEscape(type)
-    ];
+            getLogDate(),
+            getInterval(),
+            getEventTypeCriteria(types)
+        ];
+
 
     return buildSimpleQuery(EVENT_LOG_FILE_FIELDS, EVENT_LOG_FILE, criteria, 'LogDate desc', 1);
 }
 
+var blameAPIUsage = function () {
+    var criteria = [
+        getLogDate(),
+        getInterval(),
+        getEventTypeCriteria(['ApexSoap', 'API', 'RestApi'])
+    ];
+
+    return buildSimpleQuery(EVENT_LOG_FILE_FIELDS, EVENT_LOG_FILE, criteria);
+};
+
 var login = function () {
     return getLogsByType('Login');
-}
+};
+
+var generalUsers = function (user_ids) {
+    var criteria,
+        escaped_ids = [];
+
+    lo.forEach(user_ids, function (id) {
+        escaped_ids.push(utils.escapeString(id));
+    });
+
+    criteria = [
+        'Id in (' + escaped_ids + ')'
+    ];
+
+    return buildSimpleQuery(USER_FIELDS, USER, criteria);
+};
 
 var reportApexExecution = function () {
     return getLogsByType('ApexExecution');
@@ -79,7 +127,13 @@ var reportVisualforce = function () {
 };
 
 var queries = {
+    blame: {
+        apiusage: blameAPIUsage
+    },
     login: login,
+    general: {
+        users: generalUsers
+    },
     report: {
         apexexecution: reportApexExecution,
         apexsoap: reportApexSoap,

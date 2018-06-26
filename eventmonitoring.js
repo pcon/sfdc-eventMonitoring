@@ -6,6 +6,7 @@ var pkg = require('./package.json');
 
 var config = require('./src/lib/config.js');
 
+var blame = require('./src/blame.js');
 var login = require('./src/login.js');
 var report = require('./src/report.js');
 
@@ -61,8 +62,9 @@ var run = function () {
             'solenopsis': ['username', 'password', 'token']
         })
         .version(pkg.version)
-        .command('report [type]', 'Display a report', report.config, report.run)
+        .command('blame [type]', 'Blame users', blame.config, blame.run)
         .command('login [type]', 'Login information', login.config, login.run)
+        .command('report [type]', 'Display a report', report.config, report.run)
         .argv;
 
     deferred.resolve();

@@ -59,6 +59,69 @@ You can also store these values in the `$HOME/.eventmonitoring` config file
 }
 ```
 
+## Blame
+This sub command "blames" users for doing things
+
+**Flags**
+* **--format [format]** - json, table - The format the output should be displayed in
+* **--interval [interval]** - hourly, daily - The interval to use for the data
+* **--asc** - Sort the data in ascending order
+* **--sort [field1,field2]** - The fields to sort the data by.  This will vary from type to type.
+* **--limit [limit]** - The number of results to limit to
+* **--subsort [field1,field2]** - The fields to sort the secondary data by.  This will vary from type to type.
+* **--sublimit [limit]** - The number of results for secondary data to limit to.
+
+### API Usage
+Data around users and API usage
+
+```bash
+eventmonitoring blame apiusage --limit 3 --sublimit 4
+```
+
+```text
+User: Integration User - integrationuser@example.com - 005A000000abcde
+Total API Calls: 43,289
+╔══════════════════════════════════╤═══════╗
+║ Endpoint                         │ Count ║
+╟──────────────────────────────────┼───────╢
+║ CaseAPI.listAttachments          │ 10814 ║
+╟──────────────────────────────────┼───────╢
+║ AccountAPI.getContactsForAccount │ 10152 ║
+╟──────────────────────────────────┼───────╢
+║ CaseAPI.getCase                  │ 10109 ║
+╟──────────────────────────────────┼───────╢
+║ AccountAPI.getAccount            │ 10099 ║
+╚══════════════════════════════════╧═══════╝
+
+User: Utility User - utility@api.example.com - 005A000000abcdf
+Total API Calls: 19,974
+╔══════════════════════════════════╤═══════╗
+║ Endpoint                         │ Count ║
+╟──────────────────────────────────┼───────╢
+║ CaseAPI.getCase                  │ 2137  ║
+╟──────────────────────────────────┼───────╢
+║ CaseAPI.listAttachments          │ 1930  ║
+╟──────────────────────────────────┼───────╢
+║ ContactAPI.getContact            │ 1840  ║
+╟──────────────────────────────────┼───────╢
+║ AccountAPI.getContactsForAccount │ 1738  ║
+╚══════════════════════════════════╧═══════╝
+
+User: Script Kiddie - scriptkiddie@example.com - 005A0000007cUTe
+Total API Calls: 2,084
+╔═════════════════════════════════╤═══════╗
+║ Endpoint                        │ Count ║
+╟─────────────────────────────────┼───────╢
+║ ProductAPI.listVersions         │ 2046  ║
+╟─────────────────────────────────┼───────╢
+║ ProductAPI.listEntitledProducts │ 20    ║
+╟─────────────────────────────────┼───────╢
+║ InternalAPI.upsertCaseComment   │ 10    ║
+╟─────────────────────────────────┼───────╢
+║ ProductAPI.listProducts         │ 8     ║
+╚═════════════════════════════════╧═══════╝
+```
+
 ## Login
 This sub command is used around Login data
 
