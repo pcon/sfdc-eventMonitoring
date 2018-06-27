@@ -1,11 +1,8 @@
 var lo = require('lodash');
 var Q = require('q');
 
-const { table } = require('table');
-
 var formatter = require('./lib/formatter.js');
 var login = require('./lib/login.js');
-var report = require('./lib/report.js');
 var sfdc = require('./lib/sfdc.js');
 var summary = require('./login-apiversion-summary.js');
 var queries = require('./lib/queries.js');
@@ -146,17 +143,7 @@ var generateCounts = function (grouping) {
  * @returns {Promise} A promise for when the print has finished
  */
 var printCounts = function (data) {
-    var deferred = Q.defer();
-
-    if (global.config.format === 'json') {
-        global.logger.log(data.counts);
-    } else if (global.config.format === 'table') {
-        global.logger.log(table(report.generateTableData(data.counts, COLUMNS, OUTPUT_INFO)));
-    }
-
-    deferred.resolve();
-
-    return deferred.promise;
+    return utils.printFormattedData(data.counts, COLUMNS, OUTPUT_INFO);
 };
 
 /**
