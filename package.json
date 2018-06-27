@@ -7,7 +7,16 @@
     "eventmonitoring": "eventmonitoring.js"
   },
   "scripts": {
+    "lint-eslint": "eslint eventmonitoring.js src/*",
+    "lint-md": "remark --no-stdout -S README.md",
+    "lint": "npm run lint-eslint && npm run lint-md",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "remarkConfig": {
+    "plugins": [
+      "remark-preset-lint-recommended",
+      [ "remark-lint-final-newline", false ]
+    ]
   },
   "repository": {
     "type": "git",
@@ -37,5 +46,10 @@
     "q": "^1.5.1",
     "table": "^4.0.3",
     "yargs": "^11.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^5.0.1",
+    "remark-lint": "^6.0.2",
+    "remark-preset-lint-recommended": "^3.0.2"
   }
 }

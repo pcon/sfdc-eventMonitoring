@@ -1,24 +1,21 @@
 var lo = require('lodash');
-var process = require('process');
 var Q = require('q');
 
 const { table } = require('table');
 
-var errorCodes = require('./lib/errorCodes.js');
 var formatter = require('./lib/formatter.js');
 var login = require('./lib/login.js');
 var report = require('./lib/report.js');
 var sfdc = require('./lib/sfdc.js');
-var static = require('./lib/static.js');
 var summary = require('./login-apiversion-summary.js');
-var queries = require('./lib/queries');
+var queries = require('./lib/queries.js');
+var utils = require('./lib/utils.js');
 
 var COLUMNS = [
     'version',
     'username',
     'count'
 ];
-
 
 var OUTPUT_INFO = {
     'version': {
@@ -35,18 +32,33 @@ var OUTPUT_INFO = {
     }
 };
 
+/**
+ * Generates a username
+ * @param {object} log The log
+ * @returns {string} The username
+ */
 function generateUsername(log) {
     return log.USER_NAME;
 }
 
+/**
+ * Generates the version
+ * @param {object} log The log
+ * @returns {number} The version
+ */
 function generateVersion(log) {
     return parseInt(log.API_VERSION);
 }
 
+/**
+ * Groups the data by version and then by username
+ * @param {array} logs The logs
+ * @return {Promise} A promise for the logs grouped by version then username
+ */
 var groupByVersionAndUsername = function (logs) {
-    var version, username,
-        grouping = {},
-        deferred = Q.defer();
+    var version, username;
+    var grouping = {};
+    var deferred = Q.defer();
 
     lo.forEach(logs, function (log) {
         version = generateVersion(log);
@@ -75,23 +87,35 @@ var groupByVersionAndUsername = function (logs) {
     return deferred.promise;
 };
 
+/**
+ * Generates a count of all the pairings
+ * @param {array} logs The logs
+ * @param {string} version The version
+ * @param {string} username The username
+ * @return {Promise} A promise for a count of the logs
+ */
 var generateCountsForVersionAndUsername = function (logs, version, username) {
     var counts = {
-            version: parseInt(version),
-            username: username,
-            count: lo.size(logs)
-        },
-        deferred = Q.defer();
+        version: parseInt(version),
+        username: username,
+        count: lo.size(logs)
+    };
+    var deferred = Q.defer();
 
     deferred.resolve(counts);
 
     return deferred.promise;
 };
 
+/**
+ * Generates a count for all the groupings
+ * @param {object} grouping The grouping
+ * @returns {Promise} A promise for the grouping with all the counts
+ */
 var generateCounts = function (grouping) {
-    var promises = [],
-        counts = [],
-        deferred = Q.defer();
+    var promises = [];
+    var counts = [];
+    var deferred = Q.defer();
 
     lo.forEach(grouping, function (subgrouping, version) {
         lo.forEach(subgrouping, function (logs, username) {
@@ -107,12 +131,20 @@ var generateCounts = function (grouping) {
                 }
             });
 
-            deferred.resolve({grouping: grouping, counts: counts})
+            deferred.resolve({
+                grouping: grouping,
+                counts: counts
+            });
         });
 
     return deferred.promise;
 };
 
+/**
+ * Print the counts out based on the format
+ * @param {object} data The data
+ * @returns {Promise} A promise for when the print has finished
+ */
 var printCounts = function (data) {
     var deferred = Q.defer();
 
@@ -127,6 +159,10 @@ var printCounts = function (data) {
     return deferred.promise;
 };
 
+/**
+ * The stuff to run
+ * @returns {undefined}
+ */
 var run = function () {
     'use strict';
 
@@ -134,23 +170,8 @@ var run = function () {
         summary.run();
     } else {
         sfdc.query(queries.login())
-            .then(function (event_log_files) {
-                var deferred = Q.defer();
-
-                if (lo.isEmpty(event_log_files)) {
-                    global.logger.error('Unable to find log files');
-                    process.exit(errorCodes.NO_LOGFILES);
-                }
-
-                sfdc.fetchConvertFile(event_log_files[0].LogFile)
-                    .then(function (data) {
-                        deferred.resolve(data);
-                    }).catch(function (error) {
-                        deferred.reject(error);
-                    })
-
-                return deferred.promise;
-            }).then(groupByVersionAndUsername)
+            .then(utils.fetchAndConvert)
+            .then(groupByVersionAndUsername)
             .then(generateCounts)
             .then(login.sortCounts)
             .then(login.limitCounts)
@@ -161,8 +182,6 @@ var run = function () {
     }
 };
 
-var cli = {
-    run: run
-};
+var cli = { run: run };
 
 module.exports = cli;

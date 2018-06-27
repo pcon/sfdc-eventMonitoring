@@ -1,5 +1,4 @@
 var lo = require('lodash');
-var Q = require('q');
 
 var conf = require('./lib/config.js');
 var errorCodes = require('./lib/errorCodes.js');
@@ -11,8 +10,13 @@ var failed = require('./login-failed.js');
 var handlers = {
     apiversion: apiversion.run,
     failed: failed.run
-}
+};
 
+/**
+ * Configure the module
+ * @param {object} yargs The arguments
+ * @returns {undefined}
+ */
 function config(yargs) {
     'use strict';
 
@@ -25,13 +29,13 @@ function config(yargs) {
             default: 'table',
             describe: 'The format to output',
             type: 'string',
-            choices: ['json', 'table']
+            choices: [ 'json', 'table' ]
         },
         'interval': {
             default: 'hourly',
             describe: 'The interval to use',
             type: 'string',
-            choices: ['hourly', 'daily']
+            choices: [ 'hourly', 'daily' ]
         },
         'latest': {
             default: true,
@@ -65,6 +69,11 @@ function config(yargs) {
     });
 }
 
+/**
+ * The run method
+ * @param {object} args The arguments passed to the method
+ * @returns {undefined}
+ */
 function run(args) {
     conf.merge(args);
 

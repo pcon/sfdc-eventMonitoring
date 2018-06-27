@@ -63,13 +63,13 @@ You can also store these values in the `$HOME/.eventmonitoring` config file
 This sub command "blames" users for doing things
 
 **Flags**
-* **--format [format]** - json, table - The format the output should be displayed in
-* **--interval [interval]** - hourly, daily - The interval to use for the data
-* **--asc** - Sort the data in ascending order
-* **--sort [field1,field2]** - The fields to sort the data by.  This will vary from type to type.
-* **--limit [limit]** - The number of results to limit to
-* **--subsort [field1,field2]** - The fields to sort the secondary data by.  This will vary from type to type.
-* **--sublimit [limit]** - The number of results for secondary data to limit to.
+*   **--format \[format\]** - json, table - The format the output should be displayed in
+*   **--interval \[interval\]** - hourly, daily - The interval to use for the data
+*   **--asc** - Sort the data in ascending order
+*   **--sort \[field1,field2\]** - The fields to sort the data by.  This will vary from type to type.
+*   **--limit \[limit\]** - The number of results to limit to
+*   **--subsort \[field1,field2\]** - The fields to sort the secondary data by.  This will vary from type to type.
+*   **--sublimit \[limit\]** - The number of results for secondary data to limit to.
 
 ### API Usage
 Data around users and API usage
@@ -148,13 +148,13 @@ Total API Calls: 2,084
 This sub command is used around Login data
 
 **Flags**
-* **--format [format]** - json, table - The format the output should be displayed in
-* **--interval [interval]** - hourly, daily - The interval to use for the data
-* **--asc** - Sort the data in ascending order
-* **--sort** - The field to sort the data by.  This will vary from report type to report type.
-* **--limit [limit]** - The number of results to limit to
-* **--maxversion** - The max API version.  Only used with apiversion
-* **--summary** - Summerize the results.  Only used with apiversion
+*   **--format \[format\]** - json, table - The format the output should be displayed in
+*   **--interval \[interval\]** - hourly, daily - The interval to use for the data
+*   **--asc** - Sort the data in ascending order
+*   **--sort** - The field to sort the data by.  This will vary from report type to report type.
+*   **--limit \[limit\]** - The number of results to limit to
+*   **--maxversion** - The max API version.  Only used with apiversion
+*   **--summary** - Summerize the results.  Only used with apiversion
 
 ### APIVersion
 Report based on the API Version.
@@ -232,11 +232,11 @@ eventmonitoring login failed
 This sub command is used to report on Event Monitoring data
 
 **Flags**
-* **--format [format]** - json, table - The format the output should be displayed in
-* **--interval [interval]** - hourly, daily - The interval to use for the data
-* **--asc** - Sort the data in ascending order
-* **--sort** - The field to sort the data by.  This will vary from report type to report type.
-* **--limit [limit]** - The number of results to limit to
+*   **--format \[format\]** - json, table - The format the output should be displayed in
+*   **--interval \[interval\]** - hourly, daily - The interval to use for the data
+*   **--asc** - Sort the data in ascending order
+*   **--sort** - The field to sort the data by.  This will vary from report type to report type.
+*   **--limit \[limit\]** - The number of results to limit to
 
 ### Apex Execution
 Reporting based on ApexExecution data
@@ -262,14 +262,14 @@ eventmonitoring report apexexecution
 ```
 
 **Sort Fields**
-* **entry** - The Apex entry
-* **count** - The number of times the entry was called
-* **cpu** - The average time spent on the CPU
-* **run** - The average run time
-* **exec** - The average execution time
-* **dbtotal** - The average total database CPU time
-* **callout** - The average callout time
-* **soql** - The average number of SOQL calls
+*   **entry** - The Apex entry
+*   **count** - The number of times the entry was called
+*   **cpu** - The average time spent on the CPU
+*   **run** - The average run time
+*   **exec** - The average execution time
+*   **dbtotal** - The average total database CPU time
+*   **callout** - The average callout time
+*   **soql** - The average number of SOQL calls
 
 ### Apex Soap
 Reporting based on ApexSoap data
@@ -295,12 +295,12 @@ eventmonitoring report apexsoap
 ```
 
 **Sort Fields**
-* **name** - The name of the SOAP endpoint
-* **count** - The number of times the endpoint was called
-* **cpu** - The average time spent on the CPU
-* **run** - The average run time
-* **limit** - The average percentage of SOAP calls made against the org limit (probably not all that useful)
-* **dbtotal** - The average total database CPU time
+*   **name** - The name of the SOAP endpoint
+*   **count** - The number of times the endpoint was called
+*   **cpu** - The average time spent on the CPU
+*   **run** - The average run time
+*   **limit** - The average percentage of SOAP calls made against the org limit (probably not all that useful)
+*   **dbtotal** - The average total database CPU time
 
 ### Apex Trigger
 Reporting based on ApexTrigger data
@@ -326,9 +326,9 @@ eventmonitoring report apextrigger
 ```
 
 **Sort Fields**
-* **name** - The name of the trigger
-* **count** - The number of times the trigger was called
-* **exec** - The average execution time
+*   **name** - The name of the trigger
+*   **count** - The number of times the trigger was called
+*   **exec** - The average execution time
 
 ### Visualforce
 Reporting based on Visualforce data
@@ -354,11 +354,11 @@ eventmonitoring report visualforce
 ```
 
 **Sort Fields**
-* **uri** - The URI of the Visualforce page
-* **count** - The number of times the page was accessed
-* **cpu** - The average time spent on CPU
-* **run** - The average run time
-* **view** - The average view state size
-* **response** - The average response state size
-* **dbcpu** - The average database CPU time
-* **dbtotal** - The average total database CPU time
+*   **uri** - The URI of the Visualforce page
+*   **count** - The number of times the page was accessed
+*   **cpu** - The average time spent on CPU
+*   **run** - The average run time
+*   **view** - The average view state size
+*   **response** - The average response state size
+*   **dbcpu** - The average database CPU time
+*   **dbtotal** - The average total database CPU time

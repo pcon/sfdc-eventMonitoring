@@ -1,14 +1,11 @@
 var lo = require('lodash');
-var process = require('process');
 var Q = require('q');
 
-const { table } = require('table');
-
-var errorCodes = require('./lib/errorCodes.js');
 var formatter = require('./lib/formatter.js');
 var report = require('./lib/report.js');
 var sfdc = require('./lib/sfdc.js');
-var queries = require('./lib/queries');
+var queries = require('./lib/queries.js');
+var utils = require('./lib/utils.js');
 
 var COLUMNS = [
     'name',
@@ -53,13 +50,23 @@ var OUTPUT_INFO = {
     }
 };
 
+/**
+ * Generates the name
+ * @param {object} log The log
+ * @returns {string} The name
+ */
 function generateName(log) {
     return log.CLASS_NAME + '.' + log.METHOD_NAME;
 }
 
+/**
+ * Groups the data by the method
+ * @param {array} logs The Logs
+ * @return {Promise} A promise for the logs grouped by method
+ */
 var groupByMethod = function (logs) {
-    var grouping = {},
-        deferred = Q.defer();
+    var deferred = Q.defer();
+    var grouping = {};
 
     lo.forEach(logs, function (log) {
         if (!lo.has(grouping, generateName(log))) {
@@ -74,12 +81,18 @@ var groupByMethod = function (logs) {
     return deferred.promise;
 };
 
+/**
+ * Generates the averages for a single method
+ * @param {array} logs The logs
+ * @param {string} name The name
+ * @return {promise} A promise for an average for the method
+ */
 var generateAveragesForName = function (logs, name) {
+    var deferred = Q.defer();
     var averages = {
-            name: name,
-            count: lo.size(logs),
-        },
-        deferred = Q.defer();
+        name: name,
+        count: lo.size(logs)
+    };
 
     averages = report.initializeAverages(averages, DATA_MAP);
 
@@ -99,10 +112,15 @@ var generateAveragesForName = function (logs, name) {
     return deferred.promise;
 };
 
+/**
+ * Generate the averages for every method
+ * @param {object} grouping The grouping of method
+ * @returns {Promise} A promise for all the averages for all the methods
+ */
 var generateAverages = function (grouping) {
-    var promises = [],
-        averages = [],
-        deferred = Q.defer();
+    var deferred = Q.defer();
+    var promises = [];
+    var averages = [];
 
     lo.forEach(grouping, function (value, key) {
         promises.push(generateAveragesForName(value, key));
@@ -116,47 +134,33 @@ var generateAverages = function (grouping) {
                 }
             });
 
-            deferred.resolve({grouping: grouping, averages: averages})
+            deferred.resolve({
+                grouping: grouping, averages: averages
+            });
         });
 
     return deferred.promise;
 };
 
+/**
+ * Prints the averages based on the format
+ * @param {object} data The data
+ * @returns {Promise} A promise for when the data has been printed
+ */
 var printAverages = function (data) {
-    var deferred = Q.defer();
-
-    if (global.config.format === 'json') {
-        global.logger.log(data.averages);
-    } else if (global.config.format === 'table') {
-        global.logger.log(table(report.generateTableData(data.averages, COLUMNS, OUTPUT_INFO)));
-    }
-
-    deferred.resolve();
-
-    return deferred.promise;
+    return utils.printFormattedData(data.averages, COLUMNS, OUTPUT_INFO);
 };
 
+/**
+ * The stuff to run
+ * @returns {undefined}
+ */
 var run = function () {
     'use strict';
 
     sfdc.query(queries.report.apexsoap())
-        .then(function (event_log_files) {
-            var deferred = Q.defer();
-
-            if (lo.isEmpty(event_log_files)) {
-                global.logger.error('Unable to find log files');
-                process.exit(errorCodes.NO_LOGFILES);
-            }
-
-            sfdc.fetchConvertFile(event_log_files[0].LogFile)
-                .then(function (data) {
-                    deferred.resolve(data);
-                }).catch(function (error) {
-                    deferred.reject(error);
-                })
-
-            return deferred.promise;
-        }).then(groupByMethod)
+        .then(utils.fetchAndConvert)
+        .then(groupByMethod)
         .then(generateAverages)
         .then(report.sortAverages)
         .then(report.limitAverages)
@@ -166,8 +170,6 @@ var run = function () {
         });
 };
 
-var cli = {
-    run: run
-};
+var cli = {run: run};
 
 module.exports = cli;

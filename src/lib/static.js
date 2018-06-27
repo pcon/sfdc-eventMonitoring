@@ -119,9 +119,14 @@ var LOGIN_STATUS = {
     'LOGIN_SAML_PROVISION_ERROR': 'Failed: SAML Provision Error',
     'LOGIN_SAML_REPLAY_ATTEMPTED': 'Failed: Replay Detected',
     'LOGIN_SAML_SITE_INACTIVE': 'Failed: Specified Site is Inactive',
-    'LOGIN_TWOFACTOR_REQ': 'Two-factor required',
-}
+    'LOGIN_TWOFACTOR_REQ': 'Two-factor required'
+};
 
+/**
+ * Get the message for a given key
+ * @param {string} key The key
+ * @returns {string} The message or the key if not found
+ */
 var getMessage = function (key) {
     var messages = LOGIN_STATUS;
     if (
@@ -134,8 +139,6 @@ var getMessage = function (key) {
     return lo.get(messages, key);
 };
 
-var static = {
-    getMessage: getMessage
-};
+var static = { getMessage: getMessage };
 
 module.exports = static;

@@ -1,11 +1,8 @@
-var commander = require('commander');
 var ini = require('ini');
 var fs = require('fs');
 var lo = require('lodash');
 var path = require('path');
 var Q = require('q');
-
-var pkg = require('../../package.json');
 
 var SOLENOPSIS_FIELDS = [
     'username',
@@ -14,23 +11,31 @@ var SOLENOPSIS_FIELDS = [
     'url'
 ];
 
+/**
+ * Gets the user's home directory
+ * @return {string} The user's home directory
+ */
 function getUserHome() {
-    'use strict';
-
-    return process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
+    return process.env[process.platform === 'win32' ? 'USERPROFILE' : 'HOME'];
 }
 
+/**
+ * Load the solenopsis credential file into the global config
+ * @param {string} env The environment name to load
+ * @returns {undefined}
+ */
 var loadSolenopsisCredentials = function (env) {
-    'use strict';
+    var solenopsis_config_path = path.join(getUserHome(), '.solenopsis/credentials/', env + '.properties');
 
-    /*jslint stupid: true*/
-    var solenopsis_config_path = path.join(getUserHome(), '.solenopsis/credentials/', env + '.properties'),
-        sol_config = ini.parse(fs.readFileSync(solenopsis_config_path, 'utf-8'));
-    /*jslint stupid: false*/
+    var sol_config = ini.parse(fs.readFileSync(solenopsis_config_path, 'utf-8'));
 
     lo.merge(global.config, lo.pick(sol_config, SOLENOPSIS_FIELDS));
 };
 
+/**
+ * Load the config from disk
+ * @returns {Promise} A promise for when the config has been loaded
+ */
 var loadConfig = function () {
     'use strict';
 
@@ -52,6 +57,11 @@ var loadConfig = function () {
     return deferred.promise;
 };
 
+/**
+ * Merge the global config with a given set of args
+ * @param {object} args The args to merge in
+ * @returns {undefined}
+ */
 var merge = function (args) {
     lo.merge(global.config, args);
 };

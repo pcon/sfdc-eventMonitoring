@@ -1,23 +1,18 @@
 var lo = require('lodash');
-var process = require('process');
 var Q = require('q');
 
-const { table } = require('table');
-
-var errorCodes = require('./lib/errorCodes.js');
 var formatter = require('./lib/formatter.js');
 var login = require('./lib/login.js');
-var report = require('./lib/report.js');
 var sfdc = require('./lib/sfdc.js');
 var static = require('./lib/static.js');
-var queries = require('./lib/queries');
+var queries = require('./lib/queries.js');
+var utils = require('./lib/utils.js');
 
 var COLUMNS = [
     'username',
     'count',
     'message'
 ];
-
 
 var OUTPUT_INFO = {
     'username': {
@@ -34,18 +29,33 @@ var OUTPUT_INFO = {
     }
 };
 
+/**
+ * Generates the name
+ * @param {object} log The log
+ * @returns {string} The name
+ */
 function generateName(log) {
     return log.USER_NAME;
 }
 
+/**
+ * Generates the message key
+ * @param {object} log The log
+ * @returns {string} The message key
+ */
 function generateMessageKey(log) {
     return log.LOGIN_STATUS;
 }
 
+/**
+ * Groups the data by the username and login status
+ * @param {array} logs The Logs
+ * @return {Promise} A promise for the logs grouped by username and login status
+ */
 var groupByUsernameAndLoginStatus = function (logs) {
-    var name,
-        grouping = {},
-        deferred = Q.defer();
+    var name, key;
+    var grouping = {};
+    var deferred = Q.defer();
 
     lo.forEach(logs, function (log) {
         name = generateName(log);
@@ -71,23 +81,35 @@ var groupByUsernameAndLoginStatus = function (logs) {
     return deferred.promise;
 };
 
+/**
+ * Generates the averages for a username and message key
+ * @param {array} logs The logs
+ * @param {string} username The username
+ * @param {string} messageKey The message key
+ * @return {promise} A promise for an average for the username and message key
+ */
 var generateCountsForUsernameAndLoginStatus = function (logs, username, messageKey) {
+    var deferred = Q.defer();
     var counts = {
-            username: username,
-            count: lo.size(logs),
-            message: messageKey
-        },
-        deferred = Q.defer();
+        username: username,
+        count: lo.size(logs),
+        message: messageKey
+    };
 
     deferred.resolve(counts);
 
     return deferred.promise;
 };
 
+/**
+ * Generate the count for every username
+ * @param {object} grouping The grouping of data
+ * @returns {Promise} A promise for all the count for all the groupings
+ */
 var generateCounts = function (grouping) {
-    var promises = [],
-        counts = [],
-        deferred = Q.defer();
+    var deferred = Q.defer();
+    var promises = [];
+    var counts = [];
 
     lo.forEach(grouping, function (subgrouping, username) {
         lo.forEach(subgrouping, function (logs, messageKey) {
@@ -103,52 +125,33 @@ var generateCounts = function (grouping) {
                 }
             });
 
-            deferred.resolve({grouping: grouping, counts: counts})
+            deferred.resolve({
+                grouping: grouping, counts: counts
+            });
         });
 
     return deferred.promise;
 };
 
+/**
+ * Prints the averages based on the format
+ * @param {object} data The data
+ * @returns {Promise} A promise for when the data has been printed
+ */
 var printCounts = function (data) {
-    var deferred = Q.defer();
-
-    if (global.config.format === 'json') {
-        global.logger.log(data.counts);
-    } else if (global.config.format === 'table') {
-        if (lo.isEmpty(data.counts)) {
-            logger.error('No Failed Logins');
-            process.exit(0);
-        }
-
-        global.logger.log(table(report.generateTableData(data.counts, COLUMNS, OUTPUT_INFO)));
-    }
-
-    deferred.resolve();
-
-    return deferred.promise;
+    return utils.printFormattedData(data.counts, COLUMNS, OUTPUT_INFO);
 };
 
+/**
+ * The stuff to run
+ * @returns {undefined}
+ */
 var run = function () {
     'use strict';
 
     sfdc.query(queries.login())
-        .then(function (event_log_files) {
-            var deferred = Q.defer();
-
-            if (lo.isEmpty(event_log_files)) {
-                global.logger.error('Unable to find log files');
-                process.exit(errorCodes.NO_LOGFILES);
-            }
-
-            sfdc.fetchConvertFile(event_log_files[0].LogFile)
-                .then(function (data) {
-                    deferred.resolve(data);
-                }).catch(function (error) {
-                    deferred.reject(error);
-                })
-
-            return deferred.promise;
-        }).then(groupByUsernameAndLoginStatus)
+        .then(utils.fetchAndConvert)
+        .then(groupByUsernameAndLoginStatus)
         .then(generateCounts)
         .then(login.sortCounts)
         .then(login.limitCounts)
@@ -158,8 +161,6 @@ var run = function () {
         });
 };
 
-var cli = {
-    run: run
-};
+var cli = {run: run};
 
 module.exports = cli;

@@ -1,18 +1,13 @@
 var chalk = require('chalk');
 var lo = require('lodash');
-var moment = require('moment');
 var numeral = require('numeral');
-var process = require('process');
 var Q = require('q');
 
 const { table } = require('table');
 
-var errorCodes = require('./lib/errorCodes.js');
 var formatter = require('./lib/formatter.js');
-var login = require('./lib/login.js');
 var report = require('./lib/report.js');
 var sfdc = require('./lib/sfdc.js');
-var static = require('./lib/static.js');
 var queries = require('./lib/queries.js');
 var utils = require('./lib/utils.js');
 
@@ -58,6 +53,11 @@ var SUMMARY_OUTPUT_INFO = {
     }
 };
 
+/**
+ * Generate the name to display
+ * @param {object} log The log
+ * @returns {string} The name
+ */
 function generateName(log) {
     if (log.EVENT_TYPE === 'RestApi') {
         return log.URI;
@@ -70,57 +70,24 @@ function generateName(log) {
     return log.CLASS_NAME + '.' + log.METHOD_NAME;
 }
 
+/**
+ * Generate the user id
+ * @param {object} log The log
+ * @returns {string} The user id
+ */
 function generateUserId(log) {
     return log.USER_ID;
 }
 
-var downloadLogFiles = function (event_log_files) {
-    var results = [],
-        promises = [],
-        most_recent_files = {},
-        deferred = Q.defer();
-
-    if (lo.isEmpty(event_log_files)) {
-        global.logger.error('Unable to find log files');
-        process.exit(errorCodes.NO_LOGFILES);
-    }
-
-
-    lo.forEach(event_log_files, function (event_log_file) {
-        if (!lo.has(most_recent_files, event_log_file.EventType)) {
-            lo.set(most_recent_files, event_log_file.EventType, event_log_file);
-            return;
-        }
-
-        if (moment(lo.get(most_recent_files, event_log_file.EventType).LogDate).isAfter(event_log_file.LogDate)) {
-            lo.set(most_recent_files, event_log_file.EventType, event_log_file);
-        }
-    });
-
-    lo.forEach(most_recent_files, function (event_log_file) {
-        promises.push(sfdc.fetchConvertFile(event_log_file.LogFile));
-    });
-
-    Q.allSettled(promises)
-        .then(function (promise_results) {
-            lo.forEach(promise_results, function (result) {
-                if (result.state === 'fulfilled') {
-                    results = lo.concat(results, result.value);
-                }
-            });
-
-            deferred.resolve(results);
-        }).catch(function (error) {
-            deferred.reject(error);
-        })
-
-    return deferred.promise;
-};
-
+/**
+ * Groups logs by user id then by endpoint name
+ * @param {array} logs The logs
+ * @return {Promise} A promise for data grouped by user id then by endpoint
+ */
 var groupByUserIdAndName = function (logs) {
-    var name, user_id, data,
-        grouping = {},
-        deferred = Q.defer();
+    var name, user_id;
+    var grouping = {};
+    var deferred = Q.defer();
 
     lo.forEach(logs, function (log) {
         name = generateName(log);
@@ -150,7 +117,7 @@ var groupByUserIdAndName = function (logs) {
                 endpoint: name,
                 count: lo.size(logs)
             });
-        })
+        });
     });
 
     deferred.resolve(grouping);
@@ -158,9 +125,14 @@ var groupByUserIdAndName = function (logs) {
     return deferred.promise;
 };
 
+/**
+ * Fetches the username for all the user ids
+ * @param {object} data A mapping of user id to data
+ * @returns {object} An object with the original data in 'grouping' and a map of user id to user in 'user_map'
+ */
 var fetchUsernames = function (data) {
-    var results = { grouping: data },
-        deferred = Q.defer();
+    var results = { grouping: data };
+    var deferred = Q.defer();
 
     sfdc.query(queries.general.users(lo.keys(data)))
         .then(function (users) {
@@ -178,9 +150,14 @@ var fetchUsernames = function (data) {
     return deferred.promise;
 };
 
+/**
+ * Enrich the counts with the user info an raw accounts
+ * @param {object} data The data
+ * @returns {Promise} A promise for th updated data grouping
+ */
 var enrichCounts = function (data) {
-    var name, username, count,
-        deferred = Q.defer();
+    var name, username, count;
+    var deferred = Q.defer();
 
     lo.forEach(data.grouping, function (user_data, user_id) {
         count = 0;
@@ -196,10 +173,10 @@ var enrichCounts = function (data) {
             username = data.user_map[user_id].Username;
         }
 
-        lo.set(data.grouping, [user_id, '_name'], name);
-        lo.set(data.grouping, [user_id, '_username'], username);
-        lo.set(data.grouping, [user_id, '_user_id'], user_id);
-        lo.set(data.grouping, [user_id, '_count'], count);
+        lo.set(data.grouping, [ user_id, '_name' ], name);
+        lo.set(data.grouping, [ user_id, '_username' ], username);
+        lo.set(data.grouping, [ user_id, '_user_id' ], user_id);
+        lo.set(data.grouping, [ user_id, '_count' ], count);
     });
 
     deferred.resolve(data);
@@ -207,15 +184,30 @@ var enrichCounts = function (data) {
     return deferred.promise;
 };
 
+/**
+ * Sort counts
+ * @param {object} data The data
+ * @return {Promise} A promise with sorted data
+ */
 var sortCounts = function (data) {
     global.config.sort = '_' + global.config.sort;
     return utils.sortResults(data, 'grouping');
 };
 
+/**
+ * Limit counts
+ * @param {object} data The data
+ * @return {Promise} A promise with limited data
+ */
 var limitCounts = function (data) {
     return utils.limitResults(data, 'grouping');
 };
 
+/**
+ * Sort the second level counts
+ * @param {object} data The data
+ * @return {Promise} A promise with sorted data
+ */
 var subSortCounts = function (data) {
     var deferred = Q.defer();
 
@@ -227,6 +219,11 @@ var subSortCounts = function (data) {
     return deferred.promise;
 };
 
+/**
+ * Limit the second level counts
+ * @param {object} data The data
+ * @return {Promise} A promise with limited data
+ */
 var subLimitCounts = function (data) {
     var deferred = Q.defer();
 
@@ -238,6 +235,11 @@ var subLimitCounts = function (data) {
     return deferred.promise;
 };
 
+/**
+ * Get the group info header
+ * @param {object} group The group
+ * @return {string} The group info header
+ */
 function formatGroupInfo(group) {
     var output = chalk.bold('User: ') + group._name + ' - ' + group._username + ' - ' + group._user_id + '\n';
     output += chalk.bold('Total API Calls: ') + numeral(group._count).format('0,0');
@@ -245,10 +247,20 @@ function formatGroupInfo(group) {
     return output;
 }
 
+/**
+ * Get a table of endpoint data
+ * @param {object} group The group
+ * @return {string} The formatted endpoint data
+ */
 function formatEndpointData(group) {
     return table(report.generateTableData(group._counts, COLUMNS, OUTPUT_INFO));
 }
 
+/**
+ * Prints the data out based on the format
+ * @param {object} data The data to print
+ * @returns {Promise} A promise for when the printing is done
+ */
 var printCounts = function (data) {
     var deferred = Q.defer();
 
@@ -258,7 +270,7 @@ var printCounts = function (data) {
         if (global.config.summary) {
             global.logger.log(table(report.generateTableData(data.grouping, SUMMARY_COLUMNS, SUMMARY_OUTPUT_INFO)));
         } else {
-            lo.forEach(data.grouping, function (group, user_id) {
+            lo.forEach(data.grouping, function (group) {
                 global.logger.log(formatGroupInfo(group));
                 global.logger.log(formatEndpointData(group));
             });
@@ -270,11 +282,15 @@ var printCounts = function (data) {
     return deferred.promise;
 };
 
+/**
+ * The stuff to run
+ * @returns {undefined}
+ */
 var run = function () {
     'use strict';
 
     sfdc.query(queries.blame.apiusage())
-        .then(downloadLogFiles)
+        .then(utils.fetchAndConvert)
         .then(groupByUserIdAndName)
         .then(fetchUsernames)
         .then(enrichCounts)
@@ -288,8 +304,6 @@ var run = function () {
         });
 };
 
-var cli = {
-    run: run
-};
+var cli = { run: run };
 
 module.exports = cli;

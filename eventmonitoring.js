@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+var yargs = require('yargs');
 var Q = require('q');
 
 var pkg = require('./package.json');
@@ -10,17 +11,17 @@ var blame = require('./src/blame.js');
 var login = require('./src/login.js');
 var report = require('./src/report.js');
 
-global.config = {
-    url: undefined
-};
-
+global.config = { url: undefined };
 global.logger = require('./src/lib/logger.js');
 
+/**
+ * Runs the script
+ * @returns {Promise} A promise for when it's been run
+ */
 var run = function () {
     var deferred = Q.defer();
 
-    require('yargs')
-        .usage('$0 <cmd> [args]')
+    yargs.usage('$0 <cmd> [args]')
         .options({
             'env': {
                 alias: 'e',
@@ -58,8 +59,8 @@ var run = function () {
             }
         })
         .conflicts({
-            'env': ['username', 'password', 'token'],
-            'solenopsis': ['username', 'password', 'token']
+            'env': [ 'username', 'password', 'token' ],
+            'solenopsis': [ 'username', 'password', 'token' ]
         })
         .version(pkg.version)
         .command('blame [type]', 'Blame users', blame.config, blame.run)
@@ -70,7 +71,7 @@ var run = function () {
     deferred.resolve();
 
     return deferred.promise;
-}
+};
 
 config.loadConfig()
     .then(run)
