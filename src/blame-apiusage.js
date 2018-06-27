@@ -6,7 +6,6 @@ var Q = require('q');
 const { table } = require('table');
 
 var formatter = require('./lib/formatter.js');
-var report = require('./lib/report.js');
 var sfdc = require('./lib/sfdc.js');
 var queries = require('./lib/queries.js');
 var utils = require('./lib/utils.js');
@@ -253,7 +252,7 @@ function formatGroupInfo(group) {
  * @return {string} The formatted endpoint data
  */
 function formatEndpointData(group) {
-    return table(report.generateTableData(group._counts, COLUMNS, OUTPUT_INFO));
+    return table(utils.generateTableData(group._counts, COLUMNS, OUTPUT_INFO));
 }
 
 /**
@@ -268,7 +267,7 @@ var printCounts = function (data) {
         global.logger.log(JSON.stringify(data.grouping));
     } else if (global.config.format === 'table') {
         if (global.config.summary) {
-            global.logger.log(table(report.generateTableData(data.grouping, SUMMARY_COLUMNS, SUMMARY_OUTPUT_INFO)));
+            global.logger.log(table(utils.generateTableData(data.grouping, SUMMARY_COLUMNS, SUMMARY_OUTPUT_INFO)));
         } else {
             lo.forEach(data.grouping, function (group) {
                 global.logger.log(formatGroupInfo(group));
