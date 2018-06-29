@@ -91,6 +91,7 @@ This sub command "blames" users for doing things
 *   **--limit \[limit\]** - The number of results to limit to
 *   **--subsort \[field1,field2\]** - The fields to sort the secondary data by.  This will vary from type to type.
 *   **--sublimit \[limit\]** - The number of results for secondary data to limit to.
+*   **--userid \[id\]** - The user id to return.  This can be stacked to return multiple users
 
 ### API Usage
 Data around users and API usage

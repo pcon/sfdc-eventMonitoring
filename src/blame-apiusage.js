@@ -53,6 +53,30 @@ var SUMMARY_OUTPUT_INFO = {
 };
 
 /**
+ * Trims down the user ids to 15 characters if needed
+ * @returns {undefined}
+ */
+function updateUserIdCriteria() {
+    if (global.config.userid === undefined) {
+        return;
+    }
+
+    if (lo.isArray(global.config.userid)) {
+        global.config.userid = lo.map(global.config.userid, utils.trimId);
+    } else {
+        global.config.userid = utils.trimId(global.config.userid);
+    }
+}
+
+/**
+ * Updates any filter criteria that need pre-processing
+ * @returns {undefined}
+ */
+function updatefilterCriteria() {
+    updateUserIdCriteria();
+}
+
+/**
  * Generate the name to display
  * @param {object} log The log
  * @returns {string} The name
@@ -138,7 +162,7 @@ var fetchUsernames = function (data) {
             results.user_map = {};
 
             lo.forEach(users, function (user) {
-                results.user_map[user.Id.substring(0, 15)] = user;
+                results.user_map[utils.trimId(user.Id)] = user;
             });
 
             deferred.resolve(results);
@@ -181,6 +205,17 @@ var enrichCounts = function (data) {
     deferred.resolve(data);
 
     return deferred.promise;
+};
+
+/**
+ * Filter the counts down
+ * @param {object} data The data
+ * @return {Promis} A promise with filtered data
+ */
+var filterCounts = function (data) {
+    var filter = { '_user_id': global.config.userid };
+
+    return utils.filterResults(data, 'grouping', filter);
 };
 
 /**
@@ -288,11 +323,14 @@ var printCounts = function (data) {
 var run = function () {
     'use strict';
 
+    updatefilterCriteria();
+
     sfdc.query(queries.blame.apiusage())
         .then(utils.fetchAndConvert)
         .then(groupByUserIdAndName)
         .then(fetchUsernames)
         .then(enrichCounts)
+        .then(filterCounts)
         .then(sortCounts)
         .then(limitCounts)
         .then(subSortCounts)

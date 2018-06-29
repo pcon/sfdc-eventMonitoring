@@ -66,6 +66,10 @@ function config(yargs) {
         'summary': {
             describe: 'Summarize the data.  Only used with apiusage',
             type: 'boolean'
+        },
+        'userid': {
+            describe: 'A user id to filter the results by',
+            type: 'string'
         }
     });
 }

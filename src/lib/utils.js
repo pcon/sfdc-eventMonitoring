@@ -141,6 +141,59 @@ var fetchAndConvert = function (event_log_files) {
 };
 
 /**
+ * Method to do the filtering
+ * @param {object} filters The filters to apply
+ * @returns {function} The predicate function
+ */
+function filterPredicate(filters) {
+    return function (data) {
+        var matches = true;
+
+        lo.forEach(filters, function (filter, key) {
+            if (lo.isArray(filter)) {
+                if (!lo.includes(filter, lo.get(data, key))) {
+                    matches = false;
+                }
+            } else if (filter !== lo.get(data, key)) {
+                matches = false;
+            }
+        });
+
+        return matches;
+    };
+}
+
+/**
+ * Filters data
+ * @param {object} data The data to filter
+ * @param {string} key The key of the data to filter
+ * @param {object} filter The filter to apply
+ * @returns {object} The filtered data
+ */
+function filterNoPromise(data, key, filter) {
+    var filtered_results = lo.filter(lo.get(data, key), filterPredicate(filter));
+    //global.logger.log(filtered_results);
+    lo.set(data, key, filtered_results);
+
+    return data;
+}
+
+/**
+ * Filters data
+ * @param {object} data The data to filter
+ * @param {string} key The key of the data to filter
+ * @param {object} filter The filter to apply
+ * @returns {object} The filtered data
+ */
+var filterResults = function (data, key, filter) {
+    var deferred = Q.defer();
+
+    deferred.resolve(filterNoPromise(data, key, filter));
+
+    return deferred.promise;
+};
+
+/**
  * Sort a set of data based on a key and a sorter
  * @param {object} data The data to sort.
  * @param {string} key The key of the data to sort.
@@ -296,18 +349,32 @@ var splitByField = function (data, field_name) {
  * @param {array} data The data to output
  * @returns {Promise} A promise for when the data has been outputted
  */
-function outputJSONToConsole(data) {
+var outputJSONToConsole = function (data) {
     var deferred = Q.defer();
 
     global.logger.log(JSON.stringify(data));
     deferred.resolve();
 
     return deferred.promise;
-}
+};
+
+/**
+ * Trims a provided Id down to 15 characters
+ * @param {string} id The Id
+ * @returns {string} The shortened Id
+ */
+var trimId = function (id) {
+    if (id === undefined) {
+        return;
+    }
+
+    return id.substring(0, 15);
+};
 
 var utils = {
     escapeString: escapeString,
     fetchAndConvert: fetchAndConvert,
+    filterResults: filterResults,
     generateTableData: generateTableData,
     logError: logError,
     limitNoPromise: limitNoPromise,
@@ -319,6 +386,7 @@ var utils = {
     splitByField: splitByField,
     subLimitResults: subLimitResults,
     subSortResults: subSortResults,
+    trimId: trimId,
     writeJSONtoFile: writeJSONtoFile
 };
 
