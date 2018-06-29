@@ -59,6 +59,27 @@ You can also store these values in the `$HOME/.eventmonitoring` config file
 }
 ```
 
+## Dump
+This sub command dumps all the data to stdout or disk
+
+**Flags**
+*   **--format \[format\]** - json - The format the output should be displayed in
+*   **--interval \[interval\]** - hourly, daily - The interval to use for the data
+*   **--type \[type\]** - The event type to dump
+*   **--split** - Split the files based on event type
+*   **--file \[filename\]** - The filename to save the data to
+
+```bash
+eventmonitoring dump --type ApexSoap --type Login --type API --file events.json --split
+```
+
+```text
+# ls
+events_ApexSoap.json
+events_Login.json
+events_API.json
+```
+
 ## Blame
 This sub command "blames" users for doing things
 

@@ -4,7 +4,7 @@ var Q = require('q');
 var formatter = require('./lib/formatter.js');
 var login = require('./lib/login.js');
 var sfdc = require('./lib/sfdc.js');
-var static = require('./lib/static.js');
+var statics = require('./lib/statics.js');
 var queries = require('./lib/queries.js');
 var utils = require('./lib/utils.js');
 
@@ -25,7 +25,7 @@ var OUTPUT_INFO = {
     },
     'message': {
         header: 'Error Message',
-        formatter: static.getMessage
+        formatter: statics.getMessage
     }
 };
 

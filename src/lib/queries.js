@@ -94,11 +94,29 @@ function getEventTypeCriteria(types) {
 }
 
 /**
+ * Gets all the logs
+ * @param {array|undefined} types The types to get
+ * @returns {string} The query
+ */
+var getAllLogs = function (types) {
+    var criteria = [
+        getLogDate(),
+        getInterval()
+    ];
+
+    if (types !== undefined) {
+        criteria.push(getEventTypeCriteria(types));
+    }
+
+    return buildSimpleQuery(EVENT_LOG_FILE_FIELDS, EVENT_LOG_FILE, criteria, 'LogDate desc');
+};
+
+/**
  * Gets the logs for types
  * @param {string|array} types The types
  * @returns {string} The query
  */
-function getLogsByType(types) {
+var getLogsByType = function (types) {
     var criteria = [
         getLogDate(),
         getInterval(),
@@ -106,7 +124,7 @@ function getLogsByType(types) {
     ];
 
     return buildSimpleQuery(EVENT_LOG_FILE_FIELDS, EVENT_LOG_FILE, criteria, 'LogDate desc', 1);
-}
+};
 
 /**
  * Gets the query for all the "API" usage types
@@ -185,7 +203,10 @@ var reportVisualforce = function () {
 var queries = {
     blame: { apiusage: blameAPIUsage },
     login: login,
-    general: { users: generalUsers },
+    general: {
+        getAllLogs: getAllLogs,
+        users: generalUsers
+    },
     report: {
         apexexecution: reportApexExecution,
         apexsoap: reportApexSoap,

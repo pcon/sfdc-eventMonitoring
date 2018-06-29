@@ -1,5 +1,6 @@
 var chalk = require('chalk');
 var lo = require('lodash');
+var jsonfile = require('jsonfile');
 var moment = require('moment');
 var Q = require('q');
 
@@ -15,6 +16,15 @@ var sfdc = require('./sfdc.js');
  */
 var escapeString = function (data) {
     return '\'' + data.replace(/'/, '\\\'') + '\'';
+};
+
+/**
+ * Log an error
+ * @param {Error} error The error
+ * @returns {undefined}
+ */
+var logError = function (error) {
+    global.logger.error(error);
 };
 
 /**
@@ -69,20 +79,12 @@ var subLimitResults = function (data, key) {
 };
 
 /**
- * Fetch and convert a list of log files
- * @param {array} event_log_files The event log files to download
- * @returns {Promise} A promise for the data from the event log files
+ * Gets the most recent files
+ * @param {array} event_log_files All the log files to sort through
+ * @returns {object} A map of event type to the most recent log files
  */
-var fetchAndConvert = function (event_log_files) {
-    var results = [];
-    var promises = [];
+function getMostRecentFiles(event_log_files) {
     var most_recent_files = {};
-    var deferred = Q.defer();
-
-    if (lo.isEmpty(event_log_files)) {
-        global.logger.error('Unable to find log files');
-        process.exit(errorCodes.NO_LOGFILES);
-    }
 
     lo.forEach(event_log_files, function (event_log_file) {
         if (!lo.has(most_recent_files, event_log_file.EventType)) {
@@ -94,6 +96,29 @@ var fetchAndConvert = function (event_log_files) {
             lo.set(most_recent_files, event_log_file.EventType, event_log_file);
         }
     });
+
+    return most_recent_files;
+}
+
+/**
+ * Fetch and convert a list of log files
+ * @param {array} event_log_files The event log files to download
+ * @returns {Promise} A promise for the data from the event log files
+ */
+var fetchAndConvert = function (event_log_files) {
+    var most_recent_files;
+    var results = [];
+    var promises = [];
+    var deferred = Q.defer();
+
+    if (lo.isEmpty(event_log_files)) {
+        global.logger.error('Unable to find log files');
+        process.exit(errorCodes.NO_LOGFILES);
+    }
+
+    if (global.config.latest) {
+        most_recent_files = getMostRecentFiles(event_log_files);
+    }
 
     lo.forEach(most_recent_files, function (event_log_file) {
         promises.push(sfdc.fetchConvertFile(event_log_file.LogFile));
@@ -219,17 +244,82 @@ var printFormattedData = function (data, columns, output_info) {
     return deferred.promise;
 };
 
+/**
+ * Write JSON data to a file
+ * @param {object} data The data
+ * @param {string} filename The file name
+ * @returns {Promise} A promise for when the file was written
+ */
+var writeJSONtoFile = function (data, filename) {
+    var deferred = Q.defer();
+
+    jsonfile.writeFile(filename, data, function (error) {
+        if (error) {
+            deferred.reject(error);
+        } else {
+            deferred.resolve();
+        }
+    });
+
+    return deferred.promise;
+};
+
+/**
+ * Splits data to a map by a field
+ * @param {object} data The data
+ * @param {string} field_name The field name
+ * @returns {object} A map of field_name to an array of data
+ */
+var splitByField = function (data, field_name) {
+    var field_value;
+    var results = {};
+
+    lo.forEach(data, function (row) {
+        field_value = lo.get(row, field_name);
+
+        if (field_value === undefined) {
+            return;
+        }
+
+        if (!lo.has(results, field_value)) {
+            lo.set(results, field_value, []);
+        }
+
+        results[field_value].push(row);
+    });
+
+    return results;
+};
+
+/**
+ * Output the logs to the console
+ * @param {array} data The data to output
+ * @returns {Promise} A promise for when the data has been outputted
+ */
+function outputJSONToConsole(data) {
+    var deferred = Q.defer();
+
+    global.logger.log(JSON.stringify(data));
+    deferred.resolve();
+
+    return deferred.promise;
+}
+
 var utils = {
     escapeString: escapeString,
     fetchAndConvert: fetchAndConvert,
     generateTableData: generateTableData,
+    logError: logError,
     limitNoPromise: limitNoPromise,
     limitResults: limitResults,
+    outputJSONToConsole: outputJSONToConsole,
     printFormattedData: printFormattedData,
     sortNoPromise: sortNoPromise,
     sortResults: sortResults,
+    splitByField: splitByField,
     subLimitResults: subLimitResults,
-    subSortResults: subSortResults
+    subSortResults: subSortResults,
+    writeJSONtoFile: writeJSONtoFile
 };
 
 module.exports = utils;

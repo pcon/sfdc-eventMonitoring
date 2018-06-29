@@ -3,6 +3,7 @@ var lo = require('lodash');
 var conf = require('./lib/config.js');
 var errorCodes = require('./lib/errorCodes.js');
 var sfdc = require('./lib/sfdc.js');
+var utils = require('./lib/utils.js');
 
 var apexexecution = require('./report-apexexecution.js');
 var apexsoap = require('./report-apexsoap.js');
@@ -83,7 +84,8 @@ function run(args) {
     sfdc.login()
         .then(function () {
             lo.get(handlers, global.config.type)();
-        });
+        })
+        .catch(utils.logError);
 }
 
 var cli = {

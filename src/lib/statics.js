@@ -122,6 +122,55 @@ var LOGIN_STATUS = {
     'LOGIN_TWOFACTOR_REQ': 'Two-factor required'
 };
 
+var LOG_TYPES = [
+    'ApexCallout',
+    'ApexExecution',
+    'ApexSoap',
+    'ApexTrigger',
+    'API',
+    'AsyncReportRun',
+    'BulkAPI',
+    'ChangesetOperation',
+    'Console',
+    'ContentDistribution',
+    'ContentDocument',
+    'ContentTransfer',
+    'ContinuationCalloutSummary',
+    'Dashboard',
+    'DocumentAttach',
+    'ExternalCrossorgCallout',
+    'ExternaloDataCallout',
+    'ExternalCustomApexCallout',
+    'InsecureExternalAssets',
+    'KnowledgeArticleView',
+    'LightningError',
+    'LightningInteraction',
+    'LightningPageView',
+    'LightningPerformance',
+    'Login',
+    'LoginAs',
+    'Logout',
+    'MetadataAPI',
+    'Multiblock',
+    'PackageInstall',
+    'PlatformEncryption',
+    'QueuedExec',
+    'Report',
+    'ReportExport',
+    'RestAPI',
+    'Sandbox',
+    'Search',
+    'SearchClick',
+    'Sites',
+    'TimebasedWorkflow',
+    'Transaction',
+    'URI',
+    'Visualforce',
+    'WaveChange',
+    'WaveInteraction',
+    'WavePerformance'
+];
+
 /**
  * Get the message for a given key
  * @param {string} key The key
@@ -139,6 +188,9 @@ var getMessage = function (key) {
     return lo.get(messages, key);
 };
 
-var static = { getMessage: getMessage };
+var static = {
+    getMessage: getMessage,
+    LOG_TYPES: LOG_TYPES
+};
 
 module.exports = static;
