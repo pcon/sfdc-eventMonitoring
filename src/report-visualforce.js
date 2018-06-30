@@ -1,6 +1,3 @@
-var lo = require('lodash');
-var Q = require('q');
-
 var formatter = require('./lib/formatter.js');
 var queries = require('./lib/queries.js');
 
@@ -60,41 +57,19 @@ var OUTPUT_INFO = {
 };
 
 /**
- * Generates the URI
+ * Generates the name
  * @param {object} log The log
- * @returns {string} The URI
+ * @returns {string} The name
  */
-function generateURI(log) {
+var generateName = function (log) {
     return log.URI;
-}
-
-/**
- * Groups the data by page
- * @param {array} logs The Logs
- * @return {Promise} A promise for the logs grouped by page
- */
-var groupBy = function (logs) {
-    var deferred = Q.defer();
-    var grouping = {};
-
-    lo.forEach(logs, function (log) {
-        if (!lo.has(grouping, generateURI(log))) {
-            grouping[generateURI(log)] = [];
-        }
-
-        grouping[generateURI(log)].push(log);
-    });
-
-    deferred.resolve(grouping);
-
-    return deferred.promise;
 };
 
 var report_structure = {
     COLUMNS: COLUMNS,
     DATA_MAP: DATA_MAP,
     OUTPUT_INFO: OUTPUT_INFO,
-    groupBy: groupBy,
+    generateName: generateName,
     query: queries.report.visualforce
 };
 

@@ -68,6 +68,31 @@ function config(yargs) {
 }
 
 /**
+ * Groups the data by the entry point
+ * @param {array} logs The Logs
+ * @param {object} handler The handler
+ * @return {Promise} A promise for the logs grouped by entry point
+ */
+var groupBy = function (logs, handler) {
+    var name;
+    var deferred = Q.defer();
+    var grouping = {};
+
+    lo.forEach(logs, function (log) {
+        name = handler.generateName(log);
+        if (!lo.has(grouping, name)) {
+            grouping[name] = [];
+        }
+
+        grouping[name].push(log);
+    });
+
+    deferred.resolve(grouping);
+
+    return deferred.promise;
+};
+
+/**
  * Generates the averages for a single group
  * @param {array} logs The logs
  * @param {string} name The name
@@ -153,6 +178,9 @@ function run(args) {
             sfdc.query(handler.query())
                 .then(utils.fetchAndConvert)
                 .then(handler.groupBy)
+                .then(function (logs) {
+                    return groupBy(logs, handler);
+                })
                 .then(function (grouping) {
                     return generateAverages(grouping, handler);
                 })
