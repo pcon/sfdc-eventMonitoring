@@ -7,10 +7,10 @@ var report = require('./lib/report.js');
 var sfdc = require('./lib/sfdc.js');
 var utils = require('./lib/utils.js');
 
-var apexexecution = require('./report-apexexecution.js');
-var apexsoap = require('./report-apexsoap.js');
-var apextrigger = require('./report-apextrigger.js');
-var visualforce = require('./report-visualforce.js');
+var apexexecution = require('./report/apexexecution.js');
+var apexsoap = require('./report/apexsoap.js');
+var apextrigger = require('./report/apextrigger.js');
+var visualforce = require('./report/visualforce.js');
 
 var handlers = {
     apexexecution: apexexecution,

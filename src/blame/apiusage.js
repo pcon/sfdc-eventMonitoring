@@ -5,10 +5,10 @@ var Q = require('q');
 
 const { table } = require('table');
 
-var formatter = require('./lib/formatter.js');
-var sfdc = require('./lib/sfdc.js');
-var queries = require('./lib/queries.js');
-var utils = require('./lib/utils.js');
+var formatter = require('../lib/formatter.js');
+var sfdc = require('../lib/sfdc.js');
+var queries = require('../lib/queries.js');
+var utils = require('../lib/utils.js');
 
 var COLUMNS = [
     'endpoint',
@@ -336,9 +336,7 @@ var run = function () {
         .then(subSortCounts)
         .then(subLimitCounts)
         .then(printCounts)
-        .catch(function (error) {
-            global.logger.error(error);
-        });
+        .catch(utils.logError);
 };
 
 var cli = { run: run };

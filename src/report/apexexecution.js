@@ -1,5 +1,5 @@
-var formatter = require('./lib/formatter.js');
-var queries = require('./lib/queries.js');
+var formatter = require('../lib/formatter.js');
+var queries = require('../lib/queries.js');
 
 var COLUMNS = [
     'name',

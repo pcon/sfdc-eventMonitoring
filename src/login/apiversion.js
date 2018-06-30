@@ -1,12 +1,13 @@
 var lo = require('lodash');
 var Q = require('q');
 
-var formatter = require('./lib/formatter.js');
-var login = require('./lib/login.js');
-var sfdc = require('./lib/sfdc.js');
-var summary = require('./login-apiversion-summary.js');
-var queries = require('./lib/queries.js');
-var utils = require('./lib/utils.js');
+var formatter = require('../lib/formatter.js');
+var login = require('../lib/login.js');
+var sfdc = require('../lib/sfdc.js');
+var queries = require('../lib/queries.js');
+var utils = require('../lib/utils.js');
+
+var summary = require('./apiversion-summary.js');
 
 var COLUMNS = [
     'version',

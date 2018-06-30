@@ -5,8 +5,8 @@ var errorCodes = require('./lib/errorCodes.js');
 var sfdc = require('./lib/sfdc.js');
 var utils = require('./lib/utils.js');
 
-var apiversion = require('./login-apiversion.js');
-var failed = require('./login-failed.js');
+var apiversion = require('./login/apiversion.js');
+var failed = require('./login/failed.js');
 
 var handlers = {
     apiversion: apiversion.run,

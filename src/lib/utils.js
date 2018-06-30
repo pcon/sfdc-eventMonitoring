@@ -150,6 +150,10 @@ function filterPredicate(filters) {
         var matches = true;
 
         lo.forEach(filters, function (filter, key) {
+            if (filter === undefined) {
+                return;
+            }
+
             if (lo.isArray(filter)) {
                 if (!lo.includes(filter, lo.get(data, key))) {
                     matches = false;
@@ -172,7 +176,7 @@ function filterPredicate(filters) {
  */
 function filterNoPromise(data, key, filter) {
     var filtered_results = lo.filter(lo.get(data, key), filterPredicate(filter));
-    //global.logger.log(filtered_results);
+
     lo.set(data, key, filtered_results);
 
     return data;
@@ -289,7 +293,11 @@ var printFormattedData = function (data, columns, output_info) {
     if (global.config.format === 'json') {
         global.logger.log(data);
     } else if (global.config.format === 'table') {
-        global.logger.log(table(generateTableData(data, columns, output_info)));
+        if (lo.isEmpty(data)) {
+            global.logger.log('No data to display');
+        } else {
+            global.logger.log(table(generateTableData(data, columns, output_info)));
+        }
     }
 
     deferred.resolve();

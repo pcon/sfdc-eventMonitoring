@@ -5,7 +5,7 @@ var errorCodes = require('./lib/errorCodes.js');
 var sfdc = require('./lib/sfdc.js');
 var utils = require('./lib/utils.js');
 
-var apiusage = require('./blame-apiusage.js');
+var apiusage = require('./blame/apiusage.js');
 
 var handlers = { apiusage: apiusage.run };
 
