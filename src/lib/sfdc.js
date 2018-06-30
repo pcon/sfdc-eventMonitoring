@@ -79,6 +79,8 @@ var query = function (query_string) {
         process.exit(errorCodes.NO_CONNECTION_QUERY);
     }
 
+    global.logger.debug('Querying ' + query_string);
+
     global.sfdc_conn.query(query_string, function (error, results) {
         qutils.rejectResolve(deferred, error, lo.get(results, 'records'));
     });

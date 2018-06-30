@@ -3,9 +3,7 @@ var Q = require('q');
 
 var formatter = require('./lib/formatter.js');
 var report = require('./lib/report.js');
-var sfdc = require('./lib/sfdc.js');
 var queries = require('./lib/queries.js');
-var utils = require('./lib/utils.js');
 
 var COLUMNS = [
     'name',
@@ -64,7 +62,7 @@ function generateName(log) {
  * @param {array} logs The Logs
  * @return {Promise} A promise for the logs grouped by method
  */
-var groupByMethod = function (logs) {
+var groupBy = function (logs) {
     var deferred = Q.defer();
     var grouping = {};
 
@@ -142,34 +140,12 @@ var generateAverages = function (grouping) {
     return deferred.promise;
 };
 
-/**
- * Prints the averages based on the format
- * @param {object} data The data
- * @returns {Promise} A promise for when the data has been printed
- */
-var printAverages = function (data) {
-    return utils.printFormattedData(data.averages, COLUMNS, OUTPUT_INFO);
+var report_structure = {
+    COLUMNS: COLUMNS,
+    OUTPUT_INFO: OUTPUT_INFO,
+    generateAverages: generateAverages,
+    groupBy: groupBy,
+    query: queries.report.apexsoap
 };
 
-/**
- * The stuff to run
- * @returns {undefined}
- */
-var run = function () {
-    'use strict';
-
-    sfdc.query(queries.report.apexsoap())
-        .then(utils.fetchAndConvert)
-        .then(groupByMethod)
-        .then(generateAverages)
-        .then(report.sortAverages)
-        .then(report.limitAverages)
-        .then(printAverages)
-        .catch(function (error) {
-            global.logger.error(error);
-        });
-};
-
-var cli = {run: run};
-
-module.exports = cli;
+module.exports = report_structure;

@@ -6,84 +6,54 @@ var report = require('./lib/report.js');
 var queries = require('./lib/queries.js');
 
 var COLUMNS = [
-    'uri',
+    'name',
     'count',
-    'cpu',
-    'run',
-    'view',
-    'response',
-    'dbcpu',
-    'dbtotal'
+    'field1'
 ];
 
 var DATA_MAP = {
-    'cpu': 'CPU_TIME',
-    'run': 'RUN_TIME',
-    'response': 'RESPONSE_SIZE',
-    'view': 'VIEW_STATE_SIZE',
-    'dbcpu': 'DB_CPU_TIME',
-    'dbtotal': 'DB_TOTAL_TIME'
+    'field1': 'FIELD_NAME'
 };
 
 var OUTPUT_INFO = {
-    'uri': {
-        header: 'URI',
+    'name': {
+        header: 'Name',
         formatter: formatter.noop
     },
     'count': {
         header: 'Count',
         formatter: formatter.noop
     },
-    'cpu': {
-        header: 'CPU Time',
+    'feild1': {
+        header: 'Human Field Name',
         formatter: formatter.prettyms
-    },
-    'run': {
-        header: 'Run Time',
-        formatter: formatter.prettyms
-    },
-    'view': {
-        header: 'View State Size',
-        formatter: formatter.prettybytes
-    },
-    'response': {
-        header: 'Response Size',
-        formatter: formatter.prettybytes
-    },
-    'dbcpu': {
-        header: 'DB CPU Time',
-        formatter: formatter.prettyms
-    },
-    'dbtotal': {
-        header: 'DB Total Time',
-        formatter: formatter.nanoToMsToPretty
     }
 };
 
 /**
- * Generates the URI
+ * Generates the name
  * @param {object} log The log
- * @returns {string} The URI
+ * @returns {string} The name
  */
-function generateURI(log) {
-    return log.URI;
+function generateName(log) {
+    return log.NAME;
 }
 
 /**
- * Groups the data by page
+ * Groups the data by the entry point
  * @param {array} logs The Logs
- * @return {Promise} A promise for the logs grouped by page
+ * @return {Promise} A promise for the logs grouped by entry point
  */
 var groupBy = function (logs) {
     var deferred = Q.defer();
     var grouping = {};
 
     lo.forEach(logs, function (log) {
-        if (!lo.has(grouping, generateURI(log))) {
-            grouping[generateURI(log)] = [];
+        if (!lo.has(grouping, generateName(log))) {
+            grouping[generateName(log)] = [];
         }
 
-        grouping[generateURI(log)].push(log);
+        grouping[generateName(log)].push(log);
     });
 
     deferred.resolve(grouping);
@@ -92,15 +62,15 @@ var groupBy = function (logs) {
 };
 
 /**
- * Generates the averages for a single page
+ * Generates the averages for a single name
  * @param {array} logs The logs
- * @param {string} uri The uri
- * @return {promise} A promise for an average for the page
+ * @param {string} name The name
+ * @return {promise} A promise for an average for the endpoint name
  */
-var generateAveragesForUri = function (logs, uri) {
+var generateAveragesForName = function (logs, name) {
     var deferred = Q.defer();
     var averages = {
-        uri: uri,
+        name: name,
         count: lo.size(logs)
     };
 
@@ -123,8 +93,8 @@ var generateAveragesForUri = function (logs, uri) {
 };
 
 /**
- * Generate the averages for every page
- * @param {object} grouping The grouping of pages
+ * Generate the averages for every endpoint
+ * @param {object} grouping The grouping of endpoints
  * @returns {Promise} A promise for all the averages for all the groupings
  */
 var generateAverages = function (grouping) {
@@ -133,7 +103,7 @@ var generateAverages = function (grouping) {
     var averages = [];
 
     lo.forEach(grouping, function (value, key) {
-        promises.push(generateAveragesForUri(value, key));
+        promises.push(generateAveragesForName(value, key));
     });
 
     Q.allSettled(promises)
@@ -145,8 +115,7 @@ var generateAverages = function (grouping) {
             });
 
             deferred.resolve({
-                grouping: grouping,
-                averages: averages
+                grouping: grouping, averages: averages
             });
         });
 
@@ -158,7 +127,7 @@ var report_structure = {
     OUTPUT_INFO: OUTPUT_INFO,
     generateAverages: generateAverages,
     groupBy: groupBy,
-    query: queries.report.visualforce
+    query: queries.report.apexexecution
 };
 
 module.exports = report_structure;

@@ -2,6 +2,7 @@ var lo = require('lodash');
 
 var conf = require('./lib/config.js');
 var errorCodes = require('./lib/errorCodes.js');
+var report = require('./lib/report.js');
 var sfdc = require('./lib/sfdc.js');
 var utils = require('./lib/utils.js');
 
@@ -11,10 +12,10 @@ var apextrigger = require('./report-apextrigger.js');
 var visualforce = require('./report-visualforce.js');
 
 var handlers = {
-    apexexecution: apexexecution.run,
-    apexsoap: apexsoap.run,
-    apextrigger: apextrigger.run,
-    visualforce: visualforce.run
+    apexexecution: apexexecution,
+    apexsoap: apexsoap,
+    apextrigger: apextrigger,
+    visualforce: visualforce
 };
 
 /**
@@ -83,7 +84,18 @@ function run(args) {
 
     sfdc.login()
         .then(function () {
-            lo.get(handlers, global.config.type)();
+            var handler = lo.get(handlers, global.config.type);
+
+            sfdc.query(handler.query())
+                .then(utils.fetchAndConvert)
+                .then(handler.groupBy)
+                .then(handler.generateAverages)
+                .then(report.sortAverages)
+                .then(report.limitAverages)
+                .then(function (data) {
+                    return utils.printFormattedData(data.averages, handler.COLUMNS, handler.OUTPUT_INFO);
+                })
+                .catch(utils.logError);
         })
         .catch(utils.logError);
 }
