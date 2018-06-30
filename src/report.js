@@ -1,4 +1,5 @@
 var lo = require('lodash');
+var Q = require('q');
 
 var conf = require('./lib/config.js');
 var errorCodes = require('./lib/errorCodes.js');
@@ -67,6 +68,69 @@ function config(yargs) {
 }
 
 /**
+ * Generates the averages for a single group
+ * @param {array} logs The logs
+ * @param {string} name The name
+ * @param {object} data_map A map of field name to data name
+ * @return {promise} A promise for an average for the group
+ */
+function generateGroupAverage(logs, name, data_map) {
+    var deferred = Q.defer();
+    var averages = {
+        name: name,
+        count: lo.size(logs)
+    };
+
+    averages = report.initializeAverages(averages, data_map);
+
+    lo.forEach(logs, function (log) {
+        lo.forEach(data_map, function (value, key) {
+            averages[key] += parseInt(log[value]);
+        });
+    });
+
+    lo.forEach(data_map, function (value, key) {
+        averages[key] /= lo.size(logs);
+        averages[key] = Number(averages[key].toFixed(2));
+    });
+
+    deferred.resolve(averages);
+
+    return deferred.promise;
+}
+
+/**
+ * Generate the averages for every method
+ * @param {object} grouping The grouping of method
+ * @param {object} handler The handler
+ * @returns {Promise} A promise for all the averages for all the methods
+ */
+function generateAverages(grouping, handler) {
+    var deferred = Q.defer();
+    var promises = [];
+    var averages = [];
+
+    lo.forEach(grouping, function (value, key) {
+        promises.push(generateGroupAverage(value, key, handler.DATA_MAP));
+    });
+
+    Q.allSettled(promises)
+        .then(function (results) {
+            lo.forEach(results, function (result) {
+                if (result.state === 'fulfilled') {
+                    averages.push(result.value);
+                }
+            });
+
+            deferred.resolve({
+                grouping: grouping, averages: averages
+            });
+        });
+
+    return deferred.promise;
+}
+
+/**
  * The run method
  * @param {object} args The arguments passed to the method
  * @returns {undefined}
@@ -89,7 +153,9 @@ function run(args) {
             sfdc.query(handler.query())
                 .then(utils.fetchAndConvert)
                 .then(handler.groupBy)
-                .then(handler.generateAverages)
+                .then(function (grouping) {
+                    return generateAverages(grouping, handler);
+                })
                 .then(report.sortAverages)
                 .then(report.limitAverages)
                 .then(function (data) {
