@@ -10,12 +10,51 @@ var errorCodes = require('./errorCodes.js');
 var sfdc = require('./sfdc.js');
 
 /**
+ * Trims a provided Id down to 15 characters
+ * @param {string} id The Id
+ * @returns {string} The shortened Id
+ */
+var trimId = function (id) {
+    if (id === undefined) {
+        return;
+    }
+
+    return id.substring(0, 15);
+};
+
+/**
  * Escape a string with single quotes
  * @param {string} data The data to escape
  * @returns {string} The escaped string
  */
 var escapeString = function (data) {
     return '\'' + data.replace(/'/, '\\\'') + '\'';
+};
+
+/**
+ * Escape an array of strings
+ * @param {string[]} data The data to escape
+ * @return {string[]} An array of escaped strings
+ */
+var escapeArray = function (data) {
+    var escaped = [];
+
+    lo.forEach(data, function (d) {
+        escaped.push(utils.escapeString(d));
+    });
+
+    return escaped;
+};
+
+/**
+ * Maps the Id to the data
+ * @param {array} sObjects The objects to map
+ * @returns {object} A map of Id to object
+ */
+var idToObject = function (sObjects) {
+    return lo.keyBy(sObjects, function (sObject) {
+        return trimId(sObject.Id);
+    });
 };
 
 /**
@@ -366,24 +405,13 @@ var outputJSONToConsole = function (data) {
     return deferred.promise;
 };
 
-/**
- * Trims a provided Id down to 15 characters
- * @param {string} id The Id
- * @returns {string} The shortened Id
- */
-var trimId = function (id) {
-    if (id === undefined) {
-        return;
-    }
-
-    return id.substring(0, 15);
-};
-
 var utils = {
     escapeString: escapeString,
+    escapeArray: escapeArray,
     fetchAndConvert: fetchAndConvert,
     filterResults: filterResults,
     generateTableData: generateTableData,
+    idToObject: idToObject,
     logError: logError,
     limitNoPromise: limitNoPromise,
     limitResults: limitResults,

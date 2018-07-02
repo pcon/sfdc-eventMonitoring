@@ -352,6 +352,39 @@ eventmonitoring report apextrigger
 *   **count** - The number of times the trigger was called
 *   **exec** - The average execution time
 
+### Report
+Reporting based on Report data
+```bash
+eventmonitoring report report --limit 5 --sort cpu
+```
+
+```text
+╔════════════════════════════╤═════════════════╤═══════╤══════════╤══════════╤══════════╤═════════════╤═══════════╗
+║ Name                       │ Id              │ Count │ CPU Time │ Run Time │ DB Time  │ DB CPU Time │ Row Count ║
+╟────────────────────────────┼─────────────────┼───────┼──────────┼──────────┼──────────┼─────────────┼───────────╢
+║ DELETE FROM YOUR DASHBOARD │ 00OA0000004abcd │ 1     │ 1.9s     │ 12s      │ 10.9s    │ 10.7s       │ 1243006   ║
+╟────────────────────────────┼─────────────────┼───────┼──────────┼──────────┼──────────┼─────────────┼───────────╢
+║ Case Comment Report        │ 00OA0000006abcd │ 1     │ 643ms    │ 29.8s    │ 29.2s    │ 1.4s        │ 4394      ║
+╟────────────────────────────┼─────────────────┼───────┼──────────┼──────────┼──────────┼─────────────┼───────────╢
+║ 00OA0000006efgh            │ 00OA0000006efgh │ 1     │ 539ms    │ 8s       │ 7.5s     │ 970ms       │ 4613      ║
+╟────────────────────────────┼─────────────────┼───────┼──────────┼──────────┼──────────┼─────────────┼───────────╢
+║ 00OA0000006ijkl            │ 00OA0000006ijkl │ 1     │ 503ms    │ 7.9s     │ 7.5s     │ 1.6s        │ 16624     ║
+╟────────────────────────────┼─────────────────┼───────┼──────────┼──────────┼──────────┼─────────────┼───────────╢
+║ 00OA0000006mnop            │ 00OA0000006mnop │ 3     │ 487ms    │ 2m 25.9s │ 2m 24.9s │ 2m 22.7s    │ NaN       ║
+╚════════════════════════════╧═════════════════╧═══════╧══════════╧══════════╧══════════╧═════════════╧═══════════╝
+```
+
+**Sort Fields**
+*   **name** - The name of the report
+*   **id** - The id of the report
+*   **count** - The number of times the endpoint was called
+*   **cpu** - The average time spent on the CPU
+*   **run** - The average run time
+*   **dbcpu** - The average database CPU time
+*   **dbtotal** - The average total database CPU time
+*   **rowcount** - The average number of rows returned in the report
+
+
 ### Visualforce
 Reporting based on Visualforce data
 

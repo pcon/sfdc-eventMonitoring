@@ -17,6 +17,12 @@ var USER_FIELDS = [
     'Username'
 ];
 
+var REPORT = 'Report';
+var REPORT_FIELDS = [
+    'Id',
+    'Name'
+];
+
 /**
  * Format the criteria
  * @param {string|array|object} criteria The where criteria
@@ -154,18 +160,24 @@ var login = function () {
  * @returns {string} The query
  */
 var generalUsers = function (user_ids) {
-    var criteria;
-    var escaped_ids = [];
-
-    lo.forEach(user_ids, function (id) {
-        escaped_ids.push(utils.escapeString(id));
-    });
-
-    criteria = [
-        'Id in (' + escaped_ids + ')'
+    var criteria = [
+        'Id in (' + lo.join(utils.escapeArray(user_ids), ',') + ')'
     ];
 
     return buildSimpleQuery(USER_FIELDS, USER, criteria);
+};
+
+/**
+ * Gets the query for reports
+ * @param {array} report_ids The report ids
+ * @returns {string} The query
+ */
+var generalReports = function (report_ids) {
+    var criteria = [
+        'Id in (' + lo.join(utils.escapeArray(report_ids), ',') + ')'
+    ];
+
+    return buildSimpleQuery(REPORT_FIELDS, REPORT, criteria);
 };
 
 /**
@@ -193,6 +205,14 @@ var reportApexTrigger = function () {
 };
 
 /**
+ * Gets the report logs
+ * @returns {string} The query
+ */
+var reportReport = function () {
+    return getLogsByType('Report');
+};
+
+/**
  * Gets the visualforce logs
  * @returns {string} The query
  */
@@ -205,12 +225,14 @@ var queries = {
     login: login,
     general: {
         getAllLogs: getAllLogs,
+        reports: generalReports,
         users: generalUsers
     },
     report: {
         apexexecution: reportApexExecution,
         apexsoap: reportApexSoap,
         apextrigger: reportApexTrigger,
+        report: reportReport,
         visualforce: reportVisualforce
     }
 };

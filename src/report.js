@@ -10,12 +10,14 @@ var utils = require('./lib/utils.js');
 var apexexecution = require('./report/apexexecution.js');
 var apexsoap = require('./report/apexsoap.js');
 var apextrigger = require('./report/apextrigger.js');
+var report_report = require('./report/report.js');
 var visualforce = require('./report/visualforce.js');
 
 var handlers = {
     apexexecution: apexexecution,
     apexsoap: apexsoap,
     apextrigger: apextrigger,
+    report: report_report,
     visualforce: visualforce
 };
 
@@ -74,6 +76,10 @@ function config(yargs) {
  * @return {Promise} A promise for the logs grouped by entry point
  */
 var groupBy = function (logs, handler) {
+    if (handler.groupBy !== undefined) {
+        return handler.groupBy(logs);
+    }
+
     var name;
     var deferred = Q.defer();
     var grouping = {};
@@ -131,12 +137,20 @@ function generateGroupAverage(logs, name, data_map) {
  * @returns {Promise} A promise for all the averages for all the methods
  */
 function generateAverages(grouping, handler) {
+    if (handler.generateAverages !== undefined) {
+        return handler.generateAverages(grouping);
+    }
+
     var deferred = Q.defer();
     var promises = [];
     var averages = [];
 
     lo.forEach(grouping, function (value, key) {
-        promises.push(generateGroupAverage(value, key, handler.DATA_MAP));
+        if (handler.generateGroupAverage !== undefined) {
+            promises.push(handler.generateGroupAverage(value, key));
+        } else {
+            promises.push(generateGroupAverage(value, key, handler.DATA_MAP));
+        }
     });
 
     Q.allSettled(promises)
@@ -177,7 +191,6 @@ function run(args) {
 
             sfdc.query(handler.query())
                 .then(utils.fetchAndConvert)
-                .then(handler.groupBy)
                 .then(function (logs) {
                     return groupBy(logs, handler);
                 })

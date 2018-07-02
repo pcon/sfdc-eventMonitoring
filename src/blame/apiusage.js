@@ -159,12 +159,7 @@ var fetchUsernames = function (data) {
 
     sfdc.query(queries.general.users(lo.keys(data)))
         .then(function (users) {
-            results.user_map = {};
-
-            lo.forEach(users, function (user) {
-                results.user_map[utils.trimId(user.Id)] = user;
-            });
-
+            results.user_map = utils.idToObject(users);
             deferred.resolve(results);
         }).catch(function (error) {
             deferred.reject(error);
