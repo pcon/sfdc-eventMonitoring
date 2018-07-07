@@ -69,7 +69,7 @@ function buildSimpleQuery(fields, object_name, criteria, order_by, limit) {
  * @returns {string} The log date criteria based off the config interval
  */
 function getLogDate() {
-    return lo.toLower(global.config.interval === 'hourly') ? 'LogDate = TODAY' : 'LogDate = LAST_N_DAYS:2';
+    return lo.toLower(global.config.interval) === 'hourly' ? 'LogDate = TODAY' : 'LogDate = LAST_N_DAYS:2';
 }
 
 /**
