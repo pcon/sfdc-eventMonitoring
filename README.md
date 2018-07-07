@@ -260,6 +260,33 @@ This sub command is used to report on Event Monitoring data
 *   **--sort** - The field to sort the data by.  This will vary from report type to report type.
 *   **--limit \[limit\]** - The number of results to limit to
 
+### Apex Callouts
+Reporting based on ApexCallout data
+
+```bash
+eventmonitoring report apexcallout
+```
+
+```text
+╔══════════════════════════════════════════════════════════════════════╤═══════╤══════════════╤═══════════════╤════════════╗
+║ Name                                                                 │ Count │ Request Size │ Response Size │ Total Time ║
+╟──────────────────────────────────────────────────────────────────────┼───────┼──────────────┼───────────────┼────────────╢
+║ REST.GET    https://api.example.com/restful/api/Ticket               │ 368   │ -1 B         │ 85 B          │ 370ms      ║
+╟──────────────────────────────────────────────────────────────────────┼───────┼──────────────┼───────────────┼────────────╢
+║ REST.GET    https://api.example.com/restful/api/Receipt              │ 368   │ -1 B         │ 89 B          │ 410ms      ║
+╟──────────────────────────────────────────────────────────────────────┼───────┼──────────────┼───────────────┼────────────╢
+║ REST.POST   https://remote.example.com/api/command.ns                │ 3     │ -1 B         │ 195 B         │ 764ms      ║
+╚══════════════════════════════════════════════════════════════════════╧═══════╧══════════════╧═══════════════╧════════════╝
+```
+
+**Sort Fields**
+*   **name** - The Apex callout name
+*   **count** - The number of times the callout was called
+*   **request** - The average request size
+*   **response** - The average response size
+*   **time** - The average execution time
+
+
 ### Apex Execution
 Reporting based on ApexExecution data
 
@@ -284,7 +311,7 @@ eventmonitoring report apexexecution
 ```
 
 **Sort Fields**
-*   **entry** - The Apex entry
+*   **name** - The Apex entry
 *   **count** - The number of times the entry was called
 *   **cpu** - The average time spent on the CPU
 *   **run** - The average run time
@@ -409,7 +436,7 @@ eventmonitoring report visualforce
 ```
 
 **Sort Fields**
-*   **uri** - The URI of the Visualforce page
+*   **name** - The URI of the Visualforce page
 *   **count** - The number of times the page was accessed
 *   **cpu** - The average time spent on CPU
 *   **run** - The average run time

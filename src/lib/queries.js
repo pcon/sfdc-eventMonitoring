@@ -181,6 +181,14 @@ var generalReports = function (report_ids) {
 };
 
 /**
+ * Gets the apex callout logs
+ * @returns {string} The query
+ */
+var reportApexCallout = function () {
+    return getLogsByType('ApexCallout');
+};
+
+/**
  * Gets the apex execution logs
  * @returns {string} The query
  */
@@ -229,6 +237,7 @@ var queries = {
         users: generalUsers
     },
     report: {
+        apexcallout: reportApexCallout,
         apexexecution: reportApexExecution,
         apexsoap: reportApexSoap,
         apextrigger: reportApexTrigger,
