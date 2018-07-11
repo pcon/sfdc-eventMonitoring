@@ -59,6 +59,13 @@ You can also store these values in the `$HOME/.eventmonitoring` config file
 }
 ```
 
+### Caching
+You can enable caching by adding the `--cache /path/to/cache/folder` or adding the following to your config file
+
+```json
+"cache": "/path/to/cache/folder"
+```
+
 ## Dump
 This sub command dumps all the data to stdout or disk
 

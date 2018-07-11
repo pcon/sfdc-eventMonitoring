@@ -4,6 +4,7 @@ var utils = require('./utils.js');
 
 var EVENT_LOG_FILE = 'EventLogFile';
 var EVENT_LOG_FILE_FIELDS = [
+    'Id',
     'EventType',
     'LogFile',
     'LogDate',

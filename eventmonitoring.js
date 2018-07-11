@@ -53,6 +53,10 @@ var run = function () {
                 type: 'boolean',
                 default: undefined
             },
+            'cache': {
+                describe: 'The directory to cache the event logs',
+                type: 'string'
+            },
             'debug': {
                 alias: 'd',
                 describe: 'Enable debug logging',

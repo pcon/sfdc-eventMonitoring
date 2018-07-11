@@ -148,6 +148,7 @@ var fetchAndConvert = function (event_log_files) {
     var most_recent_files;
     var results = [];
     var promises = [];
+    var errors = [];
     var deferred = Q.defer();
 
     if (lo.isEmpty(event_log_files)) {
@@ -160,7 +161,7 @@ var fetchAndConvert = function (event_log_files) {
     }
 
     lo.forEach(most_recent_files, function (event_log_file) {
-        promises.push(sfdc.fetchConvertFile(event_log_file.LogFile));
+        promises.push(sfdc.fetchConvertFile(event_log_file));
     });
 
     Q.allSettled(promises)
@@ -168,10 +169,16 @@ var fetchAndConvert = function (event_log_files) {
             lo.forEach(promise_results, function (result) {
                 if (result.state === 'fulfilled') {
                     results = lo.concat(results, result.value);
+                } else {
+                    errors.push(result.reason);
                 }
             });
 
-            deferred.resolve(results);
+            if (!lo.isEmpty(errors)) {
+                deferred.reject(errors);
+            } else {
+                deferred.resolve(results);
+            }
         }).catch(function (error) {
             deferred.reject(error);
         });
