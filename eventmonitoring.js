@@ -57,6 +57,25 @@ var run = function () {
                 describe: 'The directory to cache the event logs',
                 type: 'string'
             },
+            'interval': {
+                default: 'hourly',
+                describe: 'The interval to use',
+                type: 'string',
+                choices: [ 'hourly', 'daily' ]
+            },
+            'latest': {
+                default: true,
+                describe: 'Use the most recent data',
+                type: 'boolean'
+            },
+            'start': {
+                describe: 'The start date/time to get (in GMT)',
+                type: 'string'
+            },
+            'end': {
+                describe: 'The end date/time to get (in GMT)',
+                type: 'string'
+            },
             'debug': {
                 alias: 'd',
                 describe: 'Enable debug logging',

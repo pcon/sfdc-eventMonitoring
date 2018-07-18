@@ -5,11 +5,13 @@ var jsonfile = require('jsonfile');
 var jsforce = require('jsforce');
 var lo = require('lodash');
 var path = require('path');
+var prettybytes = require('pretty-bytes');
 var process = require('process');
 var request = require('request');
 
 var conf = require('./config.js');
 var errorCodes = require('./errorCodes.js');
+var statics = require('./statics.js');
 var qutils = require('./qutils.js');
 
 /**
@@ -18,7 +20,11 @@ var qutils = require('./qutils.js');
  */
 var login = function () {
     if (global.config.url === undefined) {
-        global.config.url = global.config.sandbox ? 'https://test.salesforce.com' : 'https://login.salesforce.com';
+        global.config.url = global.config.sandbox ? statics.CONNECTION.SANDBOX_URL : statics.CONNECTION.PROD_URL;
+    }
+
+    if (global.config.version === undefined) {
+        global.config.version = statics.CONNECTION.VERSION;
     }
 
     if (global.config.solenopsis) {
@@ -42,7 +48,10 @@ var login = function () {
 
     var deferred = Q.defer();
 
-    global.sfdc_conn = new jsforce.Connection({ loginUrl: global.config.url });
+    global.sfdc_conn = new jsforce.Connection({
+        loginUrl: global.config.url,
+        version: global.config.version
+    });
 
     var combined_password = global.config.token === undefined ? global.config.password : global.config.password + global.config.token;
     global.sfdc_conn.login(global.config.username, combined_password, function (error) {
@@ -98,6 +107,15 @@ var query = function (query_string) {
  */
 function generateCacheFilename(log) {
     return path.join(global.config.cache, log.Id + '.json');
+}
+
+/**
+ * Gets the csv file name
+ * @param {object} log The log file to generate a name for
+ * @returns {string} The csv log file name
+ */
+function generateCSVFilename(log) {
+    return path.join(global.config.cache, log.Id + '.csv');
 }
 
 /**
@@ -162,6 +180,71 @@ function writeCachedLog(log, data) {
 }
 
 /**
+ * Stream the data from the URL to csvtojson and keep it all in memory
+ * @param {object} log The log to download
+ * @param {object} options The request options
+ * @returns {Promise} A promise for the results
+ */
+function streamToMemory(log, options) {
+    var deferred = Q.defer();
+    var results = [];
+
+    csvtojson()
+        .fromStream(request.get(options))
+        .subscribe(function (json) {
+            results.push(json);
+        }, function (error) {
+            deferred.reject(error);
+        }).on('error', function (error) {
+            deferred.reject(error);
+        }).on('done', function (error) {
+            if (error) {
+                deferred.reject(error);
+            } else {
+                writeCachedLog(log, results)
+                    .then(function () {
+                        deferred.resolve(results);
+                    }).catch(function (write_error) {
+                        deferred.reject(write_error);
+                    });
+            }
+        });
+
+    return deferred.promise;
+}
+
+/**
+ * Write the data from the URL to disk and then convert it into memory
+ * @param {object} log The log to download
+ * @param {object} options The request options
+ * @returns {Promise} A promise for the results
+ */
+function downloadToDiskAndConvert(log, options) {
+    var deferred = Q.defer();
+    var csvfilename = generateCSVFilename(log);
+    var csvfile = fs.createWriteStream(csvfilename);
+
+    request.get(options)
+        .pipe(csvfile)
+        .on('error', function (error) {
+            deferred.reject(error);
+        }).on('finish', function () {
+            csvtojson()
+                .fromFile(csvfilename)
+                .then(function (data) {
+                    writeCachedLog(log, data)
+                        .then(function () {
+                            deferred.resolve(data);
+                        }).catch(function (error) {
+                            deferred.reject(error);
+                        });
+                });
+        });
+
+    return deferred.promise;
+}
+
+/**
  * Download the remote file and convert it to an object
  * @param {object} log The log file to fetch and convert
  * @returns {Promise} A promise for the results
@@ -172,34 +255,33 @@ var fetchConvertFile = function (log) {
         if (results !== undefined) {
             deferred.resolve(results);
         } else {
-            results = [];
-
             if (global.sfdc_conn === undefined) {
                 global.logger.error('No valid connection');
                 process.exit(errorCodes.NO_CONNECTION_FETCH);
             }
+
+            global.logger.debug('Downloading ' + log.LogFile + ' (' + prettybytes(log.LogFileLength) + ')');
 
             var options = {
                 url: global.sfdc_conn.instanceUrl + log.LogFile,
                 headers: { Authorization: 'Bearer ' + global.sfdc_conn.accessToken }
             };
 
-            csvtojson()
-                .fromStream(request.get(options))
-                .subscribe(function (json) {
-                    results.push(json);
-                }).on('done', function (error) {
-                    if (error) {
+            if (lo.isEmpty(global.config.cache)) {
+                streamToMemory(log, options)
+                    .then(function (data) {
+                        deferred.resolve(data);
+                    }).catch(function (error) {
                         deferred.reject(error);
-                    } else {
-                        writeCachedLog(log, results)
-                            .then(function () {
-                                deferred.resolve(results);
-                            }).catch(function (write_error) {
-                                deferred.reject(write_error);
-                            });
-                    }
-                });
+                    });
+            } else {
+                downloadToDiskAndConvert(log, options)
+                    .then(function (data) {
+                        deferred.resolve(data);
+                    }).catch(function (error) {
+                        deferred.reject(error);
+                    });
+            }
         }
     }).catch(function (error) {
         deferred.reject(error);

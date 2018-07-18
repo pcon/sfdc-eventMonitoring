@@ -145,7 +145,7 @@ function getMostRecentFiles(event_log_files) {
  * @returns {Promise} A promise for the data from the event log files
  */
 var fetchAndConvert = function (event_log_files) {
-    var most_recent_files;
+    var files;
     var results = [];
     var promises = [];
     var errors = [];
@@ -157,10 +157,12 @@ var fetchAndConvert = function (event_log_files) {
     }
 
     if (global.config.latest) {
-        most_recent_files = getMostRecentFiles(event_log_files);
+        files = getMostRecentFiles(event_log_files);
+    } else {
+        files = event_log_files;
     }
 
-    lo.forEach(most_recent_files, function (event_log_file) {
+    lo.forEach(files, function (event_log_file) {
         promises.push(sfdc.fetchConvertFile(event_log_file));
     });
 

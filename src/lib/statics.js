@@ -1,5 +1,13 @@
 var lo = require('lodash');
 
+var CONNECTION = {
+    SANDBOX_URL: 'https://test.salesforce.com',
+    PROD_URL: 'https://login.salesforce.com',
+    VERSION: '43.0'
+};
+
+var DATE_FORMAT = 'YYYY-MM-DDTHH:mm:ss.000\\Z';
+
 var LOGIN_STATUS = {
     'LOGIN_CHALLENGE_ISSUED': 'Failed: Computer activation required',
     'LOGIN_CHALLENGE_PENDING': 'Failed: Computer activation pending',
@@ -189,6 +197,8 @@ var getMessage = function (key) {
 };
 
 var static = {
+    CONNECTION: CONNECTION,
+    DATE_FORMAT: DATE_FORMAT,
     getMessage: getMessage,
     LOG_TYPES: LOG_TYPES
 };

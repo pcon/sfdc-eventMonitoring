@@ -17,24 +17,12 @@ function config(yargs) {
     'use strict';
 
     yargs.options({
-        'interval': {
-            default: 'hourly',
-            describe: 'The interval to use',
-            type: 'string',
-            choices: [ 'hourly', 'daily' ]
-        },
         'format': {
             default: 'json',
             describe: 'The output format to use',
             type: 'string',
             hidden: true,
             choices: [ 'json' ]
-        },
-        'latest': {
-            default: true,
-            describe: 'Use the most recent data',
-            type: 'boolean',
-            hidden: true
         },
         'type': {
             default: undefined,

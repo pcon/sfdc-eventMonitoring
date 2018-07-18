@@ -28,18 +28,6 @@ function config(yargs) {
             type: 'string',
             choices: [ 'json', 'table' ]
         },
-        'interval': {
-            default: 'hourly',
-            describe: 'The interval to use',
-            type: 'string',
-            choices: [ 'hourly', 'daily' ]
-        },
-        'latest': {
-            default: true,
-            describe: 'Use the most recent data',
-            type: 'boolean',
-            hidden: true
-        },
         'asc': {
             default: false,
             describe: 'Sort the data in ascending order',

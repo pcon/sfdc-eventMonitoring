@@ -23,6 +23,12 @@ The simplest way to do it is to provide username, password and token as command-
 eventmonitoring --username user@example.com --password donthackme --token 123abc
 ```
 
+**Flags**
+*   **--interval \[interval\]** - hourly, daily - The interval to use for the data
+*   **--latest=\[true,false]\** - If we should get the latest (single) log
+*   **--start \[datetime\]** - The start date/time
+*   **--end \[datetime\]** - The end date/time
+
 ### Solenopsis
 The application support usage of [Solenopsis](http://solenopsis.org/Solenopsis/) style configuration files and locations.
 
@@ -71,7 +77,6 @@ This sub command dumps all the data to stdout or disk
 
 **Flags**
 *   **--format \[format\]** - json - The format the output should be displayed in
-*   **--interval \[interval\]** - hourly, daily - The interval to use for the data
 *   **--type \[type\]** - The event type to dump
 *   **--split** - Split the files based on event type
 *   **--file \[filename\]** - The filename to save the data to
@@ -92,7 +97,6 @@ This sub command "blames" users for doing things
 
 **Flags**
 *   **--format \[format\]** - json, table - The format the output should be displayed in
-*   **--interval \[interval\]** - hourly, daily - The interval to use for the data
 *   **--asc** - Sort the data in ascending order
 *   **--sort \[field1,field2\]** - The fields to sort the data by.  This will vary from type to type.
 *   **--limit \[limit\]** - The number of results to limit to
@@ -178,7 +182,6 @@ This sub command is used around Login data
 
 **Flags**
 *   **--format \[format\]** - json, table - The format the output should be displayed in
-*   **--interval \[interval\]** - hourly, daily - The interval to use for the data
 *   **--asc** - Sort the data in ascending order
 *   **--sort** - The field to sort the data by.  This will vary from report type to report type.
 *   **--limit \[limit\]** - The number of results to limit to
@@ -262,7 +265,6 @@ This sub command is used to report on Event Monitoring data
 
 **Flags**
 *   **--format \[format\]** - json, table - The format the output should be displayed in
-*   **--interval \[interval\]** - hourly, daily - The interval to use for the data
 *   **--asc** - Sort the data in ascending order
 *   **--sort** - The field to sort the data by.  This will vary from report type to report type.
 *   **--limit \[limit\]** - The number of results to limit to

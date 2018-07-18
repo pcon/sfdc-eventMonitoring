@@ -1,5 +1,7 @@
 var lo = require('lodash');
+var moment = require('moment');
 
+var statics = require('./statics.js');
 var utils = require('./utils.js');
 
 var EVENT_LOG_FILE = 'EventLogFile';
@@ -70,6 +72,13 @@ function buildSimpleQuery(fields, object_name, criteria, order_by, limit) {
  * @returns {string} The log date criteria based off the config interval
  */
 function getLogDate() {
+    if (global.config.start !== undefined) {
+        var m_start = moment.utc(global.config.start);
+        var m_end = moment.utc(global.config.end);
+
+        return 'LogDate >= ' + m_start.format(statics.DATE_FORMAT) + ' and LogDate <= ' + m_end.format(statics.DATE_FORMAT);
+    }
+
     return lo.toLower(global.config.interval) === 'hourly' ? 'LogDate = TODAY' : 'LogDate = LAST_N_DAYS:2';
 }
 
@@ -130,7 +139,7 @@ var getLogsByType = function (types) {
         getEventTypeCriteria(types)
     ];
 
-    return buildSimpleQuery(EVENT_LOG_FILE_FIELDS, EVENT_LOG_FILE, criteria, 'LogDate desc', 1);
+    return buildSimpleQuery(EVENT_LOG_FILE_FIELDS, EVENT_LOG_FILE, criteria, 'LogDate desc');
 };
 
 /**
