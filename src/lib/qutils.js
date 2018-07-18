@@ -1,3 +1,5 @@
+var lo = require('lodash');
+
 /**
  * Reject or resolve if there is an error
  * @param {object} deferred The deferred instance to reject/resolve
@@ -6,7 +8,7 @@
  * @returns {undefined}
  */
 var rejectResolve = function (deferred, error, data) {
-    if (error) {
+    if (!lo.isEmpty(error)) {
         deferred.reject(error);
     } else {
         deferred.resolve(data);

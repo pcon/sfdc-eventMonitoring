@@ -8,6 +8,7 @@ var pkg = require('./package.json');
 var config = require('./src/lib/config.js');
 
 var blame = require('./src/blame.js');
+var cache = require('./src/cache.js');
 var dump = require('./src/dump.js');
 var login = require('./src/login.js');
 var report = require('./src/report.js');
@@ -92,6 +93,7 @@ var run = function () {
         })
         .version(pkg.version)
         .command('blame [type]', 'Blame users', blame.config, blame.run)
+        .command('cache [action]', 'Interact with cache', cache.config, cache.run)
         .command('dump', 'Dump data', dump.config, dump.run)
         .command('login [type]', 'Login information', login.config, login.run)
         .command('report [type]', 'Display a report', report.config, report.run)

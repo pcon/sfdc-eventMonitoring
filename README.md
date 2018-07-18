@@ -73,6 +73,47 @@ You can enable caching by adding the `--cache /path/to/cache/folder` or adding t
 "cache": "/path/to/cache/folder"
 ```
 
+## Cache
+This sub command interacts with the cache.  If you do not have a cache set up in the config or command line flag, this will not work.
+
+### Stats
+Shows cache stats
+
+```bash
+eventmonitoring cache stats
+```
+
+```text
+Total Size Usage: 90.5 MB
+      JSON Usage: 46.4 MB
+       CSV Usage: 44.1 MB
+
+
+╔════════════╤═════════╗
+║ Date       │ Usage   ║
+╟────────────┼─────────╢
+║ 2018-07-18 │ 90.5 MB ║
+╚════════════╧═════════╝
+```
+
+### Clear
+Clears the cache
+
+#### Clear all the cache
+```bash
+eventmonitoring cache clear
+```
+
+#### Clear a specific date's cache
+```bash
+eventmonitoring cache clear --date 2018-07-18
+```
+
+#### Clear a date range's cache
+```bash
+eventmonitoring cache clear --start 2018-07-18T00:00:00.000Z --end 2018-07-18T02:00:00.000Z
+```
+
 ## Dump
 This sub command dumps all the data to stdout or disk
 

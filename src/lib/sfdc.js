@@ -4,6 +4,7 @@ var fs = require('fs');
 var jsonfile = require('jsonfile');
 var jsforce = require('jsforce');
 var lo = require('lodash');
+var moment = require('moment');
 var path = require('path');
 var prettybytes = require('pretty-bytes');
 var process = require('process');
@@ -106,7 +107,8 @@ var query = function (query_string) {
  * @returns {string} The log file name
  */
 function generateCacheFilename(log) {
-    return path.join(global.config.cache, log.Id + '.json');
+    var timestamp = moment.utc(log.LogDate).format('x');
+    return path.join(global.config.cache, timestamp + '_' + log.Id + '.json');
 }
 
 /**
@@ -115,7 +117,8 @@ function generateCacheFilename(log) {
  * @returns {string} The csv log file name
  */
 function generateCSVFilename(log) {
-    return path.join(global.config.cache, log.Id + '.csv');
+    var timestamp = moment.utc(log.LogDate).format('x');
+    return path.join(global.config.cache, timestamp + '_' + log.Id + '.csv');
 }
 
 /**

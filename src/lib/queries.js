@@ -86,7 +86,7 @@ function getLogDate() {
             m_end = moment.utc(global.config.end);
         }
 
-        return 'LogDate >= ' + m_start.format(statics.DATE_FORMAT) + ' and LogDate <= ' + m_end.format(statics.DATE_FORMAT);
+        return 'LogDate >= ' + m_start.format(statics.DATETIME_FORMAT) + ' and LogDate <= ' + m_end.format(statics.DATETIME_FORMAT);
     }
 
     return lo.toLower(global.config.interval) === 'hourly' ? 'LogDate = TODAY' : 'LogDate = LAST_N_DAYS:2';

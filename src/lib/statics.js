@@ -6,7 +6,8 @@ var CONNECTION = {
     VERSION: '43.0'
 };
 
-var DATE_FORMAT = 'YYYY-MM-DDTHH:mm:ss.000\\Z';
+var DATETIME_FORMAT = 'YYYY-MM-DDTHH:mm:ss.000\\Z';
+var DATE_FORMAT = 'YYYY-MM-DD';
 
 var LOGIN_STATUS = {
     'LOGIN_CHALLENGE_ISSUED': 'Failed: Computer activation required',
@@ -199,6 +200,7 @@ var getMessage = function (key) {
 var static = {
     CONNECTION: CONNECTION,
     DATE_FORMAT: DATE_FORMAT,
+    DATETIME_FORMAT: DATETIME_FORMAT,
     getMessage: getMessage,
     LOG_TYPES: LOG_TYPES
 };
