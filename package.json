@@ -8,7 +8,7 @@
   },
   "scripts": {
     "lint-eslint": "eslint eventmonitoring.js src/*",
-    "lint-md": "remark --no-stdout -S README.md",
+    "lint-md": "remark --no-stdout -f *.md",
     "lint": "npm run lint-eslint && npm run lint-md",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
