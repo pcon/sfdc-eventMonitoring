@@ -76,6 +76,10 @@ var run = function () {
                 describe: 'The end date/time to get (in GMT)',
                 type: 'string'
             },
+            'date': {
+                describe: 'The day to get (in GMT)',
+                type: 'string'
+            },
             'debug': {
                 alias: 'd',
                 describe: 'Enable debug logging',

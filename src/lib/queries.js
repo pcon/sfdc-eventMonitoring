@@ -72,9 +72,19 @@ function buildSimpleQuery(fields, object_name, criteria, order_by, limit) {
  * @returns {string} The log date criteria based off the config interval
  */
 function getLogDate() {
-    if (global.config.start !== undefined) {
-        var m_start = moment.utc(global.config.start);
-        var m_end = moment.utc(global.config.end);
+    if (
+        global.config.start !== undefined ||
+        global.config.date !== undefined
+    ) {
+        var m_start, m_end;
+
+        if (global.config.date !== undefined) {
+            m_start = moment.utc(global.config.date).startOf('day');
+            m_end = moment.utc(global.config.date).endOf('day');
+        } else {
+            m_start = moment.utc(global.config.start);
+            m_end = moment.utc(global.config.end);
+        }
 
         return 'LogDate >= ' + m_start.format(statics.DATE_FORMAT) + ' and LogDate <= ' + m_end.format(statics.DATE_FORMAT);
     }
