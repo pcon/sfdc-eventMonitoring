@@ -81,6 +81,10 @@ var run = function () {
                 describe: 'The day to get (in GMT)',
                 type: 'string'
             },
+            'helper': {
+                describe: 'The local helper to use',
+                type: 'string'
+            },
             'debug': {
                 alias: 'd',
                 describe: 'Enable debug logging',

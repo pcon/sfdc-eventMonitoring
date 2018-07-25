@@ -160,6 +160,23 @@ function generateAverages(grouping, handler) {
 }
 
 /**
+ * Filters out averages
+ * @param {object} data The data to filter
+ * @returns {Promise} A promise for filtered data
+ */
+function filterAverages(data) {
+    var deferred = Q.defer();
+
+    if (global.helper !== undefined && global.helper.filter !== undefined) {
+        data.averages = lo.filter(data.averages, global.helper.filter);
+    }
+
+    deferred.resolve(data);
+
+    return deferred.promise;
+}
+
+/**
  * The run method
  * @param {object} args The arguments passed to the method
  * @returns {undefined}
@@ -175,7 +192,8 @@ function run(args) {
         process.exit(errorCodes.UNSUPPORTED_HANDLER);
     }
 
-    sfdc.login()
+    conf.setupGlobals()
+        .then(sfdc.login)
         .then(function () {
             var handler = lo.get(handlers, global.config.type);
 
@@ -187,6 +205,7 @@ function run(args) {
                 .then(function (grouping) {
                     return generateAverages(grouping, handler);
                 })
+                .then(filterAverages)
                 .then(report.sortAverages)
                 .then(report.limitAverages)
                 .then(function (data) {

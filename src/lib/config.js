@@ -66,10 +66,55 @@ var merge = function (args) {
     lo.merge(global.config, args);
 };
 
+/**
+ * Loads the helper methods
+ * @returns {Promise} A promise for when the helper method is loaded
+ */
+function loadHelper() {
+    var deferred = Q.defer();
+
+    if (global.config.helper === undefined) {
+        global.logger.debug('No helper defined');
+        deferred.resolve();
+    } else {
+        fs.stat(global.config.helper, function (error) {
+            if (!error) {
+                global.helper = require(global.config.helper); // eslint-disable-line global-require
+                global.logger.debug('Loading "' + global.config.helper + '"');
+            } else {
+                global.logger.debug('Unable to load "' + global.config.helper + '" (' + error.code + ')');
+            }
+
+            deferred.resolve();
+        });
+    }
+
+    return deferred.promise;
+}
+
+/**
+ * Sets up any additional global variables we need
+ * @returns {Promise} A promise for when the setup is complete
+ */
+var setupGlobals = function () {
+    var deferred = Q.defer();
+    var promises = [];
+
+    promises.push(loadHelper());
+
+    Q.allSettled(promises)
+        .then(function () {
+            deferred.resolve();
+        });
+
+    return deferred.promise;
+};
+
 var config = {
     loadSolenopsisCredentials: loadSolenopsisCredentials,
     loadConfig: loadConfig,
-    merge: merge
+    merge: merge,
+    setupGlobals: setupGlobals
 };
 
 module.exports = config;

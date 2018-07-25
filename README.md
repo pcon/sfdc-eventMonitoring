@@ -495,3 +495,65 @@ eventmonitoring report visualforce
 *   **response** - The average response state size
 *   **dbcpu** - The average database CPU time
 *   **dbtotal** - The average total database CPU time
+
+# Advanced Usage
+## Helpers
+
+_Currently only supported by the report command_
+
+The **--helper** flag allows you to pass in a javascript file and provide your own formatter and filterer.
+
+```bash
+eventmonitoring report visualforce --sort cpu --helper /path/to/helper.js
+```
+
+```javascript
+/**
+* Format incoming data
+* @param {string} field_name The field name being outputted
+* @param {object} data The data to be formatted
+* @return {string} The formatted data
+* @throws An error if it's not a field we're formatting
+*/
+var formatter = function (field_name, data) {
+    if (field_name !== 'count') {
+        throw new Error('Unhandled field');
+    }
+
+    return 'Custom ' + data;
+};
+
+/**
+* Returns true if the data should be included
+* @param {object} data The data to check
+* @returns {boolean} If the data should be included
+*/
+var filter = function (data) {
+    if (data.view < 80) {
+        return false;
+    }
+
+    return true;
+};
+
+module.exports = {
+    formatter: formatter,
+    filter: filter
+};
+```
+
+```text
+╔═════════════════════════════════════╤════════════╤══════════╤══════════╤═════════════════╤═══════════════╤═════════════╤═══════════════╗
+║ URI                                 │ Count      │ CPU Time │ Run Time │ View State Size │ Response Size │ DB CPU Time │ DB Total Time ║
+╟─────────────────────────────────────┼────────────┼──────────┼──────────┼─────────────────┼───────────────┼─────────────┼───────────────╢
+║ /apex/Account_View                  │ Custom 4   │ 995ms    │ 2.9s     │ 52.1 kB         │ 475 kB        │ 368ms       │ 1.6s          ║
+╟─────────────────────────────────────┼────────────┼──────────┼──────────┼─────────────────┼───────────────┼─────────────┼───────────────╢
+║ /apex/Case_View                     │ Custom 811 │ 868ms    │ 1.5s     │ 39.2 kB         │ 241 kB        │ 160ms       │ 352ms         ║
+╟─────────────────────────────────────┼────────────┼──────────┼──────────┼─────────────────┼───────────────┼─────────────┼───────────────╢
+║ /apex/Case_Edit                     │ Custom 45  │ 696ms    │ 1.3s     │ 7.98 kB         │ 70.2 kB       │ 333ms       │ 540ms         ║
+╟─────────────────────────────────────┼────────────┼──────────┼──────────┼─────────────────┼───────────────┼─────────────┼───────────────╢
+║ /apex/Escalation_View               │ Custom 19  │ 315ms    │ 479ms    │ 15.3 kB         │ 102 kB        │ 68ms        │ 144ms         ║
+╟─────────────────────────────────────┼────────────┼──────────┼──────────┼─────────────────┼───────────────┼─────────────┼───────────────╢
+║ /apex/casetag                       │ Custom 3   │ 298ms    │ 470ms    │ 13.9 kB         │ 44.2 kB       │ 104ms       │ 140ms         ║
+╚═════════════════════════════════════╧════════════╧══════════╧══════════╧═════════════════╧═══════════════╧═════════════╧═══════════════╝
+```

@@ -320,7 +320,11 @@ var generateTableData = function (rows, columns, output_info) {
     lo.forEach(rows, function (row) {
         drow = [];
         lo.forEach(columns, function (column) {
-            drow.push(output_info[column].formatter(row[column]));
+            try {
+                drow.push(global.helper.formatter(column, row[column]));
+            } catch (error) {
+                drow.push(output_info[column].formatter(row[column]));
+            }
         });
         data.push(drow);
     });
