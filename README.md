@@ -1,5 +1,6 @@
 # Event Monitoring
 [![Build Status](https://travis-ci.org/pcon/sfdc-eventMonitoring.svg?branch=master)](https://travis-ci.org/pcon/sfdc-eventMonitoring)
+[![Code Climate](https://codeclimate.com/github/pcon/sfdc-eventMonitoring/badges/gpa.svg)](https://codeclimate.com/github/pcon/sfdc-eventMonitoring)
 
 This application is a command-line interface for interacting with the Event Monitoring capabilities of Salesforce.
 
