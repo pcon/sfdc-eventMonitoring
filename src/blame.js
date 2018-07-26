@@ -3,6 +3,7 @@ var lo = require('lodash');
 var conf = require('./lib/config.js');
 var errorCodes = require('./lib/errorCodes.js');
 var sfdc = require('./lib/sfdc.js');
+var statics = require('./lib/statics.js');
 var utils = require('./lib/utils.js');
 
 var apiusage = require('./blame/apiusage.js');
@@ -28,20 +29,9 @@ function config(yargs) {
             type: 'string',
             choices: [ 'json', 'table' ]
         },
-        'asc': {
-            default: false,
-            describe: 'Sort the data in ascending order',
-            type: 'boolean'
-        },
-        'sort': {
-            default: 'count',
-            describe: 'The field to sort by.  Use a comma seperated list to sort by multiple fields',
-            type: 'string'
-        },
-        'limit': {
-            describe: 'The number of results to limit to',
-            type: 'number'
-        },
+        'asc': statics.CONFIG.asc,
+        'sort': statics.CONFIG.sort,
+        'limit': statics.CONFIG.limit,
         'subsort': {
             default: 'count',
             describe: 'The sub-field to sort by.  Use a comma seperated list to sort by multiple fields',
@@ -51,10 +41,7 @@ function config(yargs) {
             describe: 'The number of results to sub-limit to',
             type: 'number'
         },
-        'summary': {
-            describe: 'Summarize the data.  Only used with apiusage',
-            type: 'boolean'
-        },
+        'summary': statics.CONFIG.summary,
         'userid': {
             describe: 'A user id to filter the results by',
             type: 'string'

@@ -3,6 +3,7 @@ var lo = require('lodash');
 var conf = require('./lib/config.js');
 var errorCodes = require('./lib/errorCodes.js');
 var sfdc = require('./lib/sfdc.js');
+var statics = require('./lib/statics.js');
 var utils = require('./lib/utils.js');
 
 var apiversion = require('./login/apiversion.js');
@@ -38,35 +39,12 @@ function config(yargs) {
             type: 'string',
             choices: [ 'hourly', 'daily' ]
         },
-        'latest': {
-            default: true,
-            describe: 'Use the most recent data',
-            type: 'boolean',
-            hidden: true
-        },
-        'asc': {
-            default: false,
-            describe: 'Sort the data in ascending order',
-            type: 'boolean'
-        },
-        'sort': {
-            default: 'count',
-            describe: 'The field to sort by.  Use a comma seperated list to sort by multiple fields',
-            type: 'string'
-        },
-        'limit': {
-            describe: 'The number of results to limit to',
-            type: 'number'
-        },
-        'maxversion': {
-            default: undefined,
-            describe: 'The max version to display.  Only used with apiversion',
-            type: 'number'
-        },
-        'summary': {
-            describe: 'Summarize the data.  Only used with apiversion',
-            type: 'boolean'
-        }
+        'latest': statics.CONFIG.latest,
+        'asc': statics.CONFIG.asc,
+        'sort': statics.CONFIG.sort,
+        'limit': statics.CONFIG.limit,
+        'maxversion': statics.CONFIG.maxversion,
+        'summary': statics.CONFIG.summary
     });
 }
 

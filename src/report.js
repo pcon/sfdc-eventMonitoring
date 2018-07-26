@@ -5,6 +5,7 @@ var conf = require('./lib/config.js');
 var errorCodes = require('./lib/errorCodes.js');
 var report = require('./lib/report.js');
 var sfdc = require('./lib/sfdc.js');
+var statics = require('./lib/statics.js');
 var utils = require('./lib/utils.js');
 
 var apexcallout= require('./report/apexcallout.js');
@@ -42,20 +43,9 @@ function config(yargs) {
             type: 'string',
             choices: [ 'json', 'table' ]
         },
-        'asc': {
-            default: false,
-            describe: 'Sort the data in ascending order',
-            type: 'boolean'
-        },
-        'sort': {
-            default: 'count',
-            describe: 'The field to sort by.  Use a comma seperated list to sort by multiple fields',
-            type: 'string'
-        },
-        'limit': {
-            describe: 'The number of results to limit to',
-            type: 'number'
-        }
+        'asc': statics.CONFIG.asc,
+        'sort': statics.CONFIG.sort,
+        'limit': statics.CONFIG.limit
     });
 }
 

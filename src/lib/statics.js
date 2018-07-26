@@ -6,6 +6,38 @@ var CONNECTION = {
     VERSION: '43.0'
 };
 
+var CONFIG = {
+    latest: {
+        default: true,
+        describe: 'Use the most recent data',
+        type: 'boolean',
+        hidden: true
+    },
+    asc: {
+        default: false,
+        describe: 'Sort the data in ascending order',
+        type: 'boolean'
+    },
+    sort: {
+        default: 'count',
+        describe: 'The field to sort by.  Use a comma seperated list to sort by multiple fields',
+        type: 'string'
+    },
+    limit: {
+        describe: 'The number of results to limit to',
+        type: 'number'
+    },
+    maxversion: {
+        default: undefined,
+        describe: 'The max version to display',
+        type: 'number'
+    },
+    summary: {
+        describe: 'Summarize the data',
+        type: 'boolean'
+    }
+};
+
 var DATETIME_FORMAT = 'YYYY-MM-DDTHH:mm:ss.000\\Z';
 var DATE_FORMAT = 'YYYY-MM-DD';
 
@@ -198,6 +230,7 @@ var getMessage = function (key) {
 };
 
 var static = {
+    CONFIG: CONFIG,
     CONNECTION: CONNECTION,
     DATE_FORMAT: DATE_FORMAT,
     DATETIME_FORMAT: DATETIME_FORMAT,
