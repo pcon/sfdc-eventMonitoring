@@ -1,4 +1,6 @@
 # Event Monitoring
+[![Build Status](https://travis-ci.org/pcon/sfdc-eventMonitoring.svg?branch=master)](https://travis-ci.org/pcon/sfdc-eventMonitoring)
+
 This application is a command-line interface for interacting with the Event Monitoring capabilities of Salesforce.
 
 This application is in a very early state and is limited in it's functionality.  Additionally, it may eat your babies if you leave it alone in the same room with them.  You have been warned.
