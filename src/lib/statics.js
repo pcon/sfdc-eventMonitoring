@@ -7,12 +7,6 @@ var CONNECTION = {
 };
 
 var CONFIG = {
-    latest: {
-        default: true,
-        describe: 'Use the most recent data',
-        type: 'boolean',
-        hidden: true
-    },
     asc: {
         default: false,
         describe: 'Sort the data in ascending order',
@@ -34,6 +28,72 @@ var CONFIG = {
     },
     summary: {
         describe: 'Summarize the data',
+        type: 'boolean'
+    },
+
+    env: {
+        alias: 'e',
+        describe: 'The envirionment name',
+        type: 'string'
+    },
+    username: {
+        alias: 'u',
+        describe: 'The Salesforce username',
+        type: 'string'
+    },
+    password: {
+        alias: 'p',
+        describe: 'The Salesforce password',
+        type: 'string'
+    },
+    token: {
+        alias: 't',
+        describe: 'The Salesforce token',
+        type: 'string'
+    },
+    sandbox: {
+        describe: 'The Salesforce instance is a sandbox',
+        type: 'boolean'
+    },
+    solenopsis: {
+        describe: 'User solenopsis configs for environments',
+        type: 'boolean',
+        default: undefined
+    },
+    cache: {
+        describe: 'The directory to cache the event logs',
+        type: 'string'
+    },
+    interval: {
+        default: 'hourly',
+        describe: 'The interval to use',
+        type: 'string',
+        choices: [ 'hourly', 'daily' ]
+    },
+    latest: {
+        default: true,
+        describe: 'Use the most recent data',
+        type: 'boolean'
+    },
+    start: {
+        describe: 'The start date/time to get (in GMT)',
+        type: 'string'
+    },
+    end: {
+        describe: 'The end date/time to get (in GMT)',
+        type: 'string'
+    },
+    date: {
+        describe: 'The day to get (in GMT)',
+        type: 'string'
+    },
+    helper: {
+        describe: 'The local helper to use',
+        type: 'string'
+    },
+    debug: {
+        alias: 'd',
+        describe: 'Enable debug logging',
         type: 'boolean'
     }
 };

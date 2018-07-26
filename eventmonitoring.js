@@ -12,9 +12,32 @@ var cache = require('./src/cache.js');
 var dump = require('./src/dump.js');
 var login = require('./src/login.js');
 var report = require('./src/report.js');
+var statics = require('./src/lib/statics.js');
 
 global.config = { url: undefined };
 global.logger = require('./src/lib/logger.js');
+
+var OPTIONS = {
+    env: statics.CONFIG.env,
+    username: statics.CONFIG.username,
+    password: statics.CONFIG.password,
+    token: statics.CONFIG.token,
+    sandbox: statics.CONFIG.sandbox,
+    solenopsis: statics.CONFIG.solenopsis,
+    cache: statics.CONFIG.cache,
+    interval: statics.CONFIG.interval,
+    latest: statics.CONFIG.latest,
+    start: statics.CONFIG.start,
+    end: statics.CONFIG.end,
+    date: statics.CONFIG.date,
+    helper: statics.CONFIG.helper,
+    debug: statics.CONFIG.debug
+};
+
+var CONFLICTS = {
+    env: [ 'username', 'password', 'token' ],
+    solenopsis: [ 'username', 'password', 'token' ]
+};
 
 /**
  * Runs the script
@@ -24,77 +47,8 @@ var run = function () {
     var deferred = Q.defer();
 
     yargs.usage('$0 <cmd> [args]')
-        .options({
-            'env': {
-                alias: 'e',
-                describe: 'The envirionment name',
-                type: 'string'
-            },
-            'username': {
-                alias: 'u',
-                describe: 'The Salesforce username',
-                type: 'string'
-            },
-            'password': {
-                alias: 'p',
-                describe: 'The Salesforce password',
-                type: 'string'
-            },
-            'token': {
-                alias: 't',
-                describe: 'The Salesforce token',
-                type: 'string'
-            },
-            'sandbox': {
-                describe: 'The Salesforce instance is a sandbox',
-                type: 'boolean'
-            },
-            'solenopsis': {
-                describe: 'User solenopsis configs for environments',
-                type: 'boolean',
-                default: undefined
-            },
-            'cache': {
-                describe: 'The directory to cache the event logs',
-                type: 'string'
-            },
-            'interval': {
-                default: 'hourly',
-                describe: 'The interval to use',
-                type: 'string',
-                choices: [ 'hourly', 'daily' ]
-            },
-            'latest': {
-                default: true,
-                describe: 'Use the most recent data',
-                type: 'boolean'
-            },
-            'start': {
-                describe: 'The start date/time to get (in GMT)',
-                type: 'string'
-            },
-            'end': {
-                describe: 'The end date/time to get (in GMT)',
-                type: 'string'
-            },
-            'date': {
-                describe: 'The day to get (in GMT)',
-                type: 'string'
-            },
-            'helper': {
-                describe: 'The local helper to use',
-                type: 'string'
-            },
-            'debug': {
-                alias: 'd',
-                describe: 'Enable debug logging',
-                type: 'boolean'
-            }
-        })
-        .conflicts({
-            'env': [ 'username', 'password', 'token' ],
-            'solenopsis': [ 'username', 'password', 'token' ]
-        })
+        .options(OPTIONS)
+        .conflicts(CONFLICTS)
         .version(pkg.version)
         .command('blame [type]', 'Blame users', blame.config, blame.run)
         .command('cache [action]', 'Interact with cache', cache.config, cache.run)
