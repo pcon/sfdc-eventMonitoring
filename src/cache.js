@@ -1,7 +1,6 @@
 var lo = require('lodash');
 
 var conf = require('./lib/config.js');
-var errorCodes = require('./lib/errorCodes.js');
 
 var clear = require('./cache/clear.js');
 var stats = require('./cache/stats.js');
@@ -33,14 +32,7 @@ function config(yargs) {
  */
 function run(args) {
     conf.merge(args);
-
-    if (
-        !lo.has(handlers, global.config.action) ||
-        lo.get(handlers, global.config.action) === undefined
-    ) {
-        global.logger.error(global.config.action + ' does not have a supported handler');
-        process.exit(errorCodes.UNSUPPORTED_HANDLER);
-    }
+    conf.checkHandlers(handlers);
 
     lo.get(handlers, global.config.action)();
 }

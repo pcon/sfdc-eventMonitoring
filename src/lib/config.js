@@ -134,21 +134,30 @@ var isUndefined = function (keys) {
 };
 
 /**
- * Logs in and runs the specified handler
- * @param {object} args The arguments passed to the method
- * @param {object} handlers The handlers
- * @param {function} login The login method
- * @return {undefined}
+ * Checks to see if the requested handler is available
+ * @param {object} handlers The available handlers
+ * @returns {undefined}
  */
-var loginAndRunHandler = function (args, handlers, login) {
-    merge(args);
-
+var checkHandlers = function (handlers) {
     if (
         !lo.has(handlers, global.config.type) ||
         lo.get(handlers, global.config.type) === undefined
     ) {
         logging.logAndExit(global.config.type + ' does not have a supported handler', errorCodes.UNSUPPORTED_HANDLER);
     }
+};
+
+/**
+ * Logs in and runs the specified handler
+ * @param {object} args The arguments passed to the method
+ * @param {object} handlers The handlers
+ * @param {function} login The login method
+ * @returns {undefined}
+ */
+var loginAndRunHandler = function (args, handlers, login) {
+    merge(args);
+
+    checkHandlers(handlers);
 
     login()
         .then(function () {
@@ -158,6 +167,7 @@ var loginAndRunHandler = function (args, handlers, login) {
 };
 
 var config = {
+    checkHandlers: checkHandlers,
     isUndefined: isUndefined,
     loadSolenopsisCredentials: loadSolenopsisCredentials,
     loadConfig: loadConfig,

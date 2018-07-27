@@ -2,7 +2,6 @@ var lo = require('lodash');
 var Q = require('q');
 
 var conf = require('./lib/config.js');
-var errorCodes = require('./lib/errorCodes.js');
 var logging = require('./lib/logging.js');
 var report = require('./lib/report.js');
 var sfdc = require('./lib/sfdc.js');
@@ -163,14 +162,7 @@ function filterAverages(data) {
  */
 function run(args) {
     conf.merge(args);
-
-    if (
-        !lo.has(handlers, global.config.type) ||
-        lo.get(handlers, global.config.type) === undefined
-    ) {
-        global.logger.error(global.config.type + ' does not have a supported report handler');
-        process.exit(errorCodes.UNSUPPORTED_HANDLER);
-    }
+    conf.checkHandlers(handlers);
 
     conf.setupGlobals()
         .then(sfdc.login)
