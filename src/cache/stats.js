@@ -62,22 +62,12 @@ var getStats = function (file) {
 var getAllStats = function (files) {
     var deferred = Q.defer();
     var promises = [];
-    var stats = [];
 
     lo.forEach(files, function (file) {
         promises.push(getStats(file));
     });
 
-    Q.allSettled(promises)
-        .then(function (results) {
-            lo.forEach(results, function (result) {
-                if (result.state === 'fulfilled') {
-                    stats.push(result.value);
-                }
-            });
-
-            deferred.resolve(stats);
-        });
+    qutils.allSettledPushArray(deferred, promises);
 
     return deferred.promise;
 };

@@ -2,6 +2,69 @@ var lo = require('lodash');
 var Q = require('q');
 
 /**
+ * Gets all the fulfilled values
+ * @param {object[]} results Results from the Q
+ * @return {object} The errors and the results
+ */
+function splitResultValues(results) {
+    var returnObj = {
+        values: [],
+        errors: []
+    };
+
+    lo.forEach(results, function (result) {
+        if (result.state === 'fulfilled') {
+            returnObj.values.push(result.value);
+        } else {
+            returnObj.errors.push(result.reson);
+        }
+    });
+
+    return returnObj;
+}
+
+/**
+ * Gets all the fulfilled values
+ * @param {object[]} results Results from the Q
+ * @return {object[]} All of the fulfilled values
+ */
+var getResultValues = function (results) {
+    return splitResultValues(results).values;
+};
+
+/**
+ * Gets all the errors
+ * @param {object[]} results Results from the Q
+ * @return {object[]} All of the errors
+ */
+function getResultErrors(results) {
+    return splitResultValues(results).errors;
+}
+
+/**
+ * Handle settled promises
+ * @param {Promise[]} promises An array of promises
+ * @param {function} func The function to run
+ * @return {undefined}
+ */
+function handleSettled(promises, func) {
+    Q.allSettled(promises)
+        .then(func);
+}
+
+/**
+ * When all the promises are settled create an array of the values and push them to the value_array_field
+ * @param {object} deferred The Q deferred
+ * @param {Promise[]} promises An array of promises
+ * @returns {undefined}
+ */
+var allSettledPushArray = function (deferred, promises) {
+    handleSettled(promises,function (results) {
+        deferred.resolve(getResultValues(results));
+    });
+};
+
+/**
  * When all the promises are settled create an array of the values and push them to the value_array_field
  * @param {object} deferred The Q deferred
  * @param {Promise[]} promises An array of promises
@@ -10,20 +73,26 @@ var Q = require('q');
  * @returns {undefined}
  */
 var allSettledPushValue = function (deferred, promises, grouping, value_array_field) {
-    var value_array = [];
+    handleSettled(promises, function (results) {
+        var value_array = getResultValues(results);
+        var resolve_value = { grouping: grouping };
 
-    Q.allSettled(promises)
-        .then(function (results) {
-            lo.forEach(results, function (result) {
-                if (result.state === 'fulfilled') {
-                    value_array.push(result.value);
-                }
-            });
+        lo.set(resolve_value, value_array_field, value_array);
 
-            var resolve_value = { grouping: grouping };
-            lo.set(resolve_value, value_array_field, value_array);
-            deferred.resolve(resolve_value);
-        });
+        deferred.resolve(resolve_value);
+    });
+};
+
+/**
+ * When all the promises are settled reject if there are any errors
+ * @param {object} deferred The Q deferred
+ * @param {Promise[]} promises An array of promises
+ * @returns {undefined}
+ */
+var allSettledRejectErrors = function (deferred, promises) {
+    handleSettled(promises, function (results) {
+        qutils.rejectResolve(deferred, getResultErrors(results), undefined);
+    });
 };
 
 /**
@@ -42,7 +111,10 @@ var rejectResolve = function (deferred, error, data) {
 };
 
 var qutils = {
+    allSettledPushArray: allSettledPushArray,
     allSettledPushValue: allSettledPushValue,
+    allSettledRejectErrors: allSettledRejectErrors,
+    getResultValues: getResultValues,
     rejectResolve: rejectResolve
 };
 

@@ -2,9 +2,10 @@ var lo = require('lodash');
 var Q = require('q');
 
 var report = require('../lib/report.js');
+var queries = require('../lib/queries.js');
+var qutils = require('../lib/qutils.js');
 var sfdc = require('../lib/sfdc.js');
 var statics = require('../lib/statics.js');
-var queries = require('../lib/queries.js');
 var utils = require('../lib/utils.js');
 
 var COLUMNS = [
@@ -65,7 +66,6 @@ function getReportMetadata(ids) {
 function generateAverages(grouping) {
     var deferred = Q.defer();
     var promises = [];
-    var averages = [];
     var report_ids = [];
 
     lo.forEach(grouping, function (value, key) {
@@ -75,11 +75,7 @@ function generateAverages(grouping) {
 
     Q.allSettled(promises)
         .then(function (results) {
-            lo.forEach(results, function (result) {
-                if (result.state === 'fulfilled') {
-                    averages.push(result.value);
-                }
-            });
+            var averages = qutils.getResultValues(results);
 
             getReportMetadata(report_ids)
                 .then(function (reports) {

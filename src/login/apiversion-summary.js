@@ -3,6 +3,7 @@ var Q = require('q');
 
 var login = require('../lib/login.js');
 var queries = require('../lib/queries.js');
+var qutils = require('../lib/qutils.js');
 var statics = require('../lib/statics.js');
 var utils = require('../lib/utils.js');
 
@@ -80,25 +81,12 @@ var generateCountsForVersion = function (logs, version) {
 var generateCounts = function (grouping) {
     var deferred = Q.defer();
     var promises = [];
-    var counts = [];
 
     lo.forEach(grouping, function (logs, version) {
         promises.push(generateCountsForVersion(logs, version));
     });
 
-    Q.allSettled(promises)
-        .then(function (results) {
-            lo.forEach(results, function (result) {
-                if (result.state === 'fulfilled') {
-                    counts.push(result.value);
-                }
-            });
-
-            deferred.resolve({
-                grouping: grouping,
-                counts: counts
-            });
-        });
+    qutils.allSettledPushValue(deferred, promises, grouping, 'counts');
 
     return deferred.promise;
 };
