@@ -4,17 +4,31 @@
  * @param {string} type The field type
  * @param {string} alias The field alias
  * @param {object} default_value The default value
- * @param {object} choices The choices available
  * @returns {object} A configuration entry
  */
-function generateConfig(describe, type, alias, default_value, choices) {
-    return {
+function generateConfig(describe, type, alias, default_value) {
+    var config = {
         describe: describe,
         type: type,
-        alias: alias,
-        default: default_value,
-        choices: choices
+        default: default_value
     };
+
+    if (alias !== undefined) {
+        config.alias = alias;
+    }
+
+    return config;
+}
+
+/**
+* Sets the choices available
+* @param {object} config The configuration to append
+* @param {object} choices The choices available
+* @returns {object} A configuration entry
+*/
+function setChoices(config, choices) {
+    config.choices = choices;
+    return config;
 }
 
 module.exports = {
@@ -30,7 +44,7 @@ module.exports = {
     sandbox: generateConfig('The Salesforce instance is a sandbox', 'boolean'),
     solenopsis: generateConfig('User solenopsis configs for environments', 'boolean'),
     cache: generateConfig('The directory to cache the event logs', 'string'),
-    interval: generateConfig('The interval to use', 'string', undefined, 'hourly', [ 'hourly', 'daily' ]),
+    interval: setChoices(generateConfig('The interval to use', 'string', undefined, 'hourly'), [ 'hourly', 'daily' ]),
     latest: generateConfig('Use the most recent data', 'boolean', undefined, true),
     start: generateConfig('The start date/time to get (in GMT)', 'string'),
     end: generateConfig('The end date/time to get (in GMT)', 'string'),
