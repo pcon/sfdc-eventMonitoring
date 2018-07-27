@@ -78,18 +78,15 @@ function generateUserId(log) {
 }
 
 /**
- * Groups logs by user id then by endpoint name
- * @param {array} logs The logs
- * @return {Promise} A promise for data grouped by user id then by endpoint
+ * Does the initial grouping of log data
+ * @param {object[]} logs The logs
+ * @param {object} grouping The grouping
+ * @returns {undefined}
  */
-var groupByUserIdAndName = function (logs) {
-    var name, user_id;
-    var grouping = {};
-    var deferred = Q.defer();
-
+function levelOneGrouping(logs, grouping) {
     lo.forEach(logs, function (log) {
-        name = generateName(log);
-        user_id = generateUserId(log);
+        var name = generateName(log);
+        var user_id = generateUserId(log);
 
         if (!lo.has(grouping, user_id)) {
             grouping[user_id] = {
@@ -104,7 +101,14 @@ var groupByUserIdAndName = function (logs) {
 
         grouping[user_id][name].push(log);
     });
+}
 
+/**
+ * Gets a total count for each endpoint
+ * @param {object} grouping The grouping
+ * @returns {undefined}
+ */
+function levelTwoGrouping(grouping) {
     lo.forEach(grouping, function (endpoint, user_id) {
         lo.forEach(endpoint, function (logs, name) {
             if (lo.startsWith(name, '_')) {
@@ -117,6 +121,19 @@ var groupByUserIdAndName = function (logs) {
             });
         });
     });
+}
+
+/**
+ * Groups logs by user id then by endpoint name
+ * @param {array} logs The logs
+ * @return {Promise} A promise for data grouped by user id then by endpoint
+ */
+var groupByUserIdAndName = function (logs) {
+    var grouping = {};
+    var deferred = Q.defer();
+
+    levelOneGrouping(logs, grouping);
+    levelTwoGrouping(grouping);
 
     deferred.resolve(grouping);
 
