@@ -140,27 +140,66 @@ function getMostRecentFiles(event_log_files) {
 }
 
 /**
+ * Make sure that we acutally have logs to download
+ * @param {objects[]} event_log_files The files to download
+ * @returns {undefined}
+ */
+function ensureLogFilesExist(event_log_files) {
+    if (lo.isEmpty(event_log_files)) {
+        global.logger.error('Unable to find log files');
+        process.exit(errorCodes.NO_LOGFILES);
+    }
+}
+
+/**
+ * Gets the log files we should be fetching
+ * @param {objects[]} event_log_files The event log files to download
+ * @returns {objects[]} The log files to download
+ */
+function getApplicableLogFiles(event_log_files) {
+    if (global.config.latest) {
+        return getMostRecentFiles(event_log_files);
+    }
+
+    return event_log_files;
+}
+
+/**
+ * Concatenates all of the promise results together
+ * @param {object[]} promise_results The results from the all settled promises
+ * @param {object} deferred The Q defer
+ * @returns {undefined}
+ */
+function concatenateResults(promise_results, deferred) {
+    var errors = [];
+    var results = [];
+
+    lo.forEach(promise_results, function (result) {
+        if (result.state === 'fulfilled') {
+            results = lo.concat(results, result.value);
+        } else {
+            errors.push(result.reason);
+        }
+    });
+
+    if (!lo.isEmpty(errors)) {
+        deferred.reject(errors);
+    } else {
+        deferred.resolve(results);
+    }
+}
+
+/**
  * Fetch and convert a list of log files
  * @param {array} event_log_files The event log files to download
  * @returns {Promise} A promise for the data from the event log files
  */
 var fetchAndConvert = function (event_log_files) {
-    var files;
-    var results = [];
     var promises = [];
-    var errors = [];
     var deferred = Q.defer();
 
-    if (lo.isEmpty(event_log_files)) {
-        global.logger.error('Unable to find log files');
-        process.exit(errorCodes.NO_LOGFILES);
-    }
-
-    if (global.config.latest) {
-        files = getMostRecentFiles(event_log_files);
-    } else {
-        files = event_log_files;
-    }
+    ensureLogFilesExist(event_log_files);
+    var files = getApplicableLogFiles(event_log_files);
 
     lo.forEach(files, function (event_log_file) {
         promises.push(sfdc.fetchConvertFile(event_log_file));
@@ -168,19 +207,7 @@ var fetchAndConvert = function (event_log_files) {
 
     Q.allSettled(promises)
         .then(function (promise_results) {
-            lo.forEach(promise_results, function (result) {
-                if (result.state === 'fulfilled') {
-                    results = lo.concat(results, result.value);
-                } else {
-                    errors.push(result.reason);
-                }
-            });
-
-            if (!lo.isEmpty(errors)) {
-                deferred.reject(errors);
-            } else {
-                deferred.resolve(results);
-            }
+            concatenateResults(promise_results, deferred);
         }).catch(function (error) {
             deferred.reject(error);
         });
