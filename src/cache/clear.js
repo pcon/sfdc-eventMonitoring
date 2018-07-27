@@ -6,6 +6,7 @@ var Q = require('q');
 
 var config = require('../lib/config.js');
 var errorCodes = require('../lib/errorCodes.js');
+var logging = require('../lib/logging.js');
 var qutils = require('../lib/qutils.js');
 
 /**
@@ -110,7 +111,7 @@ var run = function () {
     'use strict';
 
     if (config.isUndefined('cache')) {
-        config.logAndExit('Cache options are not valid without cache folder being set', errorCodes.NO_CACHE_DIR);
+        logging.logAndExit('Cache options are not valid without cache folder being set', errorCodes.NO_CACHE_DIR);
     }
 
     var action;

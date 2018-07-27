@@ -3,6 +3,7 @@ var path = require('path');
 var Q = require('q');
 
 var conf = require('./lib/config.js');
+var logging = require('./lib/logging.js');
 var sfdc = require('./lib/sfdc.js');
 var statics = require('./lib/statics.js');
 var queries = require('./lib/queries.js');
@@ -161,7 +162,7 @@ function run(args) {
         .then(queryLogs)
         .then(downloadLogs)
         .then(outputLogs)
-        .catch(utils.logError);
+        .catch(logging.logError);
 }
 
 var cli = {

@@ -58,15 +58,6 @@ var idToObject = function (sObjects) {
 };
 
 /**
- * Log an error
- * @param {Error} error The error
- * @returns {undefined}
- */
-var logError = function (error) {
-    global.logger.error(error);
-};
-
-/**
  * Limits a set of data without a promise
  * @param {object} data The data to limit.
  * @param {string} key The in the data to limit.
@@ -452,7 +443,6 @@ var utils = {
     filterResults: filterResults,
     generateTableData: generateTableData,
     idToObject: idToObject,
-    logError: logError,
     limitNoPromise: limitNoPromise,
     limitResults: limitResults,
     outputJSONToConsole: outputJSONToConsole,

@@ -5,6 +5,9 @@ var path = require('path');
 var process = require('process');
 var Q = require('q');
 
+var errorCodes = require('./errorCodes.js');
+var logging = require('./logging.js');
+
 var SOLENOPSIS_FIELDS = [
     'username',
     'password',
@@ -131,21 +134,34 @@ var isUndefined = function (keys) {
 };
 
 /**
- * Logs and error message and exits
- * @param {string} message The error message
- * @param {number} error_code The error code to use
- * @returns {undefined}
+ * Logs in and runs the specified handler
+ * @param {object} args The arguments passed to the method
+ * @param {object} handlers The handlers
+ * @param {function} login The login method
+ * @return {undefined}
  */
-var logAndExit = function (message, error_code) {
-    global.logger.error(message);
-    process.exit(error_code);
+var loginAndRunHandler = function (args, handlers, login) {
+    merge(args);
+
+    if (
+        !lo.has(handlers, global.config.type) ||
+        lo.get(handlers, global.config.type) === undefined
+    ) {
+        logging.logAndExit(global.config.type + ' does not have a supported handler', errorCodes.UNSUPPORTED_HANDLER);
+    }
+
+    login()
+        .then(function () {
+            lo.get(handlers, global.config.type)();
+        })
+        .catch(logging.logError);
 };
 
 var config = {
     isUndefined: isUndefined,
     loadSolenopsisCredentials: loadSolenopsisCredentials,
     loadConfig: loadConfig,
-    logAndExit: logAndExit,
+    loginAndRunHandler: loginAndRunHandler,
     merge: merge,
     setupGlobals: setupGlobals
 };

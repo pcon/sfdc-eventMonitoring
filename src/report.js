@@ -3,6 +3,7 @@ var Q = require('q');
 
 var conf = require('./lib/config.js');
 var errorCodes = require('./lib/errorCodes.js');
+var logging = require('./lib/logging.js');
 var report = require('./lib/report.js');
 var sfdc = require('./lib/sfdc.js');
 var statics = require('./lib/statics.js');
@@ -201,9 +202,9 @@ function run(args) {
                 .then(function (data) {
                     return utils.printFormattedData(data.averages, handler.COLUMNS, handler.OUTPUT_INFO);
                 })
-                .catch(utils.logError);
+                .catch(logging.logError);
         })
-        .catch(utils.logError);
+        .catch(logging.logError);
 }
 
 var cli = {

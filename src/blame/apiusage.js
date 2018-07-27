@@ -6,6 +6,7 @@ var Q = require('q');
 const { table } = require('table');
 
 var formatter = require('../lib/formatter.js');
+var logging = require('../lib/logging.js');
 var sfdc = require('../lib/sfdc.js');
 var queries = require('../lib/queries.js');
 var utils = require('../lib/utils.js');
@@ -331,7 +332,7 @@ var run = function () {
         .then(subSortCounts)
         .then(subLimitCounts)
         .then(printCounts)
-        .catch(utils.logError);
+        .catch(logging.logError);
 };
 
 var cli = { run: run };

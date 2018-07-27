@@ -11,6 +11,7 @@ var request = require('request');
 
 var config = require('./config.js');
 var errorCodes = require('./errorCodes.js');
+var logging = require('./logging.js');
 var statics = require('./statics.js');
 var qutils = require('./qutils.js');
 
@@ -20,7 +21,7 @@ var qutils = require('./qutils.js');
  */
 function verifyConnection() {
     if (global.sfdc_conn === undefined) {
-        config.logAndExit('No valid connection', errorCodes.NO_CONNECTION_QUERY);
+        logging.logAndExit('No valid connection', errorCodes.NO_CONNECTION_QUERY);
     }
 }
 
@@ -30,7 +31,7 @@ function verifyConnection() {
  */
 function verifySolenopsisEnvironment() {
     if (config.isUndefined('env')) {
-        config.logAndExit('No environment specified', errorCodes.NO_ENVIRONMENT);
+        logging.logAndExit('No environment specified', errorCodes.NO_ENVIRONMENT);
     }
 }
 
@@ -67,7 +68,7 @@ function setupLogin() {
     }
 
     if (config.isUndefined([ 'username', 'password', 'url' ])) {
-        config.logAndExit('Unable to login.  Incomplete credentials', errorCodes.INCOMPLETE_CREDS);
+        logging.logAndExit('Unable to login.  Incomplete credentials', errorCodes.INCOMPLETE_CREDS);
     }
 }
 

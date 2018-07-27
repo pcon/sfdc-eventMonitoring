@@ -1,10 +1,8 @@
 var lo = require('lodash');
 
 var conf = require('./lib/config.js');
-var errorCodes = require('./lib/errorCodes.js');
 var sfdc = require('./lib/sfdc.js');
 var statics = require('./lib/statics.js');
-var utils = require('./lib/utils.js');
 
 var apiusage = require('./blame/apiusage.js');
 
@@ -55,21 +53,7 @@ function config(yargs) {
  * @returns {undefined}
  */
 function run(args) {
-    conf.merge(args);
-
-    if (
-        !lo.has(handlers, global.config.type) ||
-        lo.get(handlers, global.config.type) === undefined
-    ) {
-        global.logger.error(global.config.type + ' does not have a supported login handler');
-        process.exit(errorCodes.UNSUPPORTED_HANDLER);
-    }
-
-    sfdc.login()
-        .then(function () {
-            lo.get(handlers, global.config.type)();
-        })
-        .catch(utils.logError);
+    conf.loginAndRunHandler(args, handlers, sfdc.login);
 }
 
 var cli = {
