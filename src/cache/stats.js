@@ -73,6 +73,23 @@ var getAllStats = function (files) {
 };
 
 /**
+ * Sets the base stat if it doesn't exist for a date
+ * @param {object} grouping The grouping
+ * @param {string} date The date
+ * @returns {undefined}
+ */
+function setBaseStat(grouping, date) {
+    if (!lo.has(grouping.by_date, date)) {
+        var base_stat = {
+            date: date,
+            size: 0
+        };
+
+        lo.set(grouping.by_date, date, base_stat);
+    }
+}
+
+/**
  * Group the stats into something printable
  * @param {object[]} stats The stats to group
  * @return {Promise} A promise for grouped stats
@@ -98,14 +115,7 @@ var groupStats = function (stats) {
             grouping.csv += stat.size;
         }
 
-        if (!lo.has(grouping.by_date, date)) {
-            var base_stat = {
-                date: date,
-                size: 0
-            };
-
-            lo.set(grouping.by_date, date, base_stat);
-        }
+        setBaseStat(grouping, date);
 
         lo.set(grouping.by_date, date + '.size', lo.get(grouping.by_date, date + '.size') + stat.size);
     });
