@@ -116,28 +116,8 @@ var run = function () {
 
     var action;
 
-    if (
-        global.config.start !== undefined ||
-        global.config.end !== undefined ||
-        global.config.date !== undefined
-    ) {
-        var m_start = moment.utc(0);
-        var m_end = moment.utc();
-
-        if (!config.isUndefined('start')) {
-            m_start = moment.utc(global.config.start);
-        }
-
-        if (!config.isUndefined('end')) {
-            m_end = moment.utc(global.config.end);
-        }
-
-        if (!config.isUndefined('date')) {
-            m_start = moment.utc(global.config.date).startOf('Day');
-            m_end = moment.utc(global.config.date).endOf('Day');
-        }
-
-        action = getFiles(m_start, m_end);
+    if (config.date.hasADate()) {
+        action = getFiles(config.date.getStart(), config.date.getEnd());
     } else {
         action = getAllFiles();
     }

@@ -32,7 +32,7 @@ function config(yargs) {
  */
 function run(args) {
     conf.merge(args);
-    conf.checkHandlers(handlers);
+    conf.checkHandlers(handlers, 'action');
 
     lo.get(handlers, global.config.action)();
 }

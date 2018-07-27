@@ -1,6 +1,7 @@
 var ini = require('ini');
 var fs = require('fs');
 var lo = require('lodash');
+var moment = require('moment');
 var path = require('path');
 var process = require('process');
 var Q = require('q');
@@ -136,12 +137,14 @@ var isUndefined = function (keys) {
 /**
  * Checks to see if the requested handler is available
  * @param {object} handlers The available handlers
+ * @param {string} handler_key The key in the config to use
  * @returns {undefined}
  */
-var checkHandlers = function (handlers) {
+var checkHandlers = function (handlers, handler_key) {
+    var handler_name = lo.isUndefined(handler_key) ? 'type' : handler_key;
     if (
-        !lo.has(handlers, global.config.type) ||
-        lo.get(handlers, global.config.type) === undefined
+        !lo.has(handlers, lo.get(global.config, handler_name)) ||
+        lo.get(handlers, lo.get(global.config, handler_name)) === undefined
     ) {
         logging.logAndExit(global.config.type + ' does not have a supported handler', errorCodes.UNSUPPORTED_HANDLER);
     }
@@ -166,8 +169,61 @@ var loginAndRunHandler = function (args, handlers, login) {
         .catch(logging.logError);
 };
 
+/**
+ * Gets a moment version of the end date
+ * @returns {object} The end date
+ */
+var getEnd = function () {
+    var m_end = moment.utc();
+
+    if (!config.isUndefined('end')) {
+        m_end = moment.utc(global.config.end);
+    }
+
+    if (!config.isUndefined('date')) {
+        m_end = moment.utc(global.config.date).endOf('Day');
+    }
+
+    return m_end;
+};
+
+/**
+ * Gets a moment version of the start date
+ * @returns {object} The start date
+ */
+var getStart = function () {
+    var m_start = moment.utc(0);
+
+    if (!config.isUndefined('start')) {
+        m_start = moment.utc(global.config.start);
+    }
+
+    if (!config.isUndefined('date')) {
+        m_start = moment.utc(global.config.date).startOf('Day');
+    }
+
+    return m_start;
+};
+
+/**
+ * Do we have dates to act on
+ * @returns {boolean} If we have dates
+ */
+var hasADate = function () {
+    return (
+        global.config.start !== undefined ||
+        global.config.end !== undefined ||
+        global.config.date !== undefined
+    );
+};
+
 var config = {
     checkHandlers: checkHandlers,
+    date: {
+        getEnd: getEnd,
+        getStart: getStart,
+        hasADate: hasADate
+    },
     isUndefined: isUndefined,
     loadSolenopsisCredentials: loadSolenopsisCredentials,
     loadConfig: loadConfig,
