@@ -1,5 +1,5 @@
-var formatter = require('../lib/formatter.js');
 var queries = require('../lib/queries.js');
+var statics = require('../lib/statics.js');
 
 var COLUMNS = [
     'name',
@@ -9,20 +9,7 @@ var COLUMNS = [
 
 var DATA_MAP = {'exec': 'EXEC_TIME'};
 
-var OUTPUT_INFO = {
-    'name': {
-        header: 'Name',
-        formatter: formatter.noop
-    },
-    'count': {
-        header: 'Count',
-        formatter: formatter.noop
-    },
-    'exec': {
-        header: 'Execution Time',
-        formatter: formatter.prettyms
-    }
-};
+var OUTPUT_INFO = statics.report.generateOutputInfo(COLUMNS);
 
 /**
  * Generate the name

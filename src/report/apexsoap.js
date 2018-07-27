@@ -1,5 +1,5 @@
-var formatter = require('../lib/formatter.js');
 var queries = require('../lib/queries.js');
+var statics = require('../lib/statics.js');
 
 var COLUMNS = [
     'name',
@@ -17,32 +17,7 @@ var DATA_MAP = {
     'dbtotal': 'DB_TOTAL_TIME'
 };
 
-var OUTPUT_INFO = {
-    'name': {
-        header: 'Name',
-        formatter: formatter.noop
-    },
-    'count': {
-        header: 'Count',
-        formatter: formatter.noop
-    },
-    'cpu': {
-        header: 'CPU Time',
-        formatter: formatter.prettyms
-    },
-    'run': {
-        header: 'Run Time',
-        formatter: formatter.prettyms
-    },
-    'limit': {
-        header: 'Usage Percent Limit',
-        formatter: formatter.percent
-    },
-    'dbtotal': {
-        header: 'DB Total Time',
-        formatter: formatter.nanoToMsToPretty
-    }
-};
+var OUTPUT_INFO = statics.report.generateOutputInfo(COLUMNS);
 
 /**
  * Generates the name

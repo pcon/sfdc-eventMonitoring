@@ -34,7 +34,8 @@ var static = {
     DATE_FORMAT: DATE_FORMAT,
     DATETIME_FORMAT: DATETIME_FORMAT,
     getMessage: getMessage,
-    LOG_TYPES: require('./statics/logTypes.js').types // eslint-disable-line global-require
+    LOG_TYPES: require('./statics/logTypes.js').types, // eslint-disable-line global-require
+    report: require('./statics/report.js') // eslint-disable-line global-require
 };
 
 module.exports = static;

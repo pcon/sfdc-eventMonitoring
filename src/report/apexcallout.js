@@ -1,8 +1,8 @@
 var lo = require('lodash');
 var url = require('url');
 
-var formatter = require('../lib/formatter.js');
 var queries = require('../lib/queries.js');
+var statics = require('../lib/statics.js');
 
 var COLUMNS = [
     'name',
@@ -18,28 +18,7 @@ var DATA_MAP = {
     'time': 'TIME'
 };
 
-var OUTPUT_INFO = {
-    'name': {
-        header: 'Name',
-        formatter: formatter.noop
-    },
-    'count': {
-        header: 'Count',
-        formatter: formatter.noop
-    },
-    'request': {
-        header: 'Request Size',
-        formatter: formatter.prettybytes
-    },
-    'response': {
-        header: 'Response Size',
-        formatter: formatter.prettybytes
-    },
-    'time': {
-        header: 'Total Time',
-        formatter: formatter.prettyms
-    }
-};
+var OUTPUT_INFO = statics.report.generateOutputInfo(COLUMNS);
 
 /**
  * Shortens the URL down to just the host and path
