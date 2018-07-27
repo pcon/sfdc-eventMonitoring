@@ -58,6 +58,22 @@ var idToObject = function (sObjects) {
 };
 
 /**
+ * Runs and resolves a function with three parameters
+ * @param {object} data The data
+ * @param {string} key The key
+ * @param {string} field The field
+ * @param {function} func The function to run
+ * @returns {Promise} A promise for the run
+ */
+function runFunc(data, key, field, func) {
+    var deferred = Q.defer();
+
+    deferred.resolve(func(data, key, field));
+
+    return deferred.promise;
+}
+
+/**
  * Limits a set of data without a promise
  * @param {object} data The data to limit.
  * @param {string} key The in the data to limit.
@@ -81,11 +97,7 @@ var limitNoPromise = function (data, key, limit) {
  * @returns {Promise} A promise with the limited data
  */
 function genericLimit(data, key, limit) {
-    var deferred = Q.defer();
-
-    deferred.resolve(limitNoPromise(data, key, limit));
-
-    return deferred.promise;
+    return runFunc(data, key, limit, limitNoPromise);
 }
 
 /**
@@ -291,11 +303,7 @@ var sortNoPromise = function (data, key, sorter) {
  * @returns {Promise} A promise with the sorted data
  */
 function genericSort(data, key, sorter) {
-    var deferred = Q.defer();
-
-    deferred.resolve(sortNoPromise(data, key, sorter));
-
-    return deferred.promise;
+    return runFunc(data, key, sorter, sortNoPromise);
 }
 
 /**
