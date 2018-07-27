@@ -235,15 +235,20 @@ var limitCounts = function (data) {
 
 /**
  * Act on a grouping
- * @param {object} grouping The grouping
+ * @param {object} data The data
  * @param {string} option The option
  * @param {function} func The function to apply to that grouping
  * @return {undefined}
  */
-var actOnGrouping = function (grouping, option, func) {
-    lo.forEach(grouping, function (group) {
+var actOnGrouping = function (data, option, func) {
+    var deferred = Q.defer();
+
+    lo.forEach(data.grouping, function (group) {
         func(group, '_counts', option);
     });
+
+    deferred.resolve(data);
+    return deferred.promise;
 };
 
 /**
@@ -252,12 +257,7 @@ var actOnGrouping = function (grouping, option, func) {
  * @return {Promise} A promise with sorted data
  */
 var subSortCounts = function (data) {
-    var deferred = Q.defer();
-
-    actOnGrouping(data.grouping, global.config.subsort, utils.sortNoPromise);
-
-    deferred.resolve(data);
-    return deferred.promise;
+    return actOnGrouping(data, global.config.subsort, utils.sortNoPromise);
 };
 
 /**
@@ -266,12 +266,7 @@ var subSortCounts = function (data) {
  * @return {Promise} A promise with limited data
  */
 var subLimitCounts = function (data) {
-    var deferred = Q.defer();
-
-    actOnGrouping(data.grouping, global.config.sublimit, utils.limitNoPromise);
-
-    deferred.resolve(data);
-    return deferred.promise;
+    return actOnGrouping(data, global.config.sublimit, utils.limitNoPromise);
 };
 
 /**
