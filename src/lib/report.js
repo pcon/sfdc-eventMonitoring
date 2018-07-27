@@ -1,6 +1,41 @@
 var lo = require('lodash');
+var Q = require('q');
 
 var utils = require('./utils.js');
+
+/**
+ * Generates the averages for a single group
+ * @param {array} logs The logs
+ * @param {string} name The name
+ * @param {object} data_map A map of field name to data name
+ * @param {object} additional_data Additonal data to add to the averages
+ * @return {promise} A promise for an average for the group
+ */
+var generateGroupAverage = function (logs, name, data_map, additional_data) {
+    var deferred = Q.defer();
+    var averages = {
+        name: name,
+        count: lo.size(logs)
+    };
+
+    averages = lo.merge(averages, additional_data);
+    averages = report.initializeAverages(averages, data_map);
+
+    lo.forEach(logs, function (log) {
+        lo.forEach(data_map, function (value, key) {
+            averages[key] += parseInt(log[value]);
+        });
+    });
+
+    lo.forEach(data_map, function (value, key) {
+        averages[key] /= lo.size(logs);
+        averages[key] = Number(averages[key].toFixed(2));
+    });
+
+    deferred.resolve(averages);
+
+    return deferred.promise;
+};
 
 /**
  * Intiializes all of the average fields
@@ -35,6 +70,7 @@ var sortAverages = function (data) {
 };
 
 var report = {
+    generateGroupAverage: generateGroupAverage,
     initializeAverages: initializeAverages,
     limitAverages: limitAverages,
     sortAverages: sortAverages

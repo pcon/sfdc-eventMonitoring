@@ -80,38 +80,6 @@ var groupBy = function (logs, handler) {
 };
 
 /**
- * Generates the averages for a single group
- * @param {array} logs The logs
- * @param {string} name The name
- * @param {object} data_map A map of field name to data name
- * @return {promise} A promise for an average for the group
- */
-function generateGroupAverage(logs, name, data_map) {
-    var deferred = Q.defer();
-    var averages = {
-        name: name,
-        count: lo.size(logs)
-    };
-
-    averages = report.initializeAverages(averages, data_map);
-
-    lo.forEach(logs, function (log) {
-        lo.forEach(data_map, function (value, key) {
-            averages[key] += parseInt(log[value]);
-        });
-    });
-
-    lo.forEach(data_map, function (value, key) {
-        averages[key] /= lo.size(logs);
-        averages[key] = Number(averages[key].toFixed(2));
-    });
-
-    deferred.resolve(averages);
-
-    return deferred.promise;
-}
-
-/**
  * Generate the averages for every method
  * @param {object} grouping The grouping of method
  * @param {object} handler The handler
@@ -129,7 +97,7 @@ function generateAverages(grouping, handler) {
         if (handler.generateGroupAverage !== undefined) {
             promises.push(handler.generateGroupAverage(value, key));
         } else {
-            promises.push(generateGroupAverage(value, key, handler.DATA_MAP));
+            promises.push(report.generateGroupAverage(value, key, handler.DATA_MAP));
         }
     });
 

@@ -44,29 +44,8 @@ var generateName = function (log) {
  * @return {promise} A promise for an average for the group
  */
 function generateGroupAverage(logs, name) {
-    var deferred = Q.defer();
-    var averages = {
-        name: name,
-        id: name,
-        count: lo.size(logs)
-    };
-
-    averages = report.initializeAverages(averages, DATA_MAP);
-
-    lo.forEach(logs, function (log) {
-        lo.forEach(DATA_MAP, function (value, key) {
-            averages[key] += parseInt(log[value]);
-        });
-    });
-
-    lo.forEach(DATA_MAP, function (value, key) {
-        averages[key] /= lo.size(logs);
-        averages[key] = Number(averages[key].toFixed(2));
-    });
-
-    deferred.resolve(averages);
-
-    return deferred.promise;
+    var additional_data = { id: name };
+    return report.generateGroupAverage(logs, name, DATA_MAP, additional_data);
 }
 
 /**
