@@ -25,24 +25,14 @@ function config(yargs) {
         describe: 'The type of login to run',
         choices: lo.keys(handlers)
     }).options({
-        'format': {
-            default: 'table',
-            describe: 'The format to output',
-            type: 'string',
-            choices: [ 'json', 'table' ]
-        },
-        'interval': {
-            default: 'hourly',
-            describe: 'The interval to use',
-            type: 'string',
-            choices: [ 'hourly', 'daily' ]
-        },
-        'latest': statics.CONFIG.latest,
-        'asc': statics.CONFIG.asc,
-        'sort': statics.CONFIG.sort,
-        'limit': statics.CONFIG.limit,
-        'maxversion': statics.CONFIG.maxversion,
-        'summary': statics.CONFIG.summary
+        asc: statics.CONFIG.asc,
+        format: statics.CONFIG.format,
+        interval: statics.CONFIG.interval,
+        latest: statics.CONFIG.latest,
+        limit: statics.CONFIG.limit,
+        maxversion: statics.CONFIG.maxversion,
+        sort: statics.CONFIG.sort,
+        summary: statics.CONFIG.summary
     });
 }
 

@@ -21,29 +21,14 @@ function config(yargs) {
         describe: 'Blame your users that are doing stuff',
         choices: lo.keys(handlers)
     }).options({
-        'format': {
-            default: 'table',
-            describe: 'The format to output',
-            type: 'string',
-            choices: [ 'json', 'table' ]
-        },
-        'asc': statics.CONFIG.asc,
-        'sort': statics.CONFIG.sort,
-        'limit': statics.CONFIG.limit,
-        'subsort': {
-            default: 'count',
-            describe: 'The sub-field to sort by.  Use a comma seperated list to sort by multiple fields',
-            type: 'string'
-        },
-        'sublimit': {
-            describe: 'The number of results to sub-limit to',
-            type: 'number'
-        },
-        'summary': statics.CONFIG.summary,
-        'userid': {
-            describe: 'A user id to filter the results by',
-            type: 'string'
-        }
+        asc: statics.CONFIG.asc,
+        format: statics.CONFIG.format,
+        limit: statics.CONFIG.limit,
+        sort: statics.CONFIG.sort,
+        sublimit: statics.CONFIG.sublimit,
+        subsort: statics.CONFIG.subsort,
+        summary: statics.CONFIG.summary,
+        userid: statics.CONFIG.userid
     });
 }
 

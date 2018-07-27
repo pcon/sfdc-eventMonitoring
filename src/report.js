@@ -38,15 +38,10 @@ function config(yargs) {
         describe: 'The type of report to run',
         choices: lo.keys(handlers)
     }).options({
-        'format': {
-            default: 'table',
-            describe: 'The format to output',
-            type: 'string',
-            choices: [ 'json', 'table' ]
-        },
-        'asc': statics.CONFIG.asc,
-        'sort': statics.CONFIG.sort,
-        'limit': statics.CONFIG.limit
+        asc: statics.CONFIG.asc,
+        format: statics.CONFIG.format,
+        limit: statics.CONFIG.limit,
+        sort: statics.CONFIG.sort
     });
 }
 

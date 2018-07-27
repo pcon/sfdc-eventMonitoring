@@ -16,31 +16,22 @@ var utils = require('./lib/utils.js');
  */
 function config(yargs) {
     'use strict';
-
-    yargs.options({
-        'format': {
-            default: 'json',
-            describe: 'The output format to use',
-            type: 'string',
-            hidden: true,
-            choices: [ 'json' ]
-        },
-        'type': {
+    var options = {
+        file: statics.CONFIG.file,
+        format: statics.CONFIG.format,
+        split: statics.CONFIG.split,
+        type: {
             default: undefined,
             describe: 'The log type to dump',
             type: 'string',
             choices: statics.LOG_TYPES
-        },
-        'split': {
-            default: false,
-            describe: 'The output should be split into multiple files'
-        },
-        'file': {
-            default: undefined,
-            describe: 'The file to save to.  If unset, output will be sent to stdout',
-            type: 'string'
         }
-    });
+    };
+    options.format.default = 'json';
+    options.format.choices = [ 'json' ];
+    options.format.hidden = true;
+
+    yargs.options(options);
 }
 
 /**
