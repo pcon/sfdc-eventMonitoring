@@ -2,6 +2,7 @@ var ini = require('ini');
 var fs = require('fs');
 var lo = require('lodash');
 var path = require('path');
+var process = require('process');
 var Q = require('q');
 
 var SOLENOPSIS_FIELDS = [
@@ -110,9 +111,41 @@ var setupGlobals = function () {
     return deferred.promise;
 };
 
+/**
+ * Returns if any of the variables passed in are undefined
+ * @param {string|string[]} keys The keys to check
+ * @return {boolean} If any of the keys are undefined
+ */
+var isUndefined = function (keys) {
+    if (lo.isArray(keys)) {
+        lo.forEach(keys, function (key) {
+            if (lo.isUndefined(lo.get(global.config, key))) {
+                return true;
+            }
+        });
+
+        return false;
+    }
+
+    return lo.isUndefined(lo.get(global.config, keys));
+};
+
+/**
+ * Logs and error message and exits
+ * @param {string} message The error message
+ * @param {number} error_code The error code to use
+ * @returns {undefined}
+ */
+var logAndExit = function (message, error_code) {
+    global.logger.error(message);
+    process.exit(error_code);
+};
+
 var config = {
+    isUndefined: isUndefined,
     loadSolenopsisCredentials: loadSolenopsisCredentials,
     loadConfig: loadConfig,
+    logAndExit: logAndExit,
     merge: merge,
     setupGlobals: setupGlobals
 };

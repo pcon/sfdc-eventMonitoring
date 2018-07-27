@@ -7,24 +7,12 @@ var lo = require('lodash');
 var moment = require('moment');
 var path = require('path');
 var prettybytes = require('pretty-bytes');
-var process = require('process');
 var request = require('request');
 
-var conf = require('./config.js');
+var config = require('./config.js');
 var errorCodes = require('./errorCodes.js');
 var statics = require('./statics.js');
 var qutils = require('./qutils.js');
-
-/**
- * Logs and error message and exits
- * @param {string} message The error message
- * @param {number} error_code The error code to use
- * @returns {undefined}
- */
-function logAndExit(message, error_code) {
-    global.logger.error(message);
-    process.exit(error_code);
-}
 
 /**
  * Verifies we have a connection
@@ -32,7 +20,7 @@ function logAndExit(message, error_code) {
  */
 function verifyConnection() {
     if (global.sfdc_conn === undefined) {
-        logAndExit('No valid connection', errorCodes.NO_CONNECTION_QUERY);
+        config.logAndExit('No valid connection', errorCodes.NO_CONNECTION_QUERY);
     }
 }
 
@@ -41,8 +29,8 @@ function verifyConnection() {
  * @returns {undefined}
  */
 function verifySolenopsisEnvironment() {
-    if (global.config.env === undefined) {
-        logAndExit('No environment specified', errorCodes.NO_ENVIRONMENT);
+    if (config.isUndefined('env')) {
+        config.logAndExit('No environment specified', errorCodes.NO_ENVIRONMENT);
     }
 }
 
@@ -63,11 +51,11 @@ function getQueryOptions(uri) {
  * @returns {undefined}
  */
 function setupLogin() {
-    if (global.config.url === undefined) {
+    if (config.isUndefined('url')) {
         global.config.url = global.config.sandbox ? statics.CONNECTION.SANDBOX_URL : statics.CONNECTION.PROD_URL;
     }
 
-    if (global.config.version === undefined) {
+    if (config.isUndefined('url')) {
         global.config.version = statics.CONNECTION.VERSION;
     }
 
@@ -75,15 +63,11 @@ function setupLogin() {
         verifySolenopsisEnvironment();
 
         global.logger.debug('Loading solenopsis config for ' + global.config.env);
-        conf.loadSolenopsisCredentials(global.config.env);
+        config.loadSolenopsisCredentials(global.config.env);
     }
 
-    if (
-        global.config.username === undefined ||
-        global.config.password === undefined ||
-        global.config.url === undefined
-    ) {
-        logAndExit('Unable to login.  Incomplete credentials', errorCodes.INCOMPLETE_CREDS);
+    if (config.isUndefined([ 'username', 'password', 'url' ])) {
+        config.logAndExit('Unable to login.  Incomplete credentials', errorCodes.INCOMPLETE_CREDS);
     }
 }
 
@@ -101,7 +85,7 @@ var login = function () {
         version: global.config.version
     });
 
-    var combined_password = global.config.token === undefined ? global.config.password : global.config.password + global.config.token;
+    var combined_password = config.isUndefined('token') ? global.config.password : global.config.password + global.config.token;
     global.sfdc_conn.login(global.config.username, combined_password, function (error) {
         qutils.rejectResolve(deferred, error);
     });

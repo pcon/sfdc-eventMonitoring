@@ -2,9 +2,9 @@ var lo = require('lodash');
 var fs = require('fs');
 var moment = require('moment');
 var path = require('path');
-var process = require('process');
 var Q = require('q');
 
+var config = require('../lib/config.js');
 var errorCodes = require('../lib/errorCodes.js');
 var qutils = require('../lib/qutils.js');
 
@@ -109,9 +109,8 @@ var getFiles = function (start, end) {
 var run = function () {
     'use strict';
 
-    if (global.config.cache === undefined) {
-        global.logger.error('Cache options are not valid without cache folder being set');
-        process.exit(errorCodes.NO_CACHE_DIR);
+    if (config.isUndefined('cache')) {
+        config.logAndExit('Cache options are not valid without cache folder being set', errorCodes.NO_CACHE_DIR);
     }
 
     var action;
@@ -124,15 +123,15 @@ var run = function () {
         var m_start = moment.utc(0);
         var m_end = moment.utc();
 
-        if (global.config.start !== undefined) {
+        if (!config.isUndefined('start')) {
             m_start = moment.utc(global.config.start);
         }
 
-        if (global.config.end !== undefined) {
+        if (!config.isUndefined('end')) {
             m_end = moment.utc(global.config.end);
         }
 
-        if (global.config.date !== undefined) {
+        if (!config.isUndefined('date')) {
             m_start = moment.utc(global.config.date).startOf('Day');
             m_end = moment.utc(global.config.date).endOf('Day');
         }
