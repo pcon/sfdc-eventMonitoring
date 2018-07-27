@@ -28,7 +28,7 @@ eventmonitoring --username user@example.com --password donthackme --token 123abc
 
 **Flags**
 *   **--interval \[interval\]** - hourly, daily - The interval to use for the data
-*   **--latest=\[true,false]\** - If we should get the latest (single) log
+*   **--latest=\[true,false\]** - If we should get the latest (single) log
 *   **--date \[date\]** - The date
 *   **--start \[datetime\]** - The start date/time
 *   **--end \[datetime\]** - The end date/time
