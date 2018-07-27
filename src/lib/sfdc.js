@@ -16,10 +16,10 @@ var statics = require('./statics.js');
 var qutils = require('./qutils.js');
 
 /**
- * Login to salesforce and write it to the global space
- * @returns {Promise} A promise for when the login completes
+ * Sets up and verifies login information
+ * @returns {undefined}
  */
-var login = function () {
+function setupLogin() {
     if (global.config.url === undefined) {
         global.config.url = global.config.sandbox ? statics.CONNECTION.SANDBOX_URL : statics.CONNECTION.PROD_URL;
     }
@@ -46,6 +46,14 @@ var login = function () {
         global.logger.error('Unable to login.  Incomplete credentials');
         process.exit(errorCodes.INCOMPLETE_CREDS);
     }
+}
+
+/**
+ * Login to salesforce and write it to the global space
+ * @returns {Promise} A promise for when the login completes
+ */
+var login = function () {
+    setupLogin();
 
     var deferred = Q.defer();
 
@@ -102,13 +110,23 @@ var query = function (query_string) {
 };
 
 /**
+ * Generates a file name based on a log
+ * @param {object} log The log file to generate a name for
+ * @param {string} extension The file extension
+ * @returns {string} The log file name
+ */
+function generateFilename(log, extension) {
+    var timestamp = moment.utc(log.LogDate).format('x');
+    return path.join(global.config.cache, timestamp + '_' + log.Id + '.' + extension);
+}
+
+/**
  * Gets the cache file name
  * @param {object} log The log file to generate a name for
  * @returns {string} The log file name
  */
 function generateCacheFilename(log) {
-    var timestamp = moment.utc(log.LogDate).format('x');
-    return path.join(global.config.cache, timestamp + '_' + log.Id + '.json');
+    return generateFilename(log, 'json');
 }
 
 /**
@@ -117,8 +135,7 @@ function generateCacheFilename(log) {
  * @returns {string} The csv log file name
  */
 function generateCSVFilename(log) {
-    var timestamp = moment.utc(log.LogDate).format('x');
-    return path.join(global.config.cache, timestamp + '_' + log.Id + '.csv');
+    return generateFilename(log, 'csv');
 }
 
 /**
