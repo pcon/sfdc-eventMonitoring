@@ -175,13 +175,22 @@ var login = function () {
 };
 
 /**
+ * Generates a criteria for ids
+ * @param {string[]} ids Ids
+ * @returns {string} The criteria
+ */
+function inIdCriteria(ids) {
+    return 'Id in (' + lo.join(utils.escapeArray(ids), ',') + ')';
+}
+
+/**
  * Gets the query for users
  * @param {array} user_ids The user ids
  * @returns {string} The query
  */
 var generalUsers = function (user_ids) {
     var criteria = [
-        'Id in (' + lo.join(utils.escapeArray(user_ids), ',') + ')'
+        inIdCriteria(user_ids)
     ];
 
     return buildSimpleQuery(USER_FIELDS, USER, criteria);
@@ -194,7 +203,7 @@ var generalUsers = function (user_ids) {
  */
 var generalReports = function (report_ids) {
     var criteria = [
-        'Id in (' + lo.join(utils.escapeArray(report_ids), ',') + ')'
+        inIdCriteria(report_ids)
     ];
 
     return buildSimpleQuery(REPORT_FIELDS, REPORT, criteria);
