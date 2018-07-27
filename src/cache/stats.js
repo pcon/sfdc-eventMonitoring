@@ -136,16 +136,7 @@ var printStats = function (stats) {
         'date',
         'size'
     ];
-    var output_info = {
-        'date': {
-            header: 'Date',
-            formatter: formatter.noop
-        },
-        'size': {
-            header: 'Usage',
-            formatter: formatter.prettybytes
-        }
-    };
+    var output_info = statics.report.generateOutputInfo(columns);
 
     global.logger.log(chalk.bold('Total Size Usage: ') + formatter.prettybytes(stats.total));
     global.logger.log(chalk.bold('      JSON Usage: ') + formatter.prettybytes(stats.json));

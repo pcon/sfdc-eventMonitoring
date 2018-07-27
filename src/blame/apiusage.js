@@ -5,10 +5,10 @@ var Q = require('q');
 
 const { table } = require('table');
 
-var formatter = require('../lib/formatter.js');
 var logging = require('../lib/logging.js');
-var sfdc = require('../lib/sfdc.js');
 var queries = require('../lib/queries.js');
+var sfdc = require('../lib/sfdc.js');
+var statics = require('../lib/statics.js');
 var utils = require('../lib/utils.js');
 
 var COLUMNS = [
@@ -16,16 +16,7 @@ var COLUMNS = [
     'count'
 ];
 
-var OUTPUT_INFO = {
-    'endpoint': {
-        header: 'Endpoint',
-        formatter: formatter.noop
-    },
-    'count': {
-        header: 'Count',
-        formatter: formatter.noop
-    }
-};
+var OUTPUT_INFO = statics.report.generateOutputInfo(COLUMNS);
 
 var SUMMARY_COLUMNS = [
     '_name',
@@ -34,24 +25,7 @@ var SUMMARY_COLUMNS = [
     '_count'
 ];
 
-var SUMMARY_OUTPUT_INFO = {
-    '_name': {
-        header: 'Name',
-        formatter: formatter.noop
-    },
-    '_username': {
-        header: 'Username',
-        formatter: formatter.noop
-    },
-    '_user_id': {
-        header: 'Id',
-        formatter: formatter.noop
-    },
-    '_count': {
-        header: 'Count',
-        formatter: formatter.noop
-    }
-};
+var SUMMARY_OUTPUT_INFO = statics.report.generateOutputInfo(SUMMARY_COLUMNS);
 
 /**
  * Trims down the user ids to 15 characters if needed
