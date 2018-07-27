@@ -3,6 +3,7 @@ var Q = require('q');
 
 var sfdc = require('./sfdc.js');
 var utils = require('./utils.js');
+var qutils = require('./qutils.js');
 
 /**
  * Limit the results
@@ -21,7 +22,6 @@ var limitCounts = function (data) {
  */
 var generateCounts = function (grouping, count_func) {
     var promises = [];
-    var counts = [];
     var deferred = Q.defer();
 
     lo.forEach(grouping, function (subgrouping, subgrouping_key) {
@@ -30,19 +30,7 @@ var generateCounts = function (grouping, count_func) {
         });
     });
 
-    Q.allSettled(promises)
-        .then(function (results) {
-            lo.forEach(results, function (result) {
-                if (result.state === 'fulfilled') {
-                    counts.push(result.value);
-                }
-            });
-
-            deferred.resolve({
-                grouping: grouping,
-                counts: counts
-            });
-        });
+    qutils.allSettledPushValue(deferred, promises, grouping, 'counts');
 
     return deferred.promise;
 };

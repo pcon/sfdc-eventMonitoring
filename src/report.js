@@ -8,6 +8,7 @@ var report = require('./lib/report.js');
 var sfdc = require('./lib/sfdc.js');
 var statics = require('./lib/statics.js');
 var utils = require('./lib/utils.js');
+var qutils = require('./lib/qutils.js');
 
 var apexcallout= require('./report/apexcallout.js');
 var apexexecution = require('./report/apexexecution.js');
@@ -124,7 +125,6 @@ function generateAverages(grouping, handler) {
 
     var deferred = Q.defer();
     var promises = [];
-    var averages = [];
 
     lo.forEach(grouping, function (value, key) {
         if (handler.generateGroupAverage !== undefined) {
@@ -134,18 +134,7 @@ function generateAverages(grouping, handler) {
         }
     });
 
-    Q.allSettled(promises)
-        .then(function (results) {
-            lo.forEach(results, function (result) {
-                if (result.state === 'fulfilled') {
-                    averages.push(result.value);
-                }
-            });
-
-            deferred.resolve({
-                grouping: grouping, averages: averages
-            });
-        });
+    qutils.allSettledPushValue(deferred, promises, grouping, 'averages');
 
     return deferred.promise;
 }
