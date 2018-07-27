@@ -1,5 +1,5 @@
-var formatter = require('../lib/formatter.js');
 var queries = require('../lib/queries.js');
+var statics = require('../lib/statics.js');
 
 var COLUMNS = [
     'name',
@@ -13,24 +13,8 @@ var DATA_MAP = {
     'field2': 'FIELD2_NAME'
 };
 
-var OUTPUT_INFO = {
-    'name': {
-        header: 'Name',
-        formatter: formatter.noop
-    },
-    'count': {
-        header: 'Count',
-        formatter: formatter.noop
-    },
-    'feild1': {
-        header: 'Human Field Name',
-        formatter: formatter.prettyms
-    },
-    'feild2': {
-        header: 'Human Field Name',
-        formatter: formatter.prettyms
-    }
-};
+var OUTPUT_INFO = statics.generateOutputInfo(COLUMNS);
+OUTPUT_INFO.name.header = 'Overridden Name';
 
 /**
  * Generates the name
