@@ -16,6 +16,49 @@ var statics = require('./statics.js');
 var qutils = require('./qutils.js');
 
 /**
+ * Logs and error message and exits
+ * @param {string} message The error message
+ * @param {number} error_code The error code to use
+ * @returns {undefined}
+ */
+function logAndExit(message, error_code) {
+    global.logger.error(message);
+    process.exit(error_code);
+}
+
+/**
+ * Verifies we have a connection
+ * @returns {undefined}
+ */
+function verifyConnection() {
+    if (global.sfdc_conn === undefined) {
+        logAndExit('No valid connection', errorCodes.NO_CONNECTION_QUERY);
+    }
+}
+
+/**
+ * Verifies that we have a solenopsis environment configured
+ * @returns {undefined}
+ */
+function verifySolenopsisEnvironment() {
+    if (global.config.env === undefined) {
+        logAndExit('No environment specified', errorCodes.NO_ENVIRONMENT);
+    }
+}
+
+/**
+ * Gets the request options
+ * @param {string} uri The URI to download
+ * @returns {object} The options
+ */
+function getQueryOptions(uri) {
+    return {
+        url: global.sfdc_conn.instanceUrl + uri,
+        headers: { Authorization: 'Bearer ' + global.sfdc_conn.accessToken }
+    };
+}
+
+/**
  * Sets up and verifies login information
  * @returns {undefined}
  */
@@ -29,10 +72,7 @@ function setupLogin() {
     }
 
     if (global.config.solenopsis) {
-        if (global.config.env === undefined) {
-            global.logger.error('No environment specified');
-            process.exit(errorCodes.NO_ENVIRONMENT);
-        }
+        verifySolenopsisEnvironment();
 
         global.logger.debug('Loading solenopsis config for ' + global.config.env);
         conf.loadSolenopsisCredentials(global.config.env);
@@ -43,8 +83,7 @@ function setupLogin() {
         global.config.password === undefined ||
         global.config.url === undefined
     ) {
-        global.logger.error('Unable to login.  Incomplete credentials');
-        process.exit(errorCodes.INCOMPLETE_CREDS);
+        logAndExit('Unable to login.  Incomplete credentials', errorCodes.INCOMPLETE_CREDS);
     }
 }
 
@@ -95,10 +134,7 @@ var logout = function () {
 var query = function (query_string) {
     var deferred = Q.defer();
 
-    if (global.sfdc_conn === undefined) {
-        global.logger.error('No valid connection');
-        process.exit(errorCodes.NO_CONNECTION_QUERY);
-    }
+    verifyConnection();
 
     global.logger.debug('Querying ' + query_string);
 
@@ -200,6 +236,22 @@ function writeCachedLog(log, data) {
 }
 
 /**
+ * Use a given deferred to write the cached logs
+ * @param {object} log The log file to write
+ * @param {object} data The data to write
+ * @param {object} deferred The Q.defer
+ * @returns {undefined}
+ */
+function writeLogCachedLoggedDeferred(log, data, deferred) {
+    writeCachedLog(log, data)
+        .then(function () {
+            deferred.resolve(data);
+        }).catch(function (write_error) {
+            deferred.reject(write_error);
+        });
+}
+
+/**
  * Stream the data from the URL to csvtojson and keep it all in memory
  * @param {object} log The log to download
  * @param {object} options The request options
@@ -221,12 +273,7 @@ function streamToMemory(log, options) {
             if (error) {
                 deferred.reject(error);
             } else {
-                writeCachedLog(log, results)
-                    .then(function () {
-                        deferred.resolve(results);
-                    }).catch(function (write_error) {
-                        deferred.reject(write_error);
-                    });
+                writeLogCachedLoggedDeferred(log, results, deferred);
             }
         });
 
@@ -251,17 +298,24 @@ function downloadToDiskAndConvert(log, options) {
         }).on('finish', function () {
             csvtojson()
                 .fromFile(csvfilename)
-                .then(function (data) {
-                    writeCachedLog(log, data)
-                        .then(function () {
-                            deferred.resolve(data);
-                        }).catch(function (error) {
-                            deferred.reject(error);
-                        });
+                .then(function (results) {
+                    writeLogCachedLoggedDeferred(log, results, deferred);
                 });
         });
 
     return deferred.promise;
+}
+
+/**
+ * Gets the type of download strategy to use
+ * @returns {function} The download strategy to use
+ */
+function getDownloadStrategy() {
+    if (lo.isEmpty(global.config.cache)) {
+        return streamToMemory;
+    }
+
+    return downloadToDiskAndConvert;
 }
 
 /**
@@ -275,33 +329,19 @@ var fetchConvertFile = function (log) {
         if (results !== undefined) {
             deferred.resolve(results);
         } else {
-            if (global.sfdc_conn === undefined) {
-                global.logger.error('No valid connection');
-                process.exit(errorCodes.NO_CONNECTION_FETCH);
-            }
+            verifyConnection();
 
             global.logger.debug('Downloading ' + log.LogFile + ' (' + prettybytes(log.LogFileLength) + ')');
 
-            var options = {
-                url: global.sfdc_conn.instanceUrl + log.LogFile,
-                headers: { Authorization: 'Bearer ' + global.sfdc_conn.accessToken }
-            };
+            var options = getQueryOptions(log.LogFile);
+            var methodType = getDownloadStrategy();
 
-            if (lo.isEmpty(global.config.cache)) {
-                streamToMemory(log, options)
-                    .then(function (data) {
-                        deferred.resolve(data);
-                    }).catch(function (error) {
-                        deferred.reject(error);
-                    });
-            } else {
-                downloadToDiskAndConvert(log, options)
-                    .then(function (data) {
-                        deferred.resolve(data);
-                    }).catch(function (error) {
-                        deferred.reject(error);
-                    });
-            }
+            methodType(log, options)
+                .then(function (data) {
+                    deferred.resolve(data);
+                }).catch(function (error) {
+                    deferred.reject(error);
+                });
         }
     }).catch(function (error) {
         deferred.reject(error);
