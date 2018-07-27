@@ -1,3 +1,7 @@
+var lo = require('lodash');
+var Q = require('q');
+
+var sfdc = require('./sfdc.js');
 var utils = require('./utils.js');
 
 /**
@@ -7,6 +11,58 @@ var utils = require('./utils.js');
  */
 var limitCounts = function (data) {
     return utils.limitResults(data, 'counts');
+};
+
+/**
+ * Generates counts for a grouping using a provided function
+ * @param {object} grouping The grouping
+ * @param {function} count_func The counting function
+ * @return {Promise} A promise for when the counting is complete
+ */
+var generateCounts = function (grouping, count_func) {
+    var promises = [];
+    var counts = [];
+    var deferred = Q.defer();
+
+    lo.forEach(grouping, function (subgrouping, subgrouping_key) {
+        lo.forEach(subgrouping, function (logs, key) {
+            promises.push(count_func(logs, subgrouping_key, key));
+        });
+    });
+
+    Q.allSettled(promises)
+        .then(function (results) {
+            lo.forEach(results, function (result) {
+                if (result.state === 'fulfilled') {
+                    counts.push(result.value);
+                }
+            });
+
+            deferred.resolve({
+                grouping: grouping,
+                counts: counts
+            });
+        });
+
+    return deferred.promise;
+};
+
+/**
+* Run our login code
+* @param {object} options The options
+* @returns {undefined}
+*/
+var run = function (options) {
+    sfdc.query(options.query)
+        .then(utils.fetchAndConvert)
+        .then(options.groupBy)
+        .then(options.generateCounts)
+        .then(sortCounts)
+        .then(limitCounts)
+        .then(options.printCounts)
+        .catch(function (error) {
+            global.logger.error(error);
+        });
 };
 
 /**
@@ -29,6 +85,8 @@ var wasSuccessful = function (login_status) {
 
 var login = {
     limitCounts: limitCounts,
+    generateCounts: generateCounts,
+    run: run,
     sortCounts: sortCounts,
     wasSuccessful: wasSuccessful
 };

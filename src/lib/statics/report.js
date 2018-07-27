@@ -1,5 +1,6 @@
 var lo = require('lodash');
 
+var loginStatus = require('./loginStatus.js');
 var formatter = require('../formatter.js');
 
 /**
@@ -24,6 +25,7 @@ var OUTPUT_INFO = {
     exec: generateEntry('Execution Time', formatter.prettyms),
     id: generateEntry('Id', formatter.noop),
     limit: generateEntry('Usage Percentage Limit', formatter.percent),
+    message: generateEntry('Error Message', loginStatus.getMessage),
     name: generateEntry('Name', formatter.noop),
     response: generateEntry('Response Size', formatter.prettybytes),
     request: generateEntry('Request Size', formatter.prettybytes),
@@ -31,6 +33,8 @@ var OUTPUT_INFO = {
     run: generateEntry('Run Time', formatter.prettyms),
     soql: generateEntry('SOQL Count', formatter.noop),
     time: generateEntry('Total Time', formatter.prettyms),
+    username: generateEntry('Username', formatter.noop),
+    version: generateEntry('Version', formatter.noop),
     view: generateEntry('View State Size', formatter.prettybytes)
 };
 

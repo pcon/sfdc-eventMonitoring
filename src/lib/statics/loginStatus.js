@@ -1,4 +1,6 @@
-module.exports = {
+var lo = require('lodash');
+
+var LOGIN_STATUS = {
     'LOGIN_CHALLENGE_ISSUED': 'Failed: Computer activation required',
     'LOGIN_CHALLENGE_PENDING': 'Failed: Computer activation pending',
     'LOGIN_DATA_DOWNLOAD_ONLY': undefined,
@@ -119,3 +121,22 @@ module.exports = {
     'LOGIN_SAML_SITE_INACTIVE': 'Failed: Specified Site is Inactive',
     'LOGIN_TWOFACTOR_REQ': 'Two-factor required'
 };
+
+/**
+ * Get the message for a given key
+ * @param {string} key The key
+ * @returns {string} The message or the key if not found
+ */
+var getMessage = function (key) {
+    var messages = LOGIN_STATUS;
+    if (
+        !lo.has(messages, key) ||
+        lo.get(messages, key) === undefined
+    ) {
+        return key;
+    }
+
+    return lo.get(messages, key);
+};
+
+module.exports = { getMessage: getMessage };

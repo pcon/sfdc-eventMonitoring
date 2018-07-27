@@ -1,10 +1,9 @@
 var lo = require('lodash');
 var Q = require('q');
 
-var formatter = require('../lib/formatter.js');
 var login = require('../lib/login.js');
-var sfdc = require('../lib/sfdc.js');
 var queries = require('../lib/queries.js');
+var statics = require('../lib/statics.js');
 var utils = require('../lib/utils.js');
 
 var COLUMNS = [
@@ -12,16 +11,7 @@ var COLUMNS = [
     'count'
 ];
 
-var OUTPUT_INFO = {
-    'version': {
-        header: 'Version',
-        formatter: formatter.noop
-    },
-    'count': {
-        header: 'Count',
-        formatter: formatter.noop
-    }
-};
+var OUTPUT_INFO = statics.report.generateOutputInfo(COLUMNS);
 
 /**
  * Generates the version
@@ -129,16 +119,12 @@ var printCounts = function (data) {
 var run = function () {
     'use strict';
 
-    sfdc.query(queries.login())
-        .then(utils.fetchAndConvert)
-        .then(groupByVersion)
-        .then(generateCounts)
-        .then(login.sortCounts)
-        .then(login.limitCounts)
-        .then(printCounts)
-        .catch(function (error) {
-            global.logger.error(error);
-        });
+    login.run({
+        query: queries.login(),
+        groupBy: groupByVersion,
+        generateCounts: generateCounts,
+        printCounts: printCounts
+    });
 };
 
 var cli = { run: run };

@@ -1,9 +1,7 @@
 var lo = require('lodash');
 var Q = require('q');
 
-var formatter = require('../lib/formatter.js');
 var login = require('../lib/login.js');
-var sfdc = require('../lib/sfdc.js');
 var statics = require('../lib/statics.js');
 var queries = require('../lib/queries.js');
 var utils = require('../lib/utils.js');
@@ -14,20 +12,7 @@ var COLUMNS = [
     'message'
 ];
 
-var OUTPUT_INFO = {
-    'username': {
-        header: 'Username',
-        formatter: formatter.noop
-    },
-    'count': {
-        header: 'Count',
-        formatter: formatter.noop
-    },
-    'message': {
-        header: 'Error Message',
-        formatter: statics.getMessage
-    }
-};
+var OUTPUT_INFO = statics.report.generateOutputInfo(COLUMNS);
 
 /**
  * Generates the name
@@ -107,30 +92,7 @@ var generateCountsForUsernameAndLoginStatus = function (logs, username, messageK
  * @returns {Promise} A promise for all the count for all the groupings
  */
 var generateCounts = function (grouping) {
-    var deferred = Q.defer();
-    var promises = [];
-    var counts = [];
-
-    lo.forEach(grouping, function (subgrouping, username) {
-        lo.forEach(subgrouping, function (logs, messageKey) {
-            promises.push(generateCountsForUsernameAndLoginStatus(logs, username, messageKey));
-        });
-    });
-
-    Q.allSettled(promises)
-        .then(function (results) {
-            lo.forEach(results, function (result) {
-                if (result.state === 'fulfilled') {
-                    counts.push(result.value);
-                }
-            });
-
-            deferred.resolve({
-                grouping: grouping, counts: counts
-            });
-        });
-
-    return deferred.promise;
+    return login.generateCounts(grouping, generateCountsForUsernameAndLoginStatus);
 };
 
 /**
@@ -149,16 +111,12 @@ var printCounts = function (data) {
 var run = function () {
     'use strict';
 
-    sfdc.query(queries.login())
-        .then(utils.fetchAndConvert)
-        .then(groupByUsernameAndLoginStatus)
-        .then(generateCounts)
-        .then(login.sortCounts)
-        .then(login.limitCounts)
-        .then(printCounts)
-        .catch(function (error) {
-            global.logger.error(error);
-        });
+    login.run({
+        query: queries.login(),
+        groupBy: groupByUsernameAndLoginStatus,
+        generateCounts: generateCounts,
+        printCounts: printCounts
+    });
 };
 
 var cli = {run: run};

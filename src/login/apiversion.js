@@ -1,10 +1,10 @@
 var lo = require('lodash');
 var Q = require('q');
 
-var formatter = require('../lib/formatter.js');
 var login = require('../lib/login.js');
-var sfdc = require('../lib/sfdc.js');
 var queries = require('../lib/queries.js');
+var sfdc = require('../lib/sfdc.js');
+var statics = require('../lib/statics.js');
 var utils = require('../lib/utils.js');
 
 var summary = require('./apiversion-summary.js');
@@ -15,20 +15,7 @@ var COLUMNS = [
     'count'
 ];
 
-var OUTPUT_INFO = {
-    'version': {
-        header: 'Version',
-        formatter: formatter.noop
-    },
-    'username': {
-        header: 'Username',
-        formatter: formatter.noop
-    },
-    'count': {
-        header: 'Count',
-        formatter: formatter.noop
-    }
-};
+var OUTPUT_INFO = statics.report.generateOutputInfo(COLUMNS);
 
 /**
  * Generates a username
@@ -111,31 +98,7 @@ var generateCountsForVersionAndUsername = function (logs, version, username) {
  * @returns {Promise} A promise for the grouping with all the counts
  */
 var generateCounts = function (grouping) {
-    var promises = [];
-    var counts = [];
-    var deferred = Q.defer();
-
-    lo.forEach(grouping, function (subgrouping, version) {
-        lo.forEach(subgrouping, function (logs, username) {
-            promises.push(generateCountsForVersionAndUsername(logs, version, username));
-        });
-    });
-
-    Q.allSettled(promises)
-        .then(function (results) {
-            lo.forEach(results, function (result) {
-                if (result.state === 'fulfilled') {
-                    counts.push(result.value);
-                }
-            });
-
-            deferred.resolve({
-                grouping: grouping,
-                counts: counts
-            });
-        });
-
-    return deferred.promise;
+    return login.generateCounts(grouping, generateCountsForVersionAndUsername);
 };
 
 /**
