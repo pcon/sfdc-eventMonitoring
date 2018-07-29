@@ -6,7 +6,7 @@
  * @param {object} default_value The default value
  * @returns {object} A configuration entry
  */
-function generateConfig(describe, type, alias, default_value) {
+var generateConfig = function (describe, type, alias, default_value) {
     var config = {
         describe: describe,
         type: type,
@@ -18,7 +18,7 @@ function generateConfig(describe, type, alias, default_value) {
     }
 
     return config;
-}
+};
 
 /**
 * Sets the choices available
@@ -26,12 +26,16 @@ function generateConfig(describe, type, alias, default_value) {
 * @param {object} choices The choices available
 * @returns {object} A configuration entry
 */
-function setChoices(config, choices) {
+var setChoices = function (config, choices) {
     config.choices = choices;
     return config;
-}
+};
 
 module.exports = {
+    functions: {
+        generateConfig: generateConfig,
+        setChoices: setChoices
+    },
     asc: generateConfig('Sort the data in ascending order', 'boolean', false),
     cache: generateConfig('The directory to cache the event logs', 'string'),
     date: generateConfig('The day to get (in GMT)', 'string'),

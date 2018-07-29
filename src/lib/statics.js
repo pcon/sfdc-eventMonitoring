@@ -7,7 +7,7 @@ var CONNECTION = {
 var DATETIME_FORMAT = 'YYYY-MM-DDTHH:mm:ss.000\\Z';
 var DATE_FORMAT = 'YYYY-MM-DD';
 
-var static = {
+var statics = {
     CONFIG: require('./statics/config.js'), // eslint-disable-line global-require
     CONNECTION: CONNECTION,
     DATE_FORMAT: DATE_FORMAT,
@@ -16,4 +16,4 @@ var static = {
     report: require('./statics/report.js') // eslint-disable-line global-require
 };
 
-module.exports = static;
+module.exports = statics;
