@@ -7,4 +7,4 @@ var codes = {
     NO_CONNECTION_FETCH: -101
 };
 
-module.export = codes;
+module.exports = codes;
