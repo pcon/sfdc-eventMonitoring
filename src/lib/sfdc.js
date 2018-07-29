@@ -48,28 +48,57 @@ function getQueryOptions(uri) {
 }
 
 /**
- * Sets up and verifies login information
+ * If the url is undefined set it
  * @returns {undefined}
  */
-function setupLogin() {
+function configureURL() {
     if (config.isUndefined('url')) {
         global.config.url = global.config.sandbox ? statics.CONNECTION.SANDBOX_URL : statics.CONNECTION.PROD_URL;
     }
+}
 
-    if (config.isUndefined('url')) {
+/**
+ * If the version is undefined set it
+ * @returns {undefined}
+ */
+function configureVersion() {
+    if (config.isUndefined('version')) {
         global.config.version = statics.CONNECTION.VERSION;
     }
+}
 
+/**
+ * If we're using Solenopsis credentials get them
+ * @returns {undefined}
+ */
+function configureSolenopsis() {
     if (global.config.solenopsis) {
         verifySolenopsisEnvironment();
 
         global.logger.debug('Loading solenopsis config for ' + global.config.env);
         config.loadSolenopsisCredentials(global.config.env);
     }
+}
 
+/**
+ * Make sure that we have credentials set
+ * @returns {undefined}
+ */
+function checkCredentials() {
     if (config.isUndefined([ 'username', 'password', 'url' ])) {
         logging.logAndExit('Unable to login.  Incomplete credentials', errorCodes.INCOMPLETE_CREDS);
     }
+}
+
+/**
+ * Sets up and verifies login information
+ * @returns {undefined}
+ */
+function setupLogin() {
+    configureURL();
+    configureVersion();
+    configureSolenopsis();
+    checkCredentials();
 }
 
 /**
