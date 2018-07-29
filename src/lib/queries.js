@@ -147,7 +147,7 @@ var blameAPIUsage = function () {
     var criteria = [
         getLogDate(),
         getInterval(),
-        getEventTypeCriteria([ 'ApexSoap', 'API', 'RestApi' ])
+        getEventTypeCriteria([ 'ApexSoap', 'API', 'RestAPI' ])
     ];
 
     return buildSimpleQuery(EVENT_LOG_FILE_FIELDS, EVENT_LOG_FILE, criteria);

@@ -9,12 +9,12 @@ var formatter = require('../formatter.js');
  * @param {function} formatter_func The formatter function
  * @return {object} The entry
  */
-function generateEntry(header, formatter_func) {
+var generateEntry = function (header, formatter_func) {
     return {
         header: header,
         formatter: formatter_func
     };
-}
+};
 
 var OUTPUT_INFO = {
     '_count': generateEntry('Count', formatter.noop),
@@ -60,4 +60,7 @@ var generateOutputInfo = function (fields) {
     return result;
 };
 
-module.exports = { generateOutputInfo: generateOutputInfo };
+module.exports = {
+    generateEntry: generateEntry,
+    generateOutputInfo: generateOutputInfo
+};
