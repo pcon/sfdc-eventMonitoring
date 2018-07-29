@@ -120,21 +120,39 @@ function splitLogsAndWrite(logs) {
 }
 
 /**
+ * Handle writing JSON to a file
+ * @param {object[]} logs The logs
+ * @returns {Promise} A promise for when the data has been outputted
+ */
+function handleJSONFile(logs) {
+    if (global.config.split) {
+        return splitLogsAndWrite(logs);
+    }
+
+    return utils.writeJSONtoFile(logs, global.config.file);
+}
+
+/**
+ * Handle JSON logs
+ * @param {object[]} logs The logs
+ * @returns {Promise} A promise for when the data has been outputted
+ */
+function handleJSON(logs) {
+    if (global.config.file) {
+        return handleJSONFile(logs);
+    }
+
+    return utils.outputJSONToConsole(logs);
+}
+
+/**
  * Output the logs
  * @param {array} logs The logs to output
  * @returns {Promise} A promise for when the data has been outputted
  */
 function outputLogs(logs) {
     if (isJSON()) {
-        if (global.config.file) {
-            if (global.config.split) {
-                return splitLogsAndWrite(logs);
-            } else {
-                return utils.writeJSONtoFile(logs, global.config.file);
-            }
-        } else {
-            return utils.outputJSONToConsole(logs);
-        }
+        return handleJSON(logs);
     }
 
     var deferred = Q.defer();
