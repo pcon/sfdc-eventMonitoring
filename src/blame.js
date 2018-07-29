@@ -24,7 +24,7 @@ var OPTIONS = conf.yargs.generateOptions([
 function config(yargs) {
     'use strict';
 
-    var pdata = conf.yargs.generatePdata('type', 'Blame your users that are doing stuff', handlers);
+    var pdata = conf.yargs.generateTypePdata('Blame your users that are doing stuff', handlers);
     conf.yargs.config(yargs, pdata, OPTIONS);
 }
 

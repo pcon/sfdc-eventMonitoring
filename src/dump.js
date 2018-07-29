@@ -9,23 +9,6 @@ var statics = require('./lib/statics.js');
 var queries = require('./lib/queries.js');
 var utils = require('./lib/utils.js');
 
-var OPTIONS = conf.yargs.generateOptions([
-    'file',
-    'format',
-    'split'
-]);
-
-OPTIONS.format.default = 'json';
-OPTIONS.format.choices = [ 'json' ];
-OPTIONS.format.hidden = true;
-
-OPTIONS.type = {
-    default: undefined,
-    describe: 'The log type to dump',
-    type: 'string',
-    choices: statics.LOG_TYPES
-};
-
 /**
  * Configure the module
  * @param {object} yargs The arguments
@@ -34,7 +17,24 @@ OPTIONS.type = {
 function config(yargs) {
     'use strict';
 
-    conf.yargs.config(yargs, undefined, OPTIONS);
+    var options = Object.assign({}, conf.yargs.generateOptions([
+        'file',
+        'format',
+        'split'
+    ]));
+
+    options.format.default = 'json';
+    options.format.choices = [ 'json' ];
+    options.format.hidden = true;
+
+    options.type = {
+        default: undefined,
+        describe: 'The log type to dump',
+        type: 'string',
+        choices: statics.LOG_TYPES
+    };
+
+    conf.yargs.config(yargs, undefined, options);
 }
 
 /**

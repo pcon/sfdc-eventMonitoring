@@ -39,7 +39,7 @@ module.exports = {
     end: generateConfig('The end date/time to get (in GMT)', 'string'),
     env: generateConfig('The envirionment name', 'string', 'e'),
     file: generateConfig('The file to save to.  If unset, output will be sent to stdout', 'string'),
-    format: setChoices(generateConfig('The format to output', 'string', 'undefined', 'table'), [ 'json', 'table' ]),
+    format: setChoices(generateConfig('The format to output', 'string', undefined, 'table'), [ 'json', 'table' ]),
     helper: generateConfig('The local helper to use', 'string'),
     interval: setChoices(generateConfig('The interval to use', 'string', undefined, 'hourly'), [ 'hourly', 'daily' ]),
     latest: generateConfig('Use the most recent data', 'boolean', undefined, true),

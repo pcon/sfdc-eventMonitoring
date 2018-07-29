@@ -28,7 +28,7 @@ var OPTIONS = conf.yargs.generateOptions([
 function config(yargs) {
     'use strict';
 
-    var pdata = conf.yargs.generatePdata('type', 'The type of login to run', handlers);
+    var pdata = conf.yargs.generateTypePdata('The type of login to run', handlers);
 
     conf.yargs.config(yargs, pdata, OPTIONS);
 }

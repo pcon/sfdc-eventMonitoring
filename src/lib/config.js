@@ -262,6 +262,16 @@ var yargsGeneratePdata = function (name, description, handlers) {
 };
 
 /**
+ * Generates the pdata object for 'type'
+ * @param {string} description The field description
+ * @param {object[]} handlers The handlers
+ * @returns {object} The pdata object
+ */
+var yargsGenerateTypePdata = function (description, handlers) {
+    return yargsGeneratePdata('type', description, handlers);
+};
+
+/**
  * Generate options object
  * @param {string[]} keys The option keys
  * @return {object} The option object
@@ -294,7 +304,8 @@ var config = {
     yargs: {
         config: yargsConfig,
         generateOptions: yargsGenerateOptions,
-        generatePdata: yargsGeneratePdata
+        generatePdata: yargsGeneratePdata,
+        generateTypePdata: yargsGenerateTypePdata
     }
 };
 
