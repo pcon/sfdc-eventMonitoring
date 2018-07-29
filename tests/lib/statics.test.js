@@ -1,6 +1,6 @@
 var statics = require('../../src/lib/statics.js');
 
-test('Check log types', function () {
+test('Checking statics', function () {
     var expectedResults = {
         CONNECTION: {
             SANDBOX_URL: 'https://test.salesforce.com',
