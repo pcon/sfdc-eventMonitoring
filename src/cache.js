@@ -18,11 +18,8 @@ var handlers = {
 function config(yargs) {
     'use strict';
 
-    yargs.positional('action', {
-        type: 'string',
-        describe: 'The cache action to run',
-        choices: lo.keys(handlers)
-    }).options({});
+    var pdata = conf.yargs.generatePdata('action', 'The cache action to run', handlers);
+    conf.yargs.config(yargs, pdata, {});
 }
 
 /**

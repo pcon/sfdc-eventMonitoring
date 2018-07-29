@@ -1,8 +1,5 @@
-var lo = require('lodash');
-
 var conf = require('./lib/config.js');
 var sfdc = require('./lib/sfdc.js');
-var statics = require('./lib/statics.js');
 
 var apiversion = require('./login/apiversion.js');
 var failed = require('./login/failed.js');
@@ -12,6 +9,17 @@ var handlers = {
     failed: failed.run
 };
 
+var OPTIONS = conf.yargs.generateOptions([
+    'asc',
+    'format',
+    'interval',
+    'latest',
+    'limit',
+    'maxversion',
+    'sort',
+    'summary'
+]);
+
 /**
  * Configure the module
  * @param {object} yargs The arguments
@@ -20,20 +28,9 @@ var handlers = {
 function config(yargs) {
     'use strict';
 
-    yargs.positional('type', {
-        type: 'string',
-        describe: 'The type of login to run',
-        choices: lo.keys(handlers)
-    }).options({
-        asc: statics.CONFIG.asc,
-        format: statics.CONFIG.format,
-        interval: statics.CONFIG.interval,
-        latest: statics.CONFIG.latest,
-        limit: statics.CONFIG.limit,
-        maxversion: statics.CONFIG.maxversion,
-        sort: statics.CONFIG.sort,
-        summary: statics.CONFIG.summary
-    });
+    var pdata = conf.yargs.generatePdata('type', 'The type of login to run', handlers);
+
+    conf.yargs.config(yargs, pdata, OPTIONS);
 }
 
 /**

@@ -5,11 +5,10 @@ var conf = require('./lib/config.js');
 var logging = require('./lib/logging.js');
 var report = require('./lib/report.js');
 var sfdc = require('./lib/sfdc.js');
-var statics = require('./lib/statics.js');
 var utils = require('./lib/utils.js');
 var qutils = require('./lib/qutils.js');
 
-var apexcallout= require('./report/apexcallout.js');
+var apexcallout = require('./report/apexcallout.js');
 var apexexecution = require('./report/apexexecution.js');
 var apexsoap = require('./report/apexsoap.js');
 var apextrigger = require('./report/apextrigger.js');
@@ -25,6 +24,13 @@ var handlers = {
     visualforce: visualforce
 };
 
+var OPTIONS = conf.yargs.generateOptions([
+    'asc',
+    'format',
+    'limit',
+    'sort'
+]);
+
 /**
  * Configure the module
  * @param {object} yargs The arguments
@@ -33,16 +39,9 @@ var handlers = {
 function config(yargs) {
     'use strict';
 
-    yargs.positional('type', {
-        type: 'string',
-        describe: 'The type of report to run',
-        choices: lo.keys(handlers)
-    }).options({
-        asc: statics.CONFIG.asc,
-        format: statics.CONFIG.format,
-        limit: statics.CONFIG.limit,
-        sort: statics.CONFIG.sort
-    });
+    var pdata = conf.yargs.generatePdata('type', 'The type of report to run', handlers);
+
+    conf.yargs.config(yargs, pdata, OPTIONS);
 }
 
 /**

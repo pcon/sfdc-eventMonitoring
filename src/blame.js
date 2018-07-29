@@ -1,12 +1,20 @@
-var lo = require('lodash');
-
 var conf = require('./lib/config.js');
 var sfdc = require('./lib/sfdc.js');
-var statics = require('./lib/statics.js');
 
 var apiusage = require('./blame/apiusage.js');
 
 var handlers = { apiusage: apiusage.run };
+
+var OPTIONS = conf.yargs.generateOptions([
+    'asc',
+    'format',
+    'limit',
+    'sort',
+    'sublimit',
+    'subsort',
+    'summary',
+    'userid'
+]);
 
 /**
  * Configure the module
@@ -16,20 +24,8 @@ var handlers = { apiusage: apiusage.run };
 function config(yargs) {
     'use strict';
 
-    yargs.positional('type', {
-        type: 'string',
-        describe: 'Blame your users that are doing stuff',
-        choices: lo.keys(handlers)
-    }).options({
-        asc: statics.CONFIG.asc,
-        format: statics.CONFIG.format,
-        limit: statics.CONFIG.limit,
-        sort: statics.CONFIG.sort,
-        sublimit: statics.CONFIG.sublimit,
-        subsort: statics.CONFIG.subsort,
-        summary: statics.CONFIG.summary,
-        userid: statics.CONFIG.userid
-    });
+    var pdata = conf.yargs.generatePdata('type', 'Blame your users that are doing stuff', handlers);
+    conf.yargs.config(yargs, pdata, OPTIONS);
 }
 
 /**

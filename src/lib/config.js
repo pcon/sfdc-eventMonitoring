@@ -8,6 +8,7 @@ var Q = require('q');
 
 var errorCodes = require('./errorCodes.js');
 var logging = require('./logging.js');
+var statics_config = require('./statics/config.js');
 
 var SOLENOPSIS_FIELDS = [
     'username',
@@ -217,6 +218,66 @@ var hasADate = function () {
     );
 };
 
+/**
+ * Configure yargs
+ * @param {object} yargs Instance of yargs
+ * @param {string} positional The positional data
+ * @param {object} options The options
+ * @returns {undefined}
+ */
+var yargsConfig = function (yargs, positional, options) {
+    if (!lo.isUndefined(positional)) {
+        var pdata_array = [];
+
+        if (lo.isArray(positional)) {
+            pdata_array = positional;
+        } else {
+            pdata_array.push(positional);
+        }
+
+        lo.forEach(pdata_array, function (pdata) {
+            yargs.positional(pdata.name, pdata.options);
+        });
+    }
+
+    yargs.options(options);
+};
+
+/**
+ * Generates the pdata object
+ * @param {string} name The field name
+ * @param {string} description The field description
+ * @param {object[]} handlers The handlers
+ * @returns {object} The pdata object
+ */
+var yargsGeneratePdata = function (name, description, handlers) {
+    return {
+        name: name,
+        options: {
+            type: 'string',
+            description: description,
+            choices: lo.keys(handlers)
+        }
+    };
+};
+
+/**
+ * Generate options object
+ * @param {string[]} keys The option keys
+ * @return {object} The option object
+ */
+var yargsGenerateOptions = function (keys) {
+    var options = {};
+
+    lo.forEach(keys, function (key) {
+        if (lo.has(statics_config, key)) {
+            lo.set(options, key, lo.get(statics_config, key));
+        }
+    });
+
+    return options;
+};
+
 var config = {
     checkHandlers: checkHandlers,
     date: {
@@ -229,7 +290,12 @@ var config = {
     loadConfig: loadConfig,
     loginAndRunHandler: loginAndRunHandler,
     merge: merge,
-    setupGlobals: setupGlobals
+    setupGlobals: setupGlobals,
+    yargs: {
+        config: yargsConfig,
+        generateOptions: yargsGenerateOptions,
+        generatePdata: yargsGeneratePdata
+    }
 };
 
 module.exports = config;
