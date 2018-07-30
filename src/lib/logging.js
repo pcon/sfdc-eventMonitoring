@@ -1,5 +1,3 @@
-var process = require('process');
-
 /**
  * Logs and error message and exits
  * @param {string} message The error message

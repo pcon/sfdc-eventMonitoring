@@ -122,14 +122,15 @@ var setupGlobals = function () {
  * @return {boolean} If any of the keys are undefined
  */
 var isUndefined = function (keys) {
+    var anyWereUndefined = false;
     if (lo.isArray(keys)) {
         lo.forEach(keys, function (key) {
             if (lo.isUndefined(lo.get(global.config, key))) {
-                return true;
+                anyWereUndefined = true;
             }
         });
 
-        return false;
+        return anyWereUndefined;
     }
 
     return lo.isUndefined(lo.get(global.config, keys));
@@ -147,7 +148,7 @@ var checkHandlers = function (handlers, handler_key) {
         !lo.has(handlers, lo.get(global.config, handler_name)) ||
         lo.get(handlers, lo.get(global.config, handler_name)) === undefined
     ) {
-        logging.logAndExit(global.config.type + ' does not have a supported handler', errorCodes.UNSUPPORTED_HANDLER);
+        logging.logAndExit(handler_key + ' does not have a supported handler', errorCodes.UNSUPPORTED_HANDLER);
     }
 };
 
