@@ -6,7 +6,10 @@
  * @returns {undefined}
  */
 var debug = function (message) {
-    if (global.config.debug) {
+    if (
+        global.config !== undefined &&
+        global.config.debug
+    ) {
         console.log(message);
     }
 };

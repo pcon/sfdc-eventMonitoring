@@ -65,13 +65,13 @@ var idToObject = function (sObjects) {
  * @param {function} func The function to run
  * @returns {Promise} A promise for the run
  */
-function runFunc(data, key, field, func) {
+var runFunc = function (data, key, field, func) {
     var deferred = Q.defer();
 
     deferred.resolve(func(data, key, field));
 
     return deferred.promise;
-}
+};
 
 /**
  * Limits a set of data without a promise
@@ -134,7 +134,7 @@ function getMostRecentFiles(event_log_files) {
             return;
         }
 
-        if (moment(lo.get(most_recent_files, event_log_file.EventType).LogDate).isAfter(event_log_file.LogDate)) {
+        if (moment(lo.get(most_recent_files, event_log_file.EventType).LogDate).isBefore(event_log_file.LogDate)) {
             lo.set(most_recent_files, event_log_file.EventType, event_log_file);
         }
     });
@@ -147,25 +147,25 @@ function getMostRecentFiles(event_log_files) {
  * @param {objects[]} event_log_files The files to download
  * @returns {undefined}
  */
-function ensureLogFilesExist(event_log_files) {
+var ensureLogFilesExist = function (event_log_files) {
     if (lo.isEmpty(event_log_files)) {
         global.logger.error('Unable to find log files');
         process.exit(errorCodes.NO_LOGFILES);
     }
-}
+};
 
 /**
  * Gets the log files we should be fetching
  * @param {objects[]} event_log_files The event log files to download
- * @returns {objects[]} The log files to download
+ * @returns {object|object[]} The log files to download
  */
-function getApplicableLogFiles(event_log_files) {
+var getApplicableLogFiles = function (event_log_files) {
     if (global.config.latest) {
         return getMostRecentFiles(event_log_files);
     }
 
     return event_log_files;
-}
+};
 
 /**
  * Concatenates all of the promise results together
@@ -173,7 +173,7 @@ function getApplicableLogFiles(event_log_files) {
  * @param {object} deferred The Q defer
  * @returns {undefined}
  */
-function concatenateResults(promise_results, deferred) {
+var concatenateResults = function (promise_results, deferred) {
     var errors = [];
     var results = [];
 
@@ -190,7 +190,7 @@ function concatenateResults(promise_results, deferred) {
     } else {
         deferred.resolve(results);
     }
-}
+};
 
 /**
  * Fetch and convert a list of log files
@@ -252,13 +252,13 @@ function filterPredicate(filters) {
  * @param {object} filter The filter to apply
  * @returns {object} The filtered data
  */
-function filterNoPromise(data, key, filter) {
+var filterNoPromise = function (data, key, filter) {
     var filtered_results = lo.filter(lo.get(data, key), filterPredicate(filter));
 
     lo.set(data, key, filtered_results);
 
     return data;
-}
+};
 
 /**
  * Filters data
@@ -369,7 +369,7 @@ var printFormattedData = function (data, columns, output_info) {
     var deferred = Q.defer();
 
     if (global.config.format === 'json') {
-        global.logger.log(data);
+        global.logger.log(JSON.stringify(data));
     } else if (global.config.format === 'table') {
         if (lo.isEmpty(data)) {
             global.logger.log('No data to display');
@@ -445,16 +445,21 @@ var outputJSONToConsole = function (data) {
 };
 
 var utils = {
+    concatenateResults: concatenateResults,
+    ensureLogFilesExist: ensureLogFilesExist,
     escapeString: escapeString,
     escapeArray: escapeArray,
     fetchAndConvert: fetchAndConvert,
+    filterNoPromise: filterNoPromise,
     filterResults: filterResults,
     generateTableData: generateTableData,
+    getApplicableLogFiles: getApplicableLogFiles,
     idToObject: idToObject,
     limitNoPromise: limitNoPromise,
     limitResults: limitResults,
     outputJSONToConsole: outputJSONToConsole,
     printFormattedData: printFormattedData,
+    runFunc: runFunc,
     sortNoPromise: sortNoPromise,
     sortResults: sortResults,
     splitByField: splitByField,
