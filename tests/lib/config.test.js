@@ -56,53 +56,57 @@ test('Merge', function () {
     expect(global.config).toEqual(expectedResults);
 });
 
-test('Undefined helper', function () {
-    global.config = {};
+describe('Setup Globals', function () {
+    test('Undefined helper', function () {
+        global.config = {};
 
-    config.setupGlobals()
-        .then(function () {
-            expect(global.helper).toBeUndefined();
-        });
+        config.setupGlobals()
+            .then(function () {
+                expect(global.helper).toBeUndefined();
+            });
+    });
+
+    test('Local helper', function () {
+        global.config = { helper: '../helper.js' };
+
+        config.setupGlobals()
+            .then(function () {
+                expect(global.helper).anything();
+                expect(global.helper()).toEqual('abcdef');
+            });
+    });
 });
 
-test('Local helper', function () {
-    global.config = { helper: '../helper.js' };
+describe('Is Undefined', function () {
+    test('Config has all in array', function () {
+        global.config = {
+            foo: 'bar',
+            bar: 'baz'
+        };
 
-    config.setupGlobals()
-        .then(function () {
-            expect(global.helper).anything();
-            expect(global.helper()).toEqual('abcdef');
-        });
-});
+        expect(config.isUndefined([ 'foo', 'bar' ])).toBeFalsy();
+    });
 
-test('Config has all in array', function () {
-    global.config = {
-        foo: 'bar',
-        bar: 'baz'
-    };
+    test('Config missing one in array', function () {
+        global.config = { bar: 'baz' };
 
-    expect(config.isUndefined([ 'foo', 'bar' ])).toBeFalsy();
-});
+        expect(config.isUndefined([ 'foo', 'bar' ])).toBeTruthy();
+    });
 
-test('Config missing one in array', function () {
-    global.config = { bar: 'baz' };
+    test('Config missing', function () {
+        global.config = { bar: 'baz' };
 
-    expect(config.isUndefined([ 'foo', 'bar' ])).toBeTruthy();
-});
+        expect(config.isUndefined('foo')).toBeTruthy();
+    });
 
-test('Config missing', function () {
-    global.config = { bar: 'baz' };
+    test('Config exists', function () {
+        global.config = {
+            foo: 'bar',
+            bar: 'baz'
+        };
 
-    expect(config.isUndefined('foo')).toBeTruthy();
-});
-
-test('Config exists', function () {
-    global.config = {
-        foo: 'bar',
-        bar: 'baz'
-    };
-
-    expect(config.isUndefined('foo')).toBeFalsy();
+        expect(config.isUndefined('foo')).toBeFalsy();
+    });
 });
 
 test('Handler exists', function () {
@@ -115,128 +119,136 @@ test('Handler exists', function () {
     expect(console.error).toHaveBeenCalledWith('testhandler does not have a supported handler'); // eslint-disable-line no-console
 });
 
-test('Undefined end', function () {
-    var now = moment.utc();
+describe('Get end', function () {
+    test('Undefined end', function () {
+        var now = moment.utc();
 
-    global.config = {};
+        global.config = {};
 
-    expect(config.date.getEnd()).toBeSameDay(now);
+        expect(config.date.getEnd()).toBeSameDay(now);
+    });
+
+    test('Defined end datetime', function () {
+        var m = moment.utc('2018-07-29T11:38:00.000Z');
+
+        global.config = { end: '2018-07-29T11:38:00.000Z' };
+
+        expect(config.date.getEnd()).toBeSame(m);
+    });
+
+    test('Defined end date', function () {
+        var m = moment.utc('2018-07-29T23:59:59.000Z');
+
+        global.config = { date: '2018-07-29' };
+
+        expect(config.date.getEnd()).toBeSame(m);
+    });
 });
 
-test('Defined end datetime', function () {
-    var m = moment.utc('2018-07-29T11:38:00.000Z');
+describe('Get start', function () {
+    test('Undefined start', function () {
+        var now = moment.utc(0);
 
-    global.config = { end: '2018-07-29T11:38:00.000Z' };
+        global.config = {};
 
-    expect(config.date.getEnd()).toBeSame(m);
+        expect(config.date.getStart()).toBeSameDay(now);
+    });
+
+    test('Defined start datetime', function () {
+        var m = moment.utc('2018-07-29T11:38:00.000Z');
+
+        global.config = { start: '2018-07-29T11:38:00.000Z' };
+
+        expect(config.date.getStart()).toBeSame(m);
+    });
+
+    test('Defined start date', function () {
+        var m = moment.utc('2018-07-29T00:00:00.000Z');
+
+        global.config = { date: '2018-07-29' };
+
+        expect(config.date.getStart()).toBeSame(m);
+    });
 });
 
-test('Defined end date', function () {
-    var m = moment.utc('2018-07-29T23:59:59.000Z');
+describe('Has a date', function () {
+    test('Has no dates', function () {
+        global.config = {};
 
-    global.config = { date: '2018-07-29' };
+        expect(config.date.hasADate()).toBeFalsy();
+    });
 
-    expect(config.date.getEnd()).toBeSame(m);
+    test('Has a start date', function () {
+        global.config = { start: 'foo' };
+
+        expect(config.date.hasADate()).toBeTruthy();
+    });
+
+    test('Has a end date', function () {
+        global.config = { end: 'foo' };
+
+        expect(config.date.hasADate()).toBeTruthy();
+    });
+
+    test('Has a date', function () {
+        global.config = { date: 'foo' };
+
+        expect(config.date.hasADate()).toBeTruthy();
+    });
 });
 
-test('Undefined start', function () {
-    var now = moment.utc(0);
+describe('Yargs config', function () {
+    test('Options with no positional', function () {
+        var yargs = {
+            positional: jest.fn(),
+            options: jest.fn()
+        };
 
-    global.config = {};
+        var options = { foo: 'bar' };
 
-    expect(config.date.getStart()).toBeSameDay(now);
-});
+        config.yargs.config(yargs, undefined, options);
+        expect(yargs.positional).not.toHaveBeenCalled();
+        expect(yargs.options).toBeCalledWith(options);
+    });
 
-test('Defined start datetime', function () {
-    var m = moment.utc('2018-07-29T11:38:00.000Z');
+    test('Single positional', function () {
+        var yargs = {
+            positional: jest.fn(),
+            options: jest.fn()
+        };
 
-    global.config = { start: '2018-07-29T11:38:00.000Z' };
+        var positional = {
+            name: 'pos',
+            options: { bar: 'baz' }
+        };
+        var options = { foo: 'bar' };
 
-    expect(config.date.getStart()).toBeSame(m);
-});
+        config.yargs.config(yargs, positional, options);
+        expect(yargs.positional).toBeCalledWith(positional.name, positional.options);
+        expect(yargs.options).toBeCalledWith(options);
+    });
 
-test('Defined start date', function () {
-    var m = moment.utc('2018-07-29T00:00:00.000Z');
+    test('Multiple positional', function () {
+        var yargs = {
+            positional: jest.fn(),
+            options: jest.fn()
+        };
 
-    global.config = { date: '2018-07-29' };
+        var positional_one = {
+            name: 'pos1',
+            options: { bar: 'baz' }
+        };
+        var positional_two = {
+            name: 'pos2',
+            options: { tit: 'tat' }
+        };
+        var options = { foo: 'bar' };
 
-    expect(config.date.getStart()).toBeSame(m);
-});
-
-test('Has no dates', function () {
-    global.config = {};
-
-    expect(config.date.hasADate()).toBeFalsy();
-});
-
-test('Has a start date', function () {
-    global.config = { start: 'foo' };
-
-    expect(config.date.hasADate()).toBeTruthy();
-});
-
-test('Has a end date', function () {
-    global.config = { end: 'foo' };
-
-    expect(config.date.hasADate()).toBeTruthy();
-});
-
-test('Has a date', function () {
-    global.config = { date: 'foo' };
-
-    expect(config.date.hasADate()).toBeTruthy();
-});
-
-test('Options with no positional', function () {
-    var yargs = {
-        positional: jest.fn(),
-        options: jest.fn()
-    };
-
-    var options = { foo: 'bar' };
-
-    config.yargs.config(yargs, undefined, options);
-    expect(yargs.positional).not.toHaveBeenCalled();
-    expect(yargs.options).toBeCalledWith(options);
-});
-
-test('Single positional', function () {
-    var yargs = {
-        positional: jest.fn(),
-        options: jest.fn()
-    };
-
-    var positional = {
-        name: 'pos',
-        options: { bar: 'baz' }
-    };
-    var options = { foo: 'bar' };
-
-    config.yargs.config(yargs, positional, options);
-    expect(yargs.positional).toBeCalledWith(positional.name, positional.options);
-    expect(yargs.options).toBeCalledWith(options);
-});
-
-test('Multiple positional', function () {
-    var yargs = {
-        positional: jest.fn(),
-        options: jest.fn()
-    };
-
-    var positional_one = {
-        name: 'pos1',
-        options: { bar: 'baz' }
-    };
-    var positional_two = {
-        name: 'pos2',
-        options: { tit: 'tat' }
-    };
-    var options = { foo: 'bar' };
-
-    config.yargs.config(yargs, [ positional_one, positional_two ], options);
-    expect(yargs.positional).toHaveBeenNthCalledWith(1, positional_one.name, positional_one.options);
-    expect(yargs.positional).toHaveBeenNthCalledWith(2, positional_two.name, positional_two.options);
-    expect(yargs.options).toBeCalledWith(options);
+        config.yargs.config(yargs, [ positional_one, positional_two ], options);
+        expect(yargs.positional).toHaveBeenNthCalledWith(1, positional_one.name, positional_one.options);
+        expect(yargs.positional).toHaveBeenNthCalledWith(2, positional_two.name, positional_two.options);
+        expect(yargs.options).toBeCalledWith(options);
+    });
 });
 
 test('Generate pdata', function () {
