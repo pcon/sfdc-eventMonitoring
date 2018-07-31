@@ -1,4 +1,5 @@
 var chalk = require('chalk');
+var Q = require('q');
 
 const { table } = require('table');
 
@@ -82,13 +83,11 @@ describe('Limiting', function () {
         expect(utils.limitNoPromise(data, 'values', 3)).toEqual(expectedResults);
     });
 
-    /* These won't work because for some reason it fails to actually "fail"
-     * when inside the then callback
-
     test('No limit', function () {
         global.config = {};
         var data = { values: [ 1, 2, 3, 4, 5 ] };
-        utils.limitResults(data, 'values').then(function (results) {
+        expect.assertions(1);
+        return utils.limitResults(data, 'values').then(function (results) {
             expect(results).toEqual(data);
         });
     });
@@ -97,7 +96,8 @@ describe('Limiting', function () {
         global.config = { limit: 3 };
         var data = { values: [ 1, 2, 3, 4, 5 ] };
         var expectedResults = { values: [ 1, 2, 3 ] };
-        utils.limitResults(data, 'values').then(function (results) {
+        expect.assertions(1);
+        return utils.limitResults(data, 'values').then(function (results) {
             expect(results).toEqual(expectedResults);
         });
     });
@@ -105,7 +105,8 @@ describe('Limiting', function () {
     test('No limit', function () {
         global.config = {};
         var data = { values: [ 1, 2, 3, 4, 5 ] };
-        utils.subLimitResults(data, 'values').then(function (results) {
+        expect.assertions(1);
+        return utils.subLimitResults(data, 'values').then(function (results) {
             expect(results).toEqual(data);
         });
     });
@@ -114,11 +115,11 @@ describe('Limiting', function () {
         global.config = { sublimit: 3 };
         var data = { values: [ 1, 2, 3, 4, 5 ] };
         var expectedResults = { values: [ 1, 2, 3 ] };
-        utils.subLimitResults(data, 'values').then(function (results) {
+        expect.assertions(1);
+        return utils.subLimitResults(data, 'values').then(function (results) {
             expect(results).toEqual(expectedResults);
         });
     });
-    */
 });
 
 describe('Get log files', function () {
@@ -201,9 +202,6 @@ describe('Ensure log files exist', function () {
     });
 });
 
-/* These won't work because for some reason it fails to actually "fail"
- * when inside the then callback
-
 describe('Concatenate results', function () {
     test('No errors', function () {
         var data = [
@@ -222,7 +220,8 @@ describe('Concatenate results', function () {
 
         utils.concatenateResults(data, deferred);
 
-        deferred.promise.then(function (results) {
+        expect.assertions(1);
+        return deferred.promise.then(function (results) {
             expect(results).toEqual(expect.arrayContaining(expectedResults));
         });
     });
@@ -235,7 +234,7 @@ describe('Concatenate results', function () {
             },
             {
                 state: 'unfulfilled',
-                value: 'bar'
+                reason: 'bar'
             }
         ];
         var expectedResults = [ 'bar' ];
@@ -244,12 +243,12 @@ describe('Concatenate results', function () {
 
         utils.concatenateResults(data, deferred);
 
-        deferred.promise.catch(function (error) {
+        expect.assertions(1);
+        return deferred.promise.catch(function (error) {
             expect(error).toEqual(expectedResults);
         });
     });
 });
-*/
 
 describe('Filter data', function () {
     test('Undefined', function () {
