@@ -211,8 +211,6 @@ var fetchAndConvert = function (event_log_files) {
     Q.allSettled(promises)
         .then(function (promise_results) {
             concatenateResults(promise_results, deferred);
-        }).catch(function (error) {
-            deferred.reject(error);
         });
 
     return deferred.promise;
