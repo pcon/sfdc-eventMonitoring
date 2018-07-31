@@ -99,9 +99,16 @@ describe('Get event type criteria', function () {
     });
 });
 
-test('Get all logs', function () {
-    global.config = { interval: 'hourly' };
-    expect(queries.general.getAllLogs([ 'Login', 'Logout' ])).toEqual('select Id, EventType, LogFile, LogDate, LogFileLength from EventLogFile where LogDate = TODAY and Interval = \'Hourly\' and EventType in (\'Login\',\'Logout\') order by LogDate desc');
+describe('Get all logs', function () {
+    test('Defined types', function () {
+        global.config = { interval: 'hourly' };
+        expect(queries.general.getAllLogs([ 'Login', 'Logout' ])).toEqual('select Id, EventType, LogFile, LogDate, LogFileLength from EventLogFile where LogDate = TODAY and Interval = \'Hourly\' and EventType in (\'Login\',\'Logout\') order by LogDate desc');
+    });
+
+    test('Undefined types', function () {
+        global.config = { interval: 'hourly' };
+        expect(queries.general.getAllLogs()).toEqual('select Id, EventType, LogFile, LogDate, LogFileLength from EventLogFile where LogDate = TODAY and Interval = \'Hourly\' order by LogDate desc');
+    });
 });
 
 test('Get blame usage', function () {
