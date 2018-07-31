@@ -7,6 +7,11 @@ var utils = require('../../src/lib/utils.js');
 var errorCodes = require('../../src/lib/errorCodes.js');
 global.logger = require('../../src/lib/logger.js');
 
+beforeEach(function () {
+    jest.restoreAllMocks();
+    global.config = {};
+});
+
 describe('Trim id', function () {
     test('Undefined', function () {
         expect(utils.trimId(undefined)).toBeUndefined();
@@ -264,7 +269,7 @@ describe('Filter data', function () {
             { field: 'baz' }
         ] };
 
-        expect(utils.filterNoPromise(data, 'values', undefined)).toEqual(expectedResults);
+        expect(utils.filterNoPromise(data, 'values', { key: undefined })).toEqual(expectedResults);
     });
 
     test('Array', function () {
@@ -296,6 +301,23 @@ describe('Filter data', function () {
         var filter = { field: 'bar' };
 
         expect(utils.filterNoPromise(data, 'values', filter)).toEqual(expectedResults);
+    });
+
+    test('Single async', function () {
+        var data = { values: [
+            { field: 'foo' },
+            { field: 'bar' },
+            { field: 'baz' }
+        ] };
+
+        var expectedResults = { values: [ { field: 'bar' } ] };
+
+        var filter = { field: 'bar' };
+
+        expect.assertions(1);
+        return utils.filterResults(data, 'values', filter).then(function (data) {
+            expect(data).toEqual(expectedResults);
+        });
     });
 });
 
@@ -474,6 +496,106 @@ describe('Sort', function () {
         ] };
 
         expect(utils.sortNoPromise(data, 'values', [ 'field1', 'field2' ])).toEqual(expectedResults);
+    });
+
+    test('Multiple asc, config sort', function () {
+        global.config = {
+            asc: true,
+            sort: [ 'field1', 'field2' ]
+        };
+
+        var data = { values: [
+            {
+                field1: 'b',
+                field2: 4
+            },
+            {
+                field1: 'b',
+                field2: 2
+            },
+            {
+                field1: 'a',
+                field2: 3
+            },
+            {
+                field1: 'c',
+                field2: 1
+            }
+        ] };
+
+        var expectedResults = { values: [
+            {
+                field1: 'a',
+                field2: 3
+            },
+            {
+                field1: 'b',
+                field2: 2
+            },
+            {
+                field1: 'b',
+                field2: 4
+            },
+            {
+                field1: 'c',
+                field2: 1
+            }
+        ] };
+
+        expect.assertions(1);
+        return utils.sortResults(data, 'values', [ 'field1', 'field2' ]).then(function (result) {
+            expect(result).toEqual(expectedResults);
+        });
+    });
+
+    test('Multiple asc, config subsort', function () {
+        global.config = {
+            asc: true,
+            subsort: [ 'field1', 'field2' ]
+        };
+
+        var data = { values: [
+            {
+                field1: 'b',
+                field2: 4
+            },
+            {
+                field1: 'b',
+                field2: 2
+            },
+            {
+                field1: 'a',
+                field2: 3
+            },
+            {
+                field1: 'c',
+                field2: 1
+            }
+        ] };
+
+        var expectedResults = { values: [
+            {
+                field1: 'a',
+                field2: 3
+            },
+            {
+                field1: 'b',
+                field2: 2
+            },
+            {
+                field1: 'b',
+                field2: 4
+            },
+            {
+                field1: 'c',
+                field2: 1
+            }
+        ] };
+
+        expect.assertions(1);
+        return utils.subSortResults(data, 'values', [ 'field1', 'field2' ]).then(function (result) {
+            expect(result).toEqual(expectedResults);
+        });
     });
 });
 
