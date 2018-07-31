@@ -155,9 +155,9 @@ var login = function () {
  * @param {string[]} ids Ids
  * @returns {string} The criteria
  */
-function inIdCriteria(ids) {
+var inIdCriteria = function (ids) {
     return 'Id in (' + lo.join(utils.escapeArray(ids), ',') + ')';
-}
+};
 
 /**
  * Gets the query for users
@@ -241,7 +241,8 @@ var queries = {
         formatCriteria: formatCriteria,
         getEventTypeCriteria: getEventTypeCriteria,
         getLogDate: getLogDate,
-        getInterval: getInterval
+        getInterval: getInterval,
+        inIdCriteria: inIdCriteria
     },
     general: {
         getAllLogs: getAllLogs,

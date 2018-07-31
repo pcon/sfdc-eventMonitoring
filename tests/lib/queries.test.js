@@ -103,3 +103,55 @@ test('Get all logs', function () {
     global.config = { interval: 'hourly' };
     expect(queries.general.getAllLogs([ 'Login', 'Logout' ])).toEqual('select Id, EventType, LogFile, LogDate, LogFileLength from EventLogFile where LogDate = TODAY and Interval = \'Hourly\' and EventType in (\'Login\',\'Logout\') order by LogDate desc');
 });
+
+test('Get blame usage', function () {
+    global.config = { interval: 'hourly' };
+    expect(queries.blame.apiusage()).toEqual('select Id, EventType, LogFile, LogDate, LogFileLength from EventLogFile where LogDate = TODAY and Interval = \'Hourly\' and EventType in (\'ApexSoap\',\'API\',\'RestAPI\')');
+});
+
+test('Login', function () {
+    global.config = { interval: 'hourly' };
+    expect(queries.login()).toEqual('select Id, EventType, LogFile, LogDate, LogFileLength from EventLogFile where LogDate = TODAY and Interval = \'Hourly\' and EventType = \'Login\' order by LogDate desc');
+});
+
+test('ApexCallout', function () {
+    global.config = { interval: 'hourly' };
+    expect(queries.report.apexcallout()).toEqual('select Id, EventType, LogFile, LogDate, LogFileLength from EventLogFile where LogDate = TODAY and Interval = \'Hourly\' and EventType = \'ApexCallout\' order by LogDate desc');
+});
+
+test('ApexExecution', function () {
+    global.config = { interval: 'hourly' };
+    expect(queries.report.apexexecution()).toEqual('select Id, EventType, LogFile, LogDate, LogFileLength from EventLogFile where LogDate = TODAY and Interval = \'Hourly\' and EventType = \'ApexExecution\' order by LogDate desc');
+});
+
+test('ApexSoap', function () {
+    global.config = { interval: 'hourly' };
+    expect(queries.report.apexsoap()).toEqual('select Id, EventType, LogFile, LogDate, LogFileLength from EventLogFile where LogDate = TODAY and Interval = \'Hourly\' and EventType = \'ApexSoap\' order by LogDate desc');
+});
+
+test('ApexTrigger', function () {
+    global.config = { interval: 'hourly' };
+    expect(queries.report.apextrigger()).toEqual('select Id, EventType, LogFile, LogDate, LogFileLength from EventLogFile where LogDate = TODAY and Interval = \'Hourly\' and EventType = \'ApexTrigger\' order by LogDate desc');
+});
+
+test('Report', function () {
+    global.config = { interval: 'hourly' };
+    expect(queries.report.report()).toEqual('select Id, EventType, LogFile, LogDate, LogFileLength from EventLogFile where LogDate = TODAY and Interval = \'Hourly\' and EventType = \'Report\' order by LogDate desc');
+});
+
+test('VisualforceRequest', function () {
+    global.config = { interval: 'hourly' };
+    expect(queries.report.visualforce()).toEqual('select Id, EventType, LogFile, LogDate, LogFileLength from EventLogFile where LogDate = TODAY and Interval = \'Hourly\' and EventType = \'VisualforceRequest\' order by LogDate desc');
+});
+
+test('In id criteria', function () {
+    expect(queries.functions.inIdCriteria([ 'abc', 'def' ])).toEqual('Id in (\'abc\',\'def\')');
+});
+
+test('General users', function () {
+    expect(queries.general.users([ 'abc', 'def' ])).toEqual('select Id, Name, Username from User where Id in (\'abc\',\'def\')');
+});
+
+test('General reports', function () {
+    expect(queries.general.reports([ 'abc', 'def' ])).toEqual('select Id, Name from Report where Id in (\'abc\',\'def\')');
+});
