@@ -144,11 +144,12 @@ var isUndefined = function (keys) {
  */
 var checkHandlers = function (handlers, handler_key) {
     var handler_name = lo.isUndefined(handler_key) ? 'type' : handler_key;
+    var fnname = lo.get(global.config, handler_name);
     if (
-        !lo.has(handlers, lo.get(global.config, handler_name)) ||
-        lo.get(handlers, lo.get(global.config, handler_name)) === undefined
+        !lo.has(handlers, fnname) ||
+        lo.get(handlers, fnname) === undefined
     ) {
-        logging.logAndExit(handler_key + ' does not have a supported handler', errorCodes.UNSUPPORTED_HANDLER);
+        logging.logAndExit(fnname + ' does not have a supported handler', errorCodes.UNSUPPORTED_HANDLER);
     }
 };
 

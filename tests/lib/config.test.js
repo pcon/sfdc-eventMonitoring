@@ -5,6 +5,8 @@ var errorCodes = require('../../src/lib/errorCodes.js');
 global.logger = require('../../src/lib/logger.js');
 
 beforeEach(function () {
+    jest.restoreAllMocks();
+
     expect.extend({
         toBeSameDay: function (received, argument) { // eslint-disable-line require-jsdoc
             if (argument.isSame(received, 'day')) {
@@ -109,14 +111,50 @@ describe('Is Undefined', function () {
     });
 });
 
-test('Handler exists', function () {
-    var handlers = { testhandler: jest.fn() };
-    jest.spyOn(process, 'exit').mockImplementationOnce(function () {});
-    jest.spyOn(console, 'error').mockImplementationOnce(function () {});
+describe('Handlers', function () {
+    test('Unknown, default type', function () {
+        global.config = { type: 'testhandler' };
+        var handlers = {};
+        jest.spyOn(process, 'exit').mockImplementationOnce(function () {});
+        jest.spyOn(console, 'error').mockImplementationOnce(function () {});
 
-    config.checkHandlers(handlers, 'testhandler');
-    expect(process.exit).toHaveBeenCalledWith(errorCodes.UNSUPPORTED_HANDLER);
-    expect(console.error).toHaveBeenCalledWith('testhandler does not have a supported handler'); // eslint-disable-line no-console
+        config.checkHandlers(handlers);
+        expect(process.exit).toHaveBeenCalledWith(errorCodes.UNSUPPORTED_HANDLER);
+        expect(console.error).toHaveBeenCalledWith('testhandler does not have a supported handler'); // eslint-disable-line no-console
+    });
+
+    test('Unknown, custom type', function () {
+        global.config = { action: 'testhandler' };
+        var handlers = {};
+        jest.spyOn(process, 'exit').mockImplementationOnce(function () {});
+        jest.spyOn(console, 'error').mockImplementationOnce(function () {});
+
+        config.checkHandlers(handlers, 'action');
+        expect(process.exit).toHaveBeenCalledWith(errorCodes.UNSUPPORTED_HANDLER);
+        expect(console.error).toHaveBeenCalledWith('testhandler does not have a supported handler'); // eslint-disable-line no-console
+    });
+
+    test('Undefined, default type', function () {
+        global.config = { type: 'testhandler' };
+        var handlers = { testhandler: undefined };
+        jest.spyOn(process, 'exit').mockImplementationOnce(function () {});
+        jest.spyOn(console, 'error').mockImplementationOnce(function () {});
+
+        config.checkHandlers(handlers);
+        expect(process.exit).toHaveBeenCalledWith(errorCodes.UNSUPPORTED_HANDLER);
+        expect(console.error).toHaveBeenCalledWith('testhandler does not have a supported handler'); // eslint-disable-line no-console
+    });
+
+    test('Defined, default type', function () {
+        global.config = { type: 'testhandler' };
+        var handlers = { testhandler: jest.fn() };
+        jest.spyOn(process, 'exit').mockImplementationOnce(function () {});
+        jest.spyOn(console, 'error').mockImplementationOnce(function () {});
+
+        config.checkHandlers(handlers);
+        expect(process.exit).not.toHaveBeenCalledWith(errorCodes.UNSUPPORTED_HANDLER);
+        expect(console.error).not.toHaveBeenCalledWith('testhandler does not have a supported handler'); // eslint-disable-line no-console
+    });
 });
 
 describe('Get end', function () {
