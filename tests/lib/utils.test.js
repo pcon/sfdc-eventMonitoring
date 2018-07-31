@@ -1,10 +1,12 @@
 var chalk = require('chalk');
+var jsonfile = require('jsonfile');
 var Q = require('q');
 
 const { table } = require('table');
 
 var utils = require('../../src/lib/utils.js');
 var errorCodes = require('../../src/lib/errorCodes.js');
+var sfdc = require('../../src/lib/sfdc.js');
 global.logger = require('../../src/lib/logger.js');
 
 beforeEach(function () {
@@ -94,6 +96,8 @@ describe('Limiting', function () {
         expect.assertions(1);
         return utils.limitResults(data, 'values').then(function (results) {
             expect(results).toEqual(data);
+        }).catch(function (error) {
+            expect(error).toBeUndefined();
         });
     });
 
@@ -819,4 +823,99 @@ test('json to console', function () {
 
     utils.outputJSONToConsole(data);
     expect(console.info).toHaveBeenCalledWith(JSON.stringify(data)); // eslint-disable-line no-console
+});
+
+describe('Fetch and convert', function () {
+    test('Success', function () {
+        global.config = { latest: true };
+
+        var data = [
+            {
+                API_VERSION: '18.0',
+                CLIENT_IP: '96.43.144.26',
+                USER_NAME: 'bob@example.com'
+            },
+            {
+                API_VERSION: '18.0',
+                CLIENT_IP: '96.43.144.26',
+                USER_NAME: 'alice@example.com'
+            }
+        ];
+
+        jest.spyOn(sfdc, 'fetchConvertFile').mockImplementation(function () {
+            var deferred = Q.defer();
+            deferred.resolve(data);
+            return deferred.promise;
+        });
+
+        var files = [
+            {
+                EventType: 'Login',
+                LogDate: '2018-07-29T07:38:00.000Z',
+                LogFile: '/path/to/file1'
+            },
+            {
+                EventType: 'Login',
+                LogDate: '2018-07-28T07:38:00.000Z',
+                LogFile: '/path/to/file1'
+            }
+        ];
+
+        expect.assertions(1);
+        return utils.fetchAndConvert(files).then(function (results) {
+            expect(results).toEqual(data);
+        });
+    });
+
+    test('Error', function () {
+        global.config = { latest: true };
+
+        jest.spyOn(sfdc, 'fetchConvertFile').mockImplementation(function () {
+            var deferred = Q.defer();
+            deferred.reject('oh crap');
+            return deferred.promise;
+        });
+
+        var files = [
+            {
+                EventType: 'Login',
+                LogDate: '2018-07-29T07:38:00.000Z',
+                LogFile: '/path/to/file1'
+            },
+            {
+                EventType: 'Login',
+                LogDate: '2018-07-28T07:38:00.000Z',
+                LogFile: '/path/to/file1'
+            }
+        ];
+
+        expect.assertions(1);
+        return utils.fetchAndConvert(files).catch(function (error) {
+            expect(error).toEqual([ 'oh crap' ]);
+        });
+    });
+});
+
+describe('Write JSON', function () {
+    test('Success', function () {
+        var spy = jest.spyOn(jsonfile, 'writeFile').mockImplementation(function (filename, data, cb) {
+            cb();
+        });
+
+        expect.assertions(1);
+        return utils.writeJSONtoFile().then(function () {
+            expect(spy).toHaveBeenCalled();
+        });
+    });
+
+    test('Success', function () {
+        jest.spyOn(jsonfile, 'writeFile').mockImplementation(function (filename, data, cb) {
+            cb('oh noes');
+        });
+
+        expect.assertions(1);
+        return utils.writeJSONtoFile().catch(function (error) {
+            expect(error).toEqual('oh noes');
+        });
+    });
 });
