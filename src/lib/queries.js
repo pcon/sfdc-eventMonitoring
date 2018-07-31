@@ -31,7 +31,11 @@ var REPORT_FIELDS = [
  * @param {string|array|object} criteria The where criteria
  * @returns {string} The combined criteria
  */
-function formatCriteria(criteria) {
+var formatCriteria = function (criteria) {
+    if (lo.isUndefined(criteria)) {
+        return '';
+    }
+
     if (lo.isString(criteria)) {
         return criteria;
     }
@@ -40,8 +44,8 @@ function formatCriteria(criteria) {
         return lo.join(criteria, ' and ');
     }
 
-    return lo.join(criteria.clauses, ' ' + lo.trim(lo.get(criteria, 'operator', 'and') + ' '));
-}
+    return lo.trim(lo.join(criteria.clauses, ' ' + lo.trim(lo.get(criteria, 'operator', 'and')) + ' '));
+};
 
 /**
  * Build a simple query string
@@ -52,7 +56,7 @@ function formatCriteria(criteria) {
  * @param {number} limit The limit
  * @returns {string} The query string
  */
-function buildSimpleQuery(fields, object_name, criteria, order_by, limit) {
+var buildSimpleQuery = function (fields, object_name, criteria, order_by, limit) {
     var final_criteria = formatCriteria(criteria);
     var query = 'select ' + lo.join(fields, ', ') + ' from ' + object_name + ' where ' + final_criteria;
 
@@ -64,35 +68,35 @@ function buildSimpleQuery(fields, object_name, criteria, order_by, limit) {
         query += ' limit ' + limit;
     }
 
-    return query;
-}
+    return lo.trim(query);
+};
 
 /**
  * Gets the log date criteria
  * @returns {string} The log date criteria based off the config interval
  */
-function getLogDate() {
+var getLogDate = function () {
     if (config.date.hasADate()) {
         return 'LogDate >= ' + config.date.getStart().format(statics.DATETIME_FORMAT) + ' and LogDate <= ' + config.date.getEnd().format(statics.DATETIME_FORMAT);
     }
 
     return lo.toLower(global.config.interval) === 'hourly' ? 'LogDate = TODAY' : 'LogDate = LAST_N_DAYS:2';
-}
+};
 
 /**
  * Get the interval criteria
  * @returns {string} The interval based on the global config
  */
-function getInterval() {
+var getInterval = function () {
     return 'Interval = ' + utils.escapeString(lo.upperFirst(global.config.interval));
-}
+};
 
 /**
  * Gets the event type criteria based on types
  * @param {string|array} types The types
  * @returns {string} The event type criteria
  */
-function getEventTypeCriteria(types) {
+var getEventTypeCriteria = function (types) {
     var event_types = [];
 
     if (!lo.isArray(types)) {
@@ -104,7 +108,7 @@ function getEventTypeCriteria(types) {
     });
 
     return 'EventType in (' + event_types + ')';
-}
+};
 
 /**
  * Gets all the logs
@@ -120,21 +124,6 @@ var getAllLogs = function (types) {
     if (types !== undefined) {
         criteria.push(getEventTypeCriteria(types));
     }
-
-    return buildSimpleQuery(EVENT_LOG_FILE_FIELDS, EVENT_LOG_FILE, criteria, 'LogDate desc');
-};
-
-/**
- * Gets the logs for types
- * @param {string|array} types The types
- * @returns {string} The query
- */
-var getLogsByType = function (types) {
-    var criteria = [
-        getLogDate(),
-        getInterval(),
-        getEventTypeCriteria(types)
-    ];
 
     return buildSimpleQuery(EVENT_LOG_FILE_FIELDS, EVENT_LOG_FILE, criteria, 'LogDate desc');
 };
@@ -158,7 +147,7 @@ var blameAPIUsage = function () {
  * @returns {string} The query
  */
 var login = function () {
-    return getLogsByType('Login');
+    return getAllLogs('Login');
 };
 
 /**
@@ -201,7 +190,7 @@ var generalReports = function (report_ids) {
  * @returns {string} The query
  */
 var reportApexCallout = function () {
-    return getLogsByType('ApexCallout');
+    return getAllLogs('ApexCallout');
 };
 
 /**
@@ -209,7 +198,7 @@ var reportApexCallout = function () {
  * @returns {string} The query
  */
 var reportApexExecution = function () {
-    return getLogsByType('ApexExecution');
+    return getAllLogs('ApexExecution');
 };
 
 /**
@@ -217,7 +206,7 @@ var reportApexExecution = function () {
  * @returns {string} The query
  */
 var reportApexSoap = function () {
-    return getLogsByType('ApexSoap');
+    return getAllLogs('ApexSoap');
 };
 
 /**
@@ -225,7 +214,7 @@ var reportApexSoap = function () {
  * @returns {string} The query
  */
 var reportApexTrigger = function () {
-    return getLogsByType('ApexTrigger');
+    return getAllLogs('ApexTrigger');
 };
 
 /**
@@ -233,7 +222,7 @@ var reportApexTrigger = function () {
  * @returns {string} The query
  */
 var reportReport = function () {
-    return getLogsByType('Report');
+    return getAllLogs('Report');
 };
 
 /**
@@ -241,12 +230,19 @@ var reportReport = function () {
  * @returns {string} The query
  */
 var reportVisualforce = function () {
-    return getLogsByType('VisualforceRequest');
+    return getAllLogs('VisualforceRequest');
 };
 
 var queries = {
     blame: { apiusage: blameAPIUsage },
     login: login,
+    functions: {
+        buildSimpleQuery: buildSimpleQuery,
+        formatCriteria: formatCriteria,
+        getEventTypeCriteria: getEventTypeCriteria,
+        getLogDate: getLogDate,
+        getInterval: getInterval
+    },
     general: {
         getAllLogs: getAllLogs,
         reports: generalReports,
