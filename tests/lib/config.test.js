@@ -1,4 +1,22 @@
+jest.mock('fs', function () {
+    return {
+        readFile: function (filename, cb) { //eslint-disable-line require-jsdoc,no-unused-vars
+            cb(undefined, '{"env":"myenv"}');
+        },
+        readFileSync: function () { // eslint-disable-line require-jsdoc
+            return 'username=bob@example.com\npassword=bobrules\ntoken=abcd\nurl=https://login.salesforce.com';
+        },
+        stat: function (filename, cb) { // eslint-disable-line require-jsdoc
+            if (filename === 'errorfile') {
+                cb({ code: 'oh noes' });
+            } else {
+                cb();
+            }
+        }
+    };
+});
 var moment = require('moment');
+var Q = require('q');
 
 var config = require('../../src/lib/config.js');
 var errorCodes = require('../../src/lib/errorCodes.js');
@@ -6,6 +24,8 @@ global.logger = require('../../src/lib/logger.js');
 
 beforeEach(function () {
     jest.restoreAllMocks();
+    global.config = {};
+    global.helper = undefined;
 
     expect.extend({
         toBeSameDay: function (received, argument) { // eslint-disable-line require-jsdoc
@@ -69,7 +89,7 @@ describe('Setup Globals', function () {
     });
 
     test('Local helper', function () {
-        global.config = { helper: '../helper.js' };
+        global.config = { helper: '../../tests/helper.js' };
 
         config.setupGlobals()
             .then(function () {
@@ -345,4 +365,128 @@ test('Generate options', function () {
     };
 
     expect(config.yargs.generateOptions([ 'token', 'format' ])).toEqual(expectedResults);
+});
+
+test('Get user home', function () {
+    expect(config.functions.getUserHome()).toEqual(process.env[process.platform === 'win32' ? 'USERPROFILE' : 'HOME']);
+});
+
+test('Load solenopsis', function () {
+    var expectedResults = {
+        username: 'bob@example.com',
+        password: 'bobrules',
+        token: 'abcd',
+        url: 'https://login.salesforce.com'
+    };
+
+    config.loadSolenopsisCredentials('test');
+    expect(global.config).toEqual(expect.objectContaining(expectedResults));
+});
+
+describe('Load config', function () {
+    test('Success', function () {
+        expect.hasAssertions();
+        return config.loadConfig().then(function () {
+            expect(global.config).toEqual({ env: 'myenv' });
+        });
+    });
+});
+
+test('Merge', function () {
+    global.config = {
+        foo: 'bar',
+        die: 'bart'
+    };
+
+    var mobj = {
+        die: 'the bart',
+        baz: 'boop'
+    };
+
+    var expectedResults = {
+        foo: 'bar',
+        die: 'the bart',
+        baz: 'boop'
+    };
+
+    config.merge(mobj);
+    expect(global.config).toEqual(expectedResults);
+});
+
+describe('Load helper', function () {
+    test('No helper', function () {
+        global.config.helper = undefined;
+        global.config.debug = true;
+
+        jest.spyOn(console, 'log').mockImplementationOnce(function () {});
+
+        expect.assertions(1);
+        return config.functions.loadHelper().then(function () {
+            expect(console.log).toHaveBeenCalledWith('No helper defined'); // eslint-disable-line no-console
+        });
+    });
+
+    test('Valid helper', function () {
+        global.config.helper = '../../tests/helper.js';
+
+        expect.assertions(2);
+        return config.functions.loadHelper().then(function () {
+            expect(global.helper).toBeDefined();
+            expect(global.helper.formatter).toBeDefined();
+        });
+    });
+
+    test('Unknown helper', function () {
+        global.config.helper = 'errorfile';
+        global.config.debug = true;
+
+        jest.spyOn(console, 'log').mockImplementationOnce(function () {});
+
+        expect.assertions(1);
+        return config.functions.loadHelper().then(function () {
+            expect(console.log).toHaveBeenCalledWith('Unable to load "errorfile" (oh noes)'); // eslint-disable-line no-console
+        });
+    });
+});
+
+describe('Login an run handler', function () {
+    test('Valid', function () {
+        var testhandler = jest.fn();
+        var login = jest.fn(function () { // eslint-disable-line require-jsdoc
+            var deferred = Q.defer();
+            deferred.resolve();
+            return deferred.promise;
+        });
+
+        var handlers = { testhandler: testhandler };
+        global.config.type = 'testhandler';
+
+        expect.assertions(2);
+        return config.loginAndRunHandler({}, handlers, login).then(function () {
+            expect(testhandler).toHaveBeenCalledTimes(1);
+            expect(login).toHaveBeenCalledTimes(1);
+        });
+    });
+
+    test('Invalid', function () {
+        var testhandler = jest.fn();
+        var login = jest.fn(function () { // eslint-disable-line require-jsdoc
+            var deferred = Q.defer();
+            deferred.reject('myError');
+            return deferred.promise;
+        });
+
+        var handlers = { testhandler: testhandler };
+        global.config.type = 'testhandler';
+
+        jest.spyOn(console, 'error').mockImplementationOnce(function () {});
+
+        expect.assertions(4);
+        return config.loginAndRunHandler({}, handlers, login).catch(function (error) {
+            expect(error).toEqual('myError');
+            expect(testhandler).toHaveBeenCalledTimes(0);
+            expect(login).toHaveBeenCalledTimes(1);
+            expect(console.error).toHaveBeenCalledWith('myError'); // eslint-disable-line no-console
+        });
+    });
 });

@@ -21,9 +21,9 @@ var SOLENOPSIS_FIELDS = [
  * Gets the user's home directory
  * @return {string} The user's home directory
  */
-function getUserHome() {
+var getUserHome = function () {
     return process.env[process.platform === 'win32' ? 'USERPROFILE' : 'HOME'];
-}
+};
 
 /**
  * Load the solenopsis credential file into the global config
@@ -76,7 +76,7 @@ var merge = function (args) {
  * Loads the helper methods
  * @returns {Promise} A promise for when the helper method is loaded
  */
-function loadHelper() {
+var loadHelper = function () {
     var deferred = Q.defer();
 
     if (global.config.helper === undefined) {
@@ -96,7 +96,7 @@ function loadHelper() {
     }
 
     return deferred.promise;
-}
+};
 
 /**
  * Sets up any additional global variables we need
@@ -161,6 +161,8 @@ var checkHandlers = function (handlers, handler_key) {
  * @returns {undefined}
  */
 var loginAndRunHandler = function (args, handlers, login) {
+    var deferred = Q.defer();
+
     merge(args);
 
     checkHandlers(handlers);
@@ -169,7 +171,15 @@ var loginAndRunHandler = function (args, handlers, login) {
         .then(function () {
             lo.get(handlers, global.config.type)();
         })
-        .catch(logging.logError);
+        .then(function () {
+            deferred.resolve();
+        })
+        .catch(function (error) {
+            logging.logError(error);
+            deferred.reject(error);
+        });
+
+    return deferred.promise;
 };
 
 /**
@@ -296,6 +306,10 @@ var config = {
         getEnd: getEnd,
         getStart: getStart,
         hasADate: hasADate
+    },
+    functions: {
+        getUserHome: getUserHome,
+        loadHelper: loadHelper
     },
     isUndefined: isUndefined,
     loadSolenopsisCredentials: loadSolenopsisCredentials,
