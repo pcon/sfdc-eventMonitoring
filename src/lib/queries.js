@@ -132,7 +132,7 @@ var getAllLogs = function (types) {
  * Gets the query for all the "API" usage types
  * @returns {string} The query
  */
-var blameAPIUsage = function () {
+var showAPIUsage = function () {
     var criteria = [
         getLogDate(),
         getInterval(),
@@ -234,7 +234,7 @@ var reportVisualforce = function () {
 };
 
 var queries = {
-    blame: { apiusage: blameAPIUsage },
+    show: { apiusage: showAPIUsage },
     login: login,
     functions: {
         buildSimpleQuery: buildSimpleQuery,

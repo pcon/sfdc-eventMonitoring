@@ -1,6 +1,6 @@
 {
   "name": "sfdc-eventmonitoring",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "Command line tools surrounding event monitoring",
   "main": "eventmonitoring.js",
   "bin": {

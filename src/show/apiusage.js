@@ -316,7 +316,7 @@ var run = function () {
 
     updatefilterCriteria();
 
-    sfdc.query(queries.blame.apiusage())
+    sfdc.query(queries.show.apiusage())
         .then(utils.fetchAndConvert)
         .then(groupByUserIdAndName)
         .then(fetchUsernames)

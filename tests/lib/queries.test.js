@@ -111,9 +111,9 @@ describe('Get all logs', function () {
     });
 });
 
-test('Get blame usage', function () {
+test('Get show usage', function () {
     global.config = { interval: 'hourly' };
-    expect(queries.blame.apiusage()).toEqual('select Id, EventType, LogFile, LogDate, LogFileLength from EventLogFile where LogDate = TODAY and Interval = \'Hourly\' and EventType in (\'ApexSoap\',\'API\',\'RestAPI\')');
+    expect(queries.show.apiusage()).toEqual('select Id, EventType, LogFile, LogDate, LogFileLength from EventLogFile where LogDate = TODAY and Interval = \'Hourly\' and EventType in (\'ApexSoap\',\'API\',\'RestAPI\')');
 });
 
 test('Login', function () {

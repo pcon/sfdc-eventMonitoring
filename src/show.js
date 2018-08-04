@@ -1,7 +1,7 @@
 var conf = require('./lib/config.js');
 var sfdc = require('./lib/sfdc.js');
 
-var apiusage = require('./blame/apiusage.js');
+var apiusage = require('./show/apiusage.js');
 
 var handlers = { apiusage: apiusage.run };
 
@@ -24,7 +24,7 @@ var OPTIONS = conf.yargs.generateOptions([
 function config(yargs) {
     'use strict';
 
-    var pdata = conf.yargs.generateTypePdata('Blame your users that are doing stuff', handlers);
+    var pdata = conf.yargs.generateTypePdata('Show your users that are doing stuff', handlers);
     conf.yargs.config(yargs, pdata, OPTIONS);
 }
 

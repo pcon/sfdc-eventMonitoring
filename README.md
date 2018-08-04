@@ -138,8 +138,8 @@ events_Login.json
 events_API.json
 ```
 
-## Blame
-This sub command "blames" users for doing things
+## Show
+This sub command shows users doing things
 
 **Flags**
 *   **--format \[format\]** - json, table - The format the output should be displayed in
@@ -156,7 +156,7 @@ Data around users and API usage
 The summary mode can be useful for getting an idea of the overal usage of your API
 
 ```bash
-eventmonitoring blame apiusage --summary
+eventmonitoring show apiusage --summary
 ```
 
 ```text
@@ -176,7 +176,7 @@ eventmonitoring blame apiusage --summary
 For more information you can get a breakdown per user per endpoint
 
 ```bash
-eventmonitoring blame apiusage --limit 3 --sublimit 4
+eventmonitoring show apiusage --limit 3 --sublimit 4
 ```
 
 ```text

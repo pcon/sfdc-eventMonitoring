@@ -7,7 +7,7 @@ var pkg = require('./package.json');
 
 var config = require('./src/lib/config.js');
 
-var blame = require('./src/blame.js');
+var show = require('./src/show.js');
 var cache = require('./src/cache.js');
 var dump = require('./src/dump.js');
 var login = require('./src/login.js');
@@ -50,7 +50,7 @@ var run = function () {
         .options(OPTIONS)
         .conflicts(CONFLICTS)
         .version(pkg.version)
-        .command('blame [type]', 'Blame users', blame.config, blame.run)
+        .command('show [type]', 'Show user information', show.config, show.run)
         .command('cache [action]', 'Interact with cache', cache.config, cache.run)
         .command('dump', 'Dump data', dump.config, dump.run)
         .command('login [type]', 'Login information', login.config, login.run)
