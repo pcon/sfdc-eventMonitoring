@@ -2,10 +2,15 @@ var conf = require('./lib/config.js');
 var sfdc = require('./lib/sfdc.js');
 
 var apiusage = require('./show/apiusage.js');
+var logins = require('./show/logins.js');
 
-var handlers = { apiusage: apiusage.run };
+var handlers = {
+    apiusage: apiusage.run,
+    logins: logins.run
+};
 
 var OPTIONS = conf.yargs.generateOptions([
+    'api',
     'asc',
     'format',
     'limit',

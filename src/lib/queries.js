@@ -143,6 +143,20 @@ var showAPIUsage = function () {
 };
 
 /**
+ * Gets the query for all the Logins and Logouts
+ * @returns {string} The query
+ */
+var showLogins = function () {
+    var criteria = [
+        getLogDate(),
+        getInterval(),
+        getEventTypeCriteria([ 'Login', 'Logout' ])
+    ];
+
+    return buildSimpleQuery(EVENT_LOG_FILE_FIELDS, EVENT_LOG_FILE, criteria);
+};
+
+/**
  * Gets the login logs
  * @returns {string} The query
  */
@@ -234,7 +248,10 @@ var reportVisualforce = function () {
 };
 
 var queries = {
-    show: { apiusage: showAPIUsage },
+    show: {
+        apiusage: showAPIUsage,
+        logins: showLogins
+    },
     login: login,
     functions: {
         buildSimpleQuery: buildSimpleQuery,

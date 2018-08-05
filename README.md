@@ -142,6 +142,7 @@ events_API.json
 This sub command shows users doing things
 
 **Flags**
+*   **--api** - Only show API users
 *   **--format \[format\]** - json, table - The format the output should be displayed in
 *   **--asc** - Sort the data in ascending order
 *   **--sort \[field1,field2\]** - The fields to sort the data by.  This will vary from type to type.
@@ -221,6 +222,27 @@ Total API Calls: 2,084
 ╟─────────────────────────────────┼───────╢
 ║ ProductAPI.listProducts         │ 8     ║
 ╚═════════════════════════════════╧═══════╝
+```
+
+### Logins
+Data around user logins
+
+```bash
+eventmonitoring show logins
+```
+
+```text
+Username: automation@example.com (005A00000010LgN)
+Total Logins: 20249
+Total Logouts: 209       Explicit: 0         Implicit: 209
+
+Username: bob@api.example.com (005A0000001qLI1)
+Total Logins: 1827
+Total Logouts: 0         Explicit: 0         Implicit: 0
+
+Username: foobar@api.example.com (005A0000008PItw)
+Total Logins: 1554
+Total Logouts: 42        Explicit: 0         Implicit: 42
 ```
 
 ## Login

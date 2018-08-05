@@ -116,6 +116,11 @@ test('Get show usage', function () {
     expect(queries.show.apiusage()).toEqual('select Id, EventType, LogFile, LogDate, LogFileLength from EventLogFile where LogDate = TODAY and Interval = \'Hourly\' and EventType in (\'ApexSoap\',\'API\',\'RestAPI\')');
 });
 
+test('Get show logins', function () {
+    global.config = { interval: 'hourly' };
+    expect(queries.show.logins()).toEqual('select Id, EventType, LogFile, LogDate, LogFileLength from EventLogFile where LogDate = TODAY and Interval = \'Hourly\' and EventType in (\'Login\',\'Logout\')');
+});
+
 test('Login', function () {
     global.config = { interval: 'hourly' };
     expect(queries.login()).toEqual('select Id, EventType, LogFile, LogDate, LogFileLength from EventLogFile where LogDate = TODAY and Interval = \'Hourly\' and EventType = \'Login\' order by LogDate desc');

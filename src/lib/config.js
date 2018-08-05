@@ -300,6 +300,22 @@ var yargsGenerateOptions = function (keys) {
     return options;
 };
 
+/**
+ * If our output is suppose to be JSON
+ * @return {Boolean} If we're outputting JSON
+ */
+var isJSON = function () {
+    return global.config.format === 'json';
+};
+
+/**
+ * If our output is suppose to be JSON
+ * @return {Boolean} If we're outputting JSON
+ */
+var isTable = function () {
+    return global.config.format === 'table';
+};
+
 var config = {
     checkHandlers: checkHandlers,
     date: {
@@ -311,6 +327,8 @@ var config = {
         getUserHome: getUserHome,
         loadHelper: loadHelper
     },
+    isJSON: isJSON,
+    isTable: isTable,
     isUndefined: isUndefined,
     loadSolenopsisCredentials: loadSolenopsisCredentials,
     loadConfig: loadConfig,

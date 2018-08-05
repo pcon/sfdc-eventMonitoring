@@ -490,3 +490,31 @@ describe('Login an run handler', function () {
         });
     });
 });
+
+describe('Is JSON', function () {
+    test('True', function () {
+        global.config.format = 'json';
+
+        expect(config.isJSON()).toBeTruthy();
+    });
+
+    test('False', function () {
+        global.config.format = 'table';
+
+        expect(config.isJSON()).not.toBeTruthy();
+    });
+});
+
+describe('Is Table', function () {
+    test('True', function () {
+        global.config.format = 'table';
+
+        expect(config.isTable()).toBeTruthy();
+    });
+
+    test('False', function () {
+        global.config.format = 'json';
+
+        expect(config.isTable()).not.toBeTruthy();
+    });
+});

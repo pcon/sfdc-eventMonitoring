@@ -74,6 +74,21 @@ var runFunc = function (data, key, field, func) {
 };
 
 /**
+ * Limits an array
+ * @param {object[]} data The data to limit
+ * @param {number} limit The limit
+ * @returns {object[]} The limited data
+ */
+var limitArray = function (data, limit) {
+    if (limit === undefined) {
+        return data;
+    }
+
+    global.logger.debug('Limiting to ' + limit);
+    return lo.slice(data, 0, limit);
+};
+
+/**
  * Limits a set of data without a promise
  * @param {object} data The data to limit.
  * @param {string} key The in the data to limit.
@@ -81,11 +96,7 @@ var runFunc = function (data, key, field, func) {
  * @returns {object} The limited data
  */
 var limitNoPromise = function (data, key, limit) {
-    if (limit !== undefined) {
-        global.logger.debug('Limiting to ' + limit);
-        lo.set(data, key, lo.slice(lo.get(data, key), 0, limit));
-    }
-
+    lo.set(data, key, limitArray(lo.get(data, key), limit));
     return data;
 };
 
@@ -274,6 +285,16 @@ var filterResults = function (data, key, filter) {
 };
 
 /**
+ * Sorts an array
+ * @param {object[]} data The data to sort
+ * @param {string} sorter The sort string
+ * @return {object[]} The sorted array
+ */
+var sortArray = function (data, sorter) {
+    return lo.sortBy(data, lo.split(sorter, ',')).reverse();
+};
+
+/**
  * Sort a set of data based on a key and a sorter
  * @param {object} data The data to sort.
  * @param {string} key The key of the data to sort.
@@ -282,7 +303,7 @@ var filterResults = function (data, key, filter) {
  */
 var sortNoPromise = function (data, key, sorter) {
     global.logger.debug('Sorting by ' + sorter);
-    lo.set(data, key, lo.sortBy(lo.get(data, key), lo.split(sorter, ',')).reverse());
+    lo.set(data, key, sortArray(lo.get(data, key), sorter));
 
     if (global.config.asc) {
         global.logger.debug('Ascending');
@@ -359,6 +380,15 @@ var generateTableData = function (rows, columns, output_info) {
 /**
  * Prints the averages based on the format
  * @param {object} data The data
+ * @returns {undefined}
+ */
+var printJSON = function (data) {
+    global.logger.log(JSON.stringify(data));
+};
+
+/**
+ * Prints the averages based on the format
+ * @param {object} data The data
  * @param {array} columns The columns
  * @param {object} output_info The column metadata
  * @returns {Promise} A promise for when the data has been printed
@@ -367,7 +397,7 @@ var printFormattedData = function (data, columns, output_info) {
     var deferred = Q.defer();
 
     if (global.config.format === 'json') {
-        global.logger.log(JSON.stringify(data));
+        printJSON(data);
     } else if (global.config.format === 'table') {
         if (lo.isEmpty(data)) {
             global.logger.log('No data to display');
@@ -436,10 +466,35 @@ var splitByField = function (data, field_name) {
 var outputJSONToConsole = function (data) {
     var deferred = Q.defer();
 
-    global.logger.log(JSON.stringify(data));
+    printJSON(data);
     deferred.resolve();
 
     return deferred.promise;
+};
+
+/**
+ * Trims down the user ids to 15 characters if needed
+ * @returns {undefined}
+ */
+var updateUserIdCriteria = function () {
+    if (global.config.userid === undefined) {
+        return;
+    }
+
+    if (lo.isArray(global.config.userid)) {
+        global.config.userid = lo.map(global.config.userid, trimId);
+    } else {
+        global.config.userid = trimId(global.config.userid);
+    }
+};
+
+/**
+ * Converts to a timestamp
+ * @param {string} datetime The date time
+ * @return {number} The timestamp
+ */
+var toTimestamp = function (datetime) {
+    return moment.utc(datetime).valueOf();
 };
 
 var utils = {
@@ -453,17 +508,22 @@ var utils = {
     generateTableData: generateTableData,
     getApplicableLogFiles: getApplicableLogFiles,
     idToObject: idToObject,
+    limitArray: limitArray,
     limitNoPromise: limitNoPromise,
     limitResults: limitResults,
     outputJSONToConsole: outputJSONToConsole,
+    printJSON: printJSON,
     printFormattedData: printFormattedData,
     runFunc: runFunc,
+    sortArray: sortArray,
     sortNoPromise: sortNoPromise,
     sortResults: sortResults,
     splitByField: splitByField,
     subLimitResults: subLimitResults,
     subSortResults: subSortResults,
+    toTimestamp: toTimestamp,
     trimId: trimId,
+    updateUserIdCriteria: updateUserIdCriteria,
     writeJSONtoFile: writeJSONtoFile
 };
 

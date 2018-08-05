@@ -111,7 +111,7 @@ describe('Limiting', function () {
         });
     });
 
-    test('No limit', function () {
+    test('No sublimit', function () {
         global.config = {};
         var data = { values: [ 1, 2, 3, 4, 5 ] };
         expect.assertions(1);
@@ -120,7 +120,7 @@ describe('Limiting', function () {
         });
     });
 
-    test('With limit', function () {
+    test('With sublimit', function () {
         global.config = { sublimit: 3 };
         var data = { values: [ 1, 2, 3, 4, 5 ] };
         var expectedResults = { values: [ 1, 2, 3 ] };
@@ -128,6 +128,18 @@ describe('Limiting', function () {
         return utils.subLimitResults(data, 'values').then(function (results) {
             expect(results).toEqual(expectedResults);
         });
+    });
+
+    test('Limit array', function () {
+        var data = [ 1, 2, 3, 4, 5 ];
+        var expectedResults = [ 1, 2, 3 ];
+        expect(utils.limitArray(data, 3)).toEqual(expectedResults);
+    });
+
+    test('Limit array, undefined', function () {
+        var data = [ 1, 2, 3, 4, 5 ];
+        var expectedResults = [ 1, 2, 3, 4, 5 ];
+        expect(utils.limitArray(data, undefined)).toEqual(expectedResults);
     });
 });
 
@@ -601,6 +613,48 @@ describe('Sort', function () {
             expect(result).toEqual(expectedResults);
         });
     });
+
+    test('Sort array', function () {
+        var data = [
+            {
+                field1: 'b',
+                field2: 4
+            },
+            {
+                field1: 'b',
+                field2: 2
+            },
+            {
+                field1: 'a',
+                field2: 3
+            },
+            {
+                field1: 'c',
+                field2: 1
+            }
+        ];
+
+        var expectedResults = [
+            {
+                field1: 'c',
+                field2: 1
+            },
+            {
+                field1: 'b',
+                field2: 4
+            },
+            {
+                field1: 'b',
+                field2: 2
+            },
+            {
+                field1: 'a',
+                field2: 3
+            }
+        ];
+
+        expect(utils.sortArray(data, [ 'field1', 'field2' ])).toEqual(expectedResults);
+    });
 });
 
 describe('Generate table data', function () {
@@ -825,6 +879,18 @@ test('json to console', function () {
     expect(console.info).toHaveBeenCalledWith(JSON.stringify(data)); // eslint-disable-line no-console
 });
 
+test('Print JSON', function () {
+    jest.spyOn(console, 'info').mockImplementationOnce(function () {});
+
+    var data = {
+        foo: 'bar',
+        bar: 'baz'
+    };
+
+    utils.printJSON(data);
+    expect(console.info).toHaveBeenCalledWith(JSON.stringify(data)); // eslint-disable-line no-console
+});
+
 describe('Fetch and convert', function () {
     test('Success', function () {
         global.config = { latest: true };
@@ -918,4 +984,27 @@ describe('Write JSON', function () {
             expect(error).toEqual('oh noes');
         });
     });
+});
+
+describe('User Id criteria', function () {
+    test('Undefined criteria', function () {
+        utils.updateUserIdCriteria();
+        expect(global.config.userid).toBeUndefined();
+    });
+
+    test('Single id', function () {
+        global.config.userid = 'abcdefghijklmnopqr';
+        utils.updateUserIdCriteria();
+        expect(global.config.userid).toEqual('abcdefghijklmno');
+    });
+
+    test('Multiple ids', function () {
+        global.config.userid = [ 'abcdefghijklmnopqr', 'bcdefghijklmnopqrs' ];
+        utils.updateUserIdCriteria();
+        expect(global.config.userid).toEqual([ 'abcdefghijklmno', 'bcdefghijklmnop' ]);
+    });
+});
+
+test('To timestamp', function () {
+    expect(utils.toTimestamp('2018-01-01T00:00:00.000Z')).toEqual(1514764800000);
 });

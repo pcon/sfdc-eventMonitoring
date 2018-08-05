@@ -28,30 +28,6 @@ var SUMMARY_COLUMNS = [
 var SUMMARY_OUTPUT_INFO = statics.report.generateOutputInfo(SUMMARY_COLUMNS);
 
 /**
- * Trims down the user ids to 15 characters if needed
- * @returns {undefined}
- */
-function updateUserIdCriteria() {
-    if (global.config.userid === undefined) {
-        return;
-    }
-
-    if (lo.isArray(global.config.userid)) {
-        global.config.userid = lo.map(global.config.userid, utils.trimId);
-    } else {
-        global.config.userid = utils.trimId(global.config.userid);
-    }
-}
-
-/**
- * Updates any filter criteria that need pre-processing
- * @returns {undefined}
- */
-function updatefilterCriteria() {
-    updateUserIdCriteria();
-}
-
-/**
  * Generate the name to display
  * @param {object} log The log
  * @returns {string} The name
@@ -314,7 +290,7 @@ var printCounts = function (data) {
 var run = function () {
     'use strict';
 
-    updatefilterCriteria();
+    utils.updateUserIdCriteria();
 
     sfdc.query(queries.show.apiusage())
         .then(utils.fetchAndConvert)
