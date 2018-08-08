@@ -1,3 +1,5 @@
 templates
+tests
+examples
 .github
 .eslintrc.json

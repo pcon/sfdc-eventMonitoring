@@ -1,0 +1,18 @@
+def totimestamp(td): td[:19] + "Z" | fromdate * 1000;
+def fixurl(url): url | ltrimstr("\"") | rtrimstr("\"");
+
+[.[] | {
+	eventType: .EVENT_TYPE,
+	timestamp: totimestamp(.TIMESTAMP_DERIVED),
+	requestId: .REQUEST_ID,
+	sessionId: .SESSION_KEY,
+	userId: .USER_ID,
+	success: .SUCCESS,
+	url: fixurl(.URL),
+	uri: .URI,
+	type: .TYPE,
+	method: .METHOD,
+	time: .TIME | tonumber,
+	requestSize: .REQUEST_SIZE | tonumber,
+	responseSize: .RESPONSE_SIZE | tonumber
+} | select(.timestamp > ($lasttimestamp | tonumber))]
