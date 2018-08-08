@@ -9,7 +9,7 @@
   "scripts": {
     "coverage": "./node_modules/.bin/jest --coverage --coverageReporters=text-lcov | ./node_modules/.bin/coveralls",
     "lint-eslint": "./node_modules/.bin/eslint eventmonitoring.js src/* tests/*",
-    "lint-md": "./node_modules/.bin/remark --no-stdout -f *.md",
+    "lint-md": "./node_modules/.bin/remark --no-stdout -f *.md examples/**/*.md",
     "lint": "npm run lint-eslint && npm run lint-md",
     "test": "./node_modules/.bin/jest"
   },
