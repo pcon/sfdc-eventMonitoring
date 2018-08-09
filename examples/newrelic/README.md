@@ -15,6 +15,8 @@ I found that this is most useful when run via cron and a wrapper script.
 2.  Download the `insertApexCallouts.sh` and `jq_transform` file into that directory
 3.  Create a wrapper script `newrelic.sh` to call `insertApexCallouts.sh` inside your directory
     ```bash
+    export PATH="$PATH:$HOME/bin"
+
     export NEWRELIC_ACCOUNT_ID="55555"
     export NEWRELIC_INSERT_KEY="xxxxx"
     export NEWRELIC_QUERY_KEY="yyyyy"
@@ -23,11 +25,11 @@ I found that this is most useful when run via cron and a wrapper script.
     ```
 4.  Add to cron
     ```text
-    */30 * * * * /home/username/eventmonitoring/scripts/apexcallouts/newrelic.sh
+    */30 * * * * sh /home/username/eventmonitoring/scripts/apexcallouts/newrelic.sh
     ```
 
 ## Query data and build dashboards
-Once you have data in the insights platform, you can make queries and build dashboards / alerts.  Keep in mind that your data will be up to 2hrs delayed so I recommend adding the `since 2 hours ago` to your queries.
+Once you have data in the insights platform, you can make queries and build dashboards / alerts.  Keep in mind that your data will be up to 3hrs delayed so I recommend adding the `since 3 hours ago` to your queries.
 
 ![Dashboard Example](https://raw.githubusercontent.com/pcon/sfdc-eventMonitoring/master/examples/newrelic/dashboard.png)
 
@@ -38,9 +40,9 @@ SELECT max(timestamp) from ApexCallout since today
 ```
 
 ```text
-SELECT average(time) from ApexCallout since 2 hours ago
+SELECT average(time) from ApexCallout since 3 hours ago
 ```
 
 ```text
-SELECT max(time) from ApexCallout since 2 hours ago
+SELECT max(time) from ApexCallout since 3 hours ago
 ```
