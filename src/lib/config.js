@@ -19,10 +19,18 @@ var SOLENOPSIS_FIELDS = [
 
 /**
  * Gets the user's home directory
- * @return {string} The user's home directory
+ * @returns {string} The user's home directory
  */
 var getUserHome = function () {
     return process.env[process.platform === 'win32' ? 'USERPROFILE' : 'HOME'];
+};
+
+/**
+ * Gets the config file path
+ * @returns {string} The path to the config file
+ */
+var getConfigPath = function () {
+    return path.join(getUserHome(), '.eventmonitoring');
 };
 
 /**
@@ -40,14 +48,16 @@ var loadSolenopsisCredentials = function (env) {
 
 /**
  * Load the config from disk
+ * @param {string} path_override The path to override if set
  * @returns {Promise} A promise for when the config has been loaded
  */
-var loadConfig = function () {
+var loadConfig = function (path_override) {
     'use strict';
 
     var deferred = Q.defer();
+    var config_path = path_override !== undefined ? path_override : getConfigPath();
 
-    fs.readFile(path.join(getUserHome(), '.eventmonitoring'), function (error, data) {
+    fs.readFile(config_path, function (error, data) {
         if (error) {
             if (error.code === 'ENOENT') {
                 deferred.resolve();
@@ -324,6 +334,7 @@ var config = {
         hasADate: hasADate
     },
     functions: {
+        getConfigPath: getConfigPath,
         getUserHome: getUserHome,
         loadHelper: loadHelper
     },

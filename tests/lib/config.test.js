@@ -1,7 +1,13 @@
 jest.mock('fs', function () {
     return {
         readFile: function (filename, cb) { //eslint-disable-line require-jsdoc,no-unused-vars
-            cb(undefined, '{"env":"myenv"}');
+            if (filename === 'errorfile') {
+                cb({ code: 'EERROR' }, undefined);
+            } else if (filename === 'unknownfile') {
+                cb({ code: 'ENOENT' }, undefined);
+            } else {
+                cb(undefined, '{"env":"myenv"}');
+            }
         },
         readFileSync: function () { // eslint-disable-line require-jsdoc
             return 'username=bob@example.com\npassword=bobrules\ntoken=abcd\nurl=https://login.salesforce.com';
@@ -16,6 +22,7 @@ jest.mock('fs', function () {
     };
 });
 var moment = require('moment');
+var path = require('path');
 var Q = require('q');
 
 var config = require('../../src/lib/config.js');
@@ -367,8 +374,14 @@ test('Generate options', function () {
     expect(config.yargs.generateOptions([ 'token', 'format' ])).toEqual(expectedResults);
 });
 
-test('Get user home', function () {
-    expect(config.functions.getUserHome()).toEqual(process.env[process.platform === 'win32' ? 'USERPROFILE' : 'HOME']);
+describe('Get user home', function () {
+    test('Default', function () {
+        expect(config.functions.getUserHome()).toEqual(process.env[process.platform === 'win32' ? 'USERPROFILE' : 'HOME']);
+    });
+});
+
+test('Get config path', function () {
+    expect(config.functions.getConfigPath()).toEqual(path.join(config.functions.getUserHome(), '.eventmonitoring'));
 });
 
 test('Load solenopsis', function () {
@@ -388,6 +401,22 @@ describe('Load config', function () {
         expect.hasAssertions();
         return config.loadConfig().then(function () {
             expect(global.config).toEqual({ env: 'myenv' });
+        });
+    });
+
+    test('Failure error', function () {
+        expect.hasAssertions();
+
+        return config.loadConfig('errorfile').catch(function (error) {
+            expect(error).toEqual({ code: 'EERROR' });
+        });
+    });
+
+    test('Failure does not exist', function () {
+        expect.hasAssertions();
+
+        return config.loadConfig('unknownfile').then(function () {
+            expect(global.config).toEqual({});
         });
     });
 });
