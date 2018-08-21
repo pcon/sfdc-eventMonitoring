@@ -767,6 +767,17 @@ describe('Print formatted data', function () {
         expect(console.info).toHaveBeenCalledWith(JSON.stringify(data)); // eslint-disable-line no-console
     });
 
+    test('unknown format', function () {
+        jest.spyOn(console, 'info').mockImplementationOnce(function () {});
+
+        global.config = { format: 'wtf' };
+
+        var data = [];
+
+        utils.printFormattedData(data, undefined, undefined);
+        expect(console.info).not.toHaveBeenCalled(); // eslint-disable-line no-console
+    });
+
     test('no data', function () {
         jest.spyOn(console, 'info').mockImplementationOnce(function () {});
 
