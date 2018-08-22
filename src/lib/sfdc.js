@@ -19,87 +19,87 @@ var qutils = require('./qutils.js');
  * Verifies we have a connection
  * @returns {undefined}
  */
-function verifyConnection() {
+var verifyConnection = function () {
     if (global.sfdc_conn === undefined) {
         logging.logAndExit('No valid connection', errorCodes.NO_CONNECTION_QUERY);
     }
-}
+};
 
 /**
  * Verifies that we have a solenopsis environment configured
  * @returns {undefined}
  */
-function verifySolenopsisEnvironment() {
+var verifySolenopsisEnvironment = function () {
     if (config.isUndefined('env')) {
         logging.logAndExit('No environment specified', errorCodes.NO_ENVIRONMENT);
     }
-}
+};
 
 /**
  * Gets the request options
  * @param {string} uri The URI to download
  * @returns {object} The options
  */
-function getQueryOptions(uri) {
+var getQueryOptions = function (uri) {
     return {
         url: global.sfdc_conn.instanceUrl + uri,
         headers: { Authorization: 'Bearer ' + global.sfdc_conn.accessToken }
     };
-}
+};
 
 /**
  * If the url is undefined set it
  * @returns {undefined}
  */
-function configureURL() {
+var configureURL = function () {
     if (config.isUndefined('url')) {
         global.config.url = global.config.sandbox ? statics.CONNECTION.SANDBOX_URL : statics.CONNECTION.PROD_URL;
     }
-}
+};
 
 /**
  * If the version is undefined set it
  * @returns {undefined}
  */
-function configureVersion() {
+var configureVersion = function () {
     if (config.isUndefined('version')) {
         global.config.version = statics.CONNECTION.VERSION;
     }
-}
+};
 
 /**
  * If we're using Solenopsis credentials get them
  * @returns {undefined}
  */
-function configureSolenopsis() {
+var configureSolenopsis = function () {
     if (global.config.solenopsis) {
         verifySolenopsisEnvironment();
 
         global.logger.debug('Loading solenopsis config for ' + global.config.env);
         config.loadSolenopsisCredentials(global.config.env);
     }
-}
+};
 
 /**
  * Make sure that we have credentials set
  * @returns {undefined}
  */
-function checkCredentials() {
+var checkCredentials = function () {
     if (config.isUndefined([ 'username', 'password', 'url' ])) {
         logging.logAndExit('Unable to login.  Incomplete credentials', errorCodes.INCOMPLETE_CREDS);
     }
-}
+};
 
 /**
  * Sets up and verifies login information
  * @returns {undefined}
  */
-function setupLogin() {
+var setupLogin = function () {
     configureURL();
     configureVersion();
     configureSolenopsis();
     checkCredentials();
-}
+};
 
 /**
  * Login to salesforce and write it to the global space
@@ -165,35 +165,35 @@ var query = function (query_string) {
  * @param {string} extension The file extension
  * @returns {string} The log file name
  */
-function generateFilename(log, extension) {
+var generateFilename = function (log, extension) {
     var timestamp = moment.utc(log.LogDate).format('x');
     return path.join(global.config.cache, timestamp + '_' + log.Id + '.' + extension);
-}
+};
 
 /**
  * Gets the cache file name
  * @param {object} log The log file to generate a name for
  * @returns {string} The log file name
  */
-function generateCacheFilename(log) {
+var generateCacheFilename = function (log) {
     return generateFilename(log, 'json');
-}
+};
 
 /**
  * Gets the csv file name
  * @param {object} log The log file to generate a name for
  * @returns {string} The csv log file name
  */
-function generateCSVFilename(log) {
+var generateCSVFilename = function (log) {
     return generateFilename(log, 'csv');
-}
+};
 
 /**
  * Gets the log from cache (if it exists)
  * @param {object} log The log file to get from cache
  * @returns {Promise} A promise for the results
  */
-function getCachedLog(log) {
+var getCachedLog = function (log) {
     var deferred = Q.defer();
 
     if (lo.isEmpty(global.config.cache)) {
@@ -217,7 +217,7 @@ function getCachedLog(log) {
     }
 
     return deferred.promise;
-}
+};
 
 /**
  * Writes the data to cache (if it exists)
@@ -225,7 +225,7 @@ function getCachedLog(log) {
  * @param {object[]} data The data to cache
  * @returns {Promise} A promise for when the cache is writte
  */
-function writeCachedLog(log, data) {
+var writeCachedLog = function (log, data) {
     var deferred = Q.defer();
 
     if (lo.isEmpty(global.config.cache)) {
@@ -247,7 +247,7 @@ function writeCachedLog(log, data) {
     }
 
     return deferred.promise;
-}
+};
 
 /**
  * Use a given deferred to write the cached logs
@@ -256,14 +256,14 @@ function writeCachedLog(log, data) {
  * @param {object} deferred The Q.defer
  * @returns {undefined}
  */
-function writeLogCachedLoggedDeferred(log, data, deferred) {
+var writeLogCachedLoggedDeferred = function (log, data, deferred) {
     writeCachedLog(log, data)
         .then(function () {
             deferred.resolve(data);
         }).catch(function (write_error) {
             deferred.reject(write_error);
         });
-}
+};
 
 /**
  * Stream the data from the URL to csvtojson and keep it all in memory
@@ -271,7 +271,7 @@ function writeLogCachedLoggedDeferred(log, data, deferred) {
  * @param {object} options The request options
  * @returns {Promise} A promise for the results
  */
-function streamToMemory(log, options) {
+var streamToMemory = function (log, options) {
     var deferred = Q.defer();
     var results = [];
 
@@ -292,7 +292,7 @@ function streamToMemory(log, options) {
         });
 
     return deferred.promise;
-}
+};
 
 /**
  * Write the data from the URL to disk and then convert it into memory
@@ -300,7 +300,7 @@ function streamToMemory(log, options) {
  * @param {object} options The request options
  * @returns {Promise} A promise for the results
  */
-function downloadToDiskAndConvert(log, options) {
+var downloadToDiskAndConvert = function (log, options) {
     var deferred = Q.defer();
     var csvfilename = generateCSVFilename(log);
     var csvfile = fs.createWriteStream(csvfilename);
@@ -318,19 +318,19 @@ function downloadToDiskAndConvert(log, options) {
         });
 
     return deferred.promise;
-}
+};
 
 /**
  * Gets the type of download strategy to use
  * @returns {function} The download strategy to use
  */
-function getDownloadStrategy() {
+var getDownloadStrategy = function () {
     if (lo.isEmpty(global.config.cache)) {
         return streamToMemory;
     }
 
     return downloadToDiskAndConvert;
-}
+};
 
 /**
  * Download the remote file and convert it to an object
@@ -366,6 +366,25 @@ var fetchConvertFile = function (log) {
 
 var sfdc = {
     fetchConvertFile: fetchConvertFile,
+    functions: {
+        verifyConnection: verifyConnection,
+        verifySolenopsisEnvironment: verifySolenopsisEnvironment,
+        getQueryOptions: getQueryOptions,
+        configureURL: configureURL,
+        configureVersion: configureVersion,
+        configureSolenopsis: configureSolenopsis,
+        checkCredentials: checkCredentials,
+        setupLogin: setupLogin,
+        generateFilename: generateFilename,
+        generateCacheFilename: generateCacheFilename,
+        generateCSVFilename: generateCSVFilename,
+        getCachedLog: getCachedLog,
+        writeCachedLog: writeCachedLog,
+        writeLogCachedLoggedDeferred: writeLogCachedLoggedDeferred,
+        streamToMemory: streamToMemory,
+        downloadToDiskAndConvert: downloadToDiskAndConvert,
+        getDownloadStrategy: getDownloadStrategy
+    },
     login: login,
     logout: logout,
     query: query
