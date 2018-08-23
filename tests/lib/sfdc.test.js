@@ -1,3 +1,6 @@
+var jsforce = require('jsforce');
+var jsonfile = require('jsonfile');
+
 jest.mock('fs', function () {
     return {
         readFile: function (filename, cb) { //eslint-disable-line require-jsdoc,no-unused-vars
@@ -18,9 +21,20 @@ jest.mock('fs', function () {
             } else {
                 cb();
             }
-        }
+        },
+        access: function (filename, constants, callback) { // eslint-disable-line require-jsdoc
+            if (filename === '/tmp/1532854800000_abc.json') {
+                callback('ERROR');
+            } else {
+                callback();
+            }
+        },
+        constants: { R_OK: 0 }
     };
 });
+
+jest.mock('jsforce');
+jest.mock('jsonfile');
 
 var sfdc = require('../../src/lib/sfdc.js');
 var statics = require('../../src/lib/statics.js');
@@ -225,4 +239,204 @@ test('Generate CSV filename', function () {
     global.config.cache = '/tmp/';
 
     expect(sfdc.functions.generateCSVFilename(log)).toEqual('/tmp/1532854800000_abc.csv');
+});
+
+describe('Get download strategy', function () {
+    test('No cache', function () {
+        expect(sfdc.functions.getDownloadStrategy()).toEqual(sfdc.functions.streamToMemory);
+    });
+
+    test('Cache', function () {
+        global.config.cache = '/tmp/';
+        expect(sfdc.functions.getDownloadStrategy()).toEqual(sfdc.functions.downloadToDiskAndConvert);
+    });
+});
+
+describe('Login', function () {
+    test('No Token', function () {
+        global.config = {
+            username: 'bob@example.com',
+            password: 'abc'
+        };
+
+        jsforce.Connection.prototype.login.mockImplementation(function (username, password, callback) {
+            expect(username).toEqual('bob@example.com');
+            expect(password).toEqual('abc');
+            callback(undefined);
+        });
+
+        expect.assertions(3);
+        return sfdc.login().then(function () {
+            expect(jsforce.Connection.prototype.login).toHaveBeenCalled();
+        });
+    });
+
+    test('Token', function () {
+        global.config = {
+            username: 'bob@example.com',
+            password: 'abc',
+            token: '123'
+        };
+
+        jsforce.Connection.prototype.login.mockImplementation(function (username, password, callback) {
+            expect(username).toEqual('bob@example.com');
+            expect(password).toEqual('abc123');
+            callback(undefined);
+        });
+
+        expect.assertions(3);
+        return sfdc.login().then(function () {
+            expect(jsforce.Connection.prototype.login).toHaveBeenCalled();
+        });
+    });
+
+    test('Error', function () {
+        global.config = {
+            username: 'bob@example.com',
+            password: 'abc',
+            token: '123'
+        };
+
+        jsforce.Connection.prototype.login.mockImplementation(function (username, password, callback) {
+            expect(username).toEqual('bob@example.com');
+            expect(password).toEqual('abc123');
+            callback('I AM ERROR');
+        });
+
+        expect.assertions(4);
+        return sfdc.login().catch(function (error) {
+            expect(jsforce.Connection.prototype.login).toHaveBeenCalled();
+            expect(error).toEqual('I AM ERROR');
+        });
+    });
+});
+
+describe('Logout', function () {
+    test('No connection', function () {
+        global.sfdc_conn = undefined;
+
+        jsforce.Connection.prototype.logout.mockImplementation(function (callback) {
+            callback(undefined);
+        });
+
+        expect.assertions(1);
+        return sfdc.logout().then(function () {
+            expect(jsforce.Connection.prototype.logout).not.toHaveBeenCalled();
+        });
+    });
+
+    test('Valid', function () {
+        global.sfdc_conn = new jsforce.Connection();
+
+        jsforce.Connection.prototype.logout.mockImplementation(function (callback) {
+            callback(undefined);
+        });
+
+        expect.assertions(1);
+        return sfdc.logout().then(function () {
+            expect(jsforce.Connection.prototype.logout).toHaveBeenCalled();
+        });
+    });
+});
+
+describe('Query', function () {
+    test('Invalid', function () {
+        global.sfdc_conn = new jsforce.Connection();
+        var query = 'select Id from EventMonitoring';
+
+        jsforce.Connection.prototype.query.mockImplementation(function (query_string, callback) {
+            expect(query_string).toEqual(query);
+            callback('I AM ERROR', undefined);
+        });
+
+        expect.assertions(3);
+        return sfdc.query(query).catch(function (error) {
+            expect(jsforce.Connection.prototype.query).toHaveBeenCalled();
+            expect(error).toEqual('I AM ERROR');
+        });
+    });
+
+    test('Valid', function () {
+        global.sfdc_conn = new jsforce.Connection();
+        var query = 'select Id from EventMonitoring';
+
+        jsforce.Connection.prototype.query.mockImplementation(function (query_string, callback) {
+            expect(query_string).toEqual(query);
+            callback(undefined, { records: [ 'abc', '123' ]});
+        });
+
+        expect.assertions(3);
+        return sfdc.query(query).then(function (results) {
+            expect(jsforce.Connection.prototype.query).toHaveBeenCalled();
+            expect(results).toEqual([ 'abc', '123' ]);
+        });
+    });
+});
+
+describe('Get cached log', function () {
+    test('No cache', function () {
+        global.config.debug = true;
+        global.sfdc_conn = new jsforce.Connection();
+        var log = {
+            Id: 'abc',
+            LogDate: '2018-07-29T09:00:00.000Z'
+        };
+
+        jest.spyOn(console, 'log').mockImplementationOnce(function () {});
+
+        expect.assertions(2);
+        return sfdc.functions.getCachedLog(log).then(function (data) {
+            expect(data).toBeUndefined();
+            expect(console.log).toHaveBeenCalledWith('No cache folder set'); // eslint-disable-line no-console
+        });
+    });
+
+    test('Invalid', function () {
+        var log = {
+            Id: 'abc',
+            LogDate: '2018-07-29T09:00:00.000Z'
+        };
+        global.config.cache = '/tmp/';
+
+        expect.assertions(1);
+        return sfdc.functions.getCachedLog(log).then(function (data) {
+            expect(data).toBeUndefined();
+        });
+    });
+
+    test('Invalid read', function () {
+        var log = {
+            Id: 'def',
+            LogDate: '2018-07-29T09:00:00.000Z'
+        };
+        global.config.cache = '/tmp/';
+
+        jsonfile.readFile.mockImplementation(function (filename, cb) {
+            expect(filename).toEqual('/tmp/1532854800000_def.json');
+            cb('I AM ERROR', undefined);
+        });
+
+        expect.assertions(2);
+        return sfdc.functions.getCachedLog(log).catch(function (error) {
+            expect(error).toEqual('I AM ERROR');
+        });
+    });
+
+    test('Valid read', function () {
+        var log = {
+            Id: 'def',
+            LogDate: '2018-07-29T09:00:00.000Z'
+        };
+        global.config.cache = '/tmp/';
+
+        jsonfile.readFile.mockImplementation(function (filename, cb) {
+            expect(filename).toEqual('/tmp/1532854800000_def.json');
+            cb(undefined, { foo: 'bar' });
+        });
+
+        expect.assertions(2);
+        return sfdc.functions.getCachedLog(log).then(function (data) {
+            expect(data).toEqual({ foo: 'bar' });
+        });
+    });
 });
