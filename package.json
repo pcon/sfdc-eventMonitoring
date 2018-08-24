@@ -24,8 +24,8 @@
   },
   "jest": {
     "collectCoverageFrom": [
-        "src/**/*.js",
-        "eventmonitoring.js"
+      "src/**/*.js",
+      "eventmonitoring.js"
     ],
     "testURL": "http://localhost/"
   },
@@ -63,6 +63,7 @@
     "coveralls": "^3.0.2",
     "eslint": "^5.0.1",
     "jest": "^23.4.2",
+    "pretend-platform": "^2.0.0",
     "remark": "^9.0.0",
     "remark-cli": "^5.0.0",
     "remark-lint": "^6.0.2",

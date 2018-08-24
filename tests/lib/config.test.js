@@ -21,6 +21,8 @@ jest.mock('fs', function () {
         }
     };
 });
+
+var pretendPlatform = require('pretend-platform');
 var moment = require('moment');
 var path = require('path');
 var Q = require('q');
@@ -33,6 +35,7 @@ beforeEach(function () {
     jest.restoreAllMocks();
     global.config = {};
     global.helper = undefined;
+    pretendPlatform.restore();
 
     expect.extend({
         toBeSameDay: function (received, argument) { // eslint-disable-line require-jsdoc
@@ -377,6 +380,18 @@ test('Generate options', function () {
 describe('Get user home', function () {
     test('Default', function () {
         expect(config.functions.getUserHome()).toEqual(process.env[process.platform === 'win32' ? 'USERPROFILE' : 'HOME']);
+    });
+});
+
+describe('Get home param', function () {
+    test('Windows', function () {
+        pretendPlatform('win32');
+        expect(config.functions.getHomeParam()).toEqual('USERPROFILE');
+    });
+
+    test('Linux', function () {
+        pretendPlatform('linux');
+        expect(config.functions.getHomeParam()).toEqual('HOME');
     });
 });
 

@@ -18,11 +18,19 @@ var SOLENOPSIS_FIELDS = [
 ];
 
 /**
+ * Gets the environment variable name for home
+ * @returns {string} The environment variable name
+ */
+var getHomeParam = function () {
+    return process.platform === 'win32' ? 'USERPROFILE' : 'HOME';
+};
+
+/**
  * Gets the user's home directory
  * @returns {string} The user's home directory
  */
 var getUserHome = function () {
-    return process.env[process.platform === 'win32' ? 'USERPROFILE' : 'HOME'];
+    return process.env[getHomeParam()];
 };
 
 /**
@@ -335,6 +343,7 @@ var config = {
     },
     functions: {
         getConfigPath: getConfigPath,
+        getHomeParam: getHomeParam,
         getUserHome: getUserHome,
         loadHelper: loadHelper
     },
