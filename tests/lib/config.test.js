@@ -358,23 +358,29 @@ test('Generate type pdata', function () {
     expect(config.yargs.generateTypePdata(description, handlers)).toEqual(expectedResults);
 });
 
-test('Generate options', function () {
-    var expectedResults = {
-        token: {
-            alias: 't',
-            describe: 'The Salesforce token',
-            type: 'string',
-            default: undefined
-        },
-        format: {
-            describe: 'The format to output',
-            type: 'string',
-            default: 'table',
-            choices: [ 'json', 'table' ]
-        }
-    };
+describe('Generate options', function () {
+    test('No options', function () {
+        expect(config.yargs.generateOptions([])).toEqual({});
+    });
 
-    expect(config.yargs.generateOptions([ 'token', 'format' ])).toEqual(expectedResults);
+    test('Options', function () {
+        var expectedResults = {
+            token: {
+                alias: 't',
+                describe: 'The Salesforce token',
+                type: 'string',
+                default: undefined
+            },
+            format: {
+                describe: 'The format to output',
+                type: 'string',
+                default: 'table',
+                choices: [ 'json', 'table' ]
+            }
+        };
+
+        expect(config.yargs.generateOptions([ 'token', 'format' ])).toEqual(expectedResults);
+    });
 });
 
 describe('Get user home', function () {

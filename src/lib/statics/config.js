@@ -36,8 +36,8 @@ module.exports = {
         generateConfig: generateConfig,
         setChoices: setChoices
     },
-    api: generateConfig('Show API users and logins', 'boolean', false),
-    asc: generateConfig('Sort the data in ascending order', 'boolean', false),
+    api: generateConfig('Show API users and logins', 'boolean', undefined, false),
+    asc: generateConfig('Sort the data in ascending order', 'boolean', undefined, false),
     cache: generateConfig('The directory to cache the event logs', 'string'),
     date: generateConfig('The day to get (in GMT)', 'string'),
     debug: generateConfig('Enable debug logging', 'boolean', 'd'),
