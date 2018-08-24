@@ -379,7 +379,7 @@ describe('Generate options', function () {
             }
         };
 
-        expect(config.yargs.generateOptions([ 'token', 'format' ])).toEqual(expectedResults);
+        expect(config.yargs.generateOptions([ 'token', 'format', 'unknownoption' ])).toEqual(expectedResults);
     });
 });
 
