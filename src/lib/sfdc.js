@@ -260,8 +260,6 @@ var writeLogCachedLoggedDeferred = function (log, data, deferred) {
     writeCachedLog(log, data)
         .then(function () {
             deferred.resolve(data);
-        }).catch(function (write_error) {
-            deferred.reject(write_error);
         });
 };
 

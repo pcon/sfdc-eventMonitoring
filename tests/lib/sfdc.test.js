@@ -1,5 +1,6 @@
 var jsforce = require('jsforce');
 var jsonfile = require('jsonfile');
+var Q = require('q');
 
 jest.mock('fs', function () {
     return {
@@ -439,4 +440,76 @@ describe('Get cached log', function () {
             expect(data).toEqual({ foo: 'bar' });
         });
     });
+});
+
+describe('Write cached log', function () {
+    test('No cache', function () {
+        global.config.debug = true;
+        var log = {
+            Id: 'abc',
+            LogDate: '2018-07-29T09:00:00.000Z'
+        };
+        var data = [];
+
+        jest.spyOn(console, 'log').mockImplementationOnce(function () {});
+
+        expect.assertions(1);
+        return sfdc.functions.writeCachedLog(log, data).then(function () {
+            expect(console.log).toHaveBeenCalledWith('No cache folder set'); // eslint-disable-line no-console
+        });
+    });
+
+    test('Invalid write', function () {
+        var log = {
+            Id: 'def',
+            LogDate: '2018-07-29T09:00:00.000Z'
+        };
+        var data = [ 'a', 'b', 'c' ];
+        global.config.cache = '/tmp/';
+        global.config.debug = true;
+
+        jest.spyOn(console, 'log').mockImplementation(function () {});
+
+        jsonfile.writeFile.mockImplementation(function (filename, json_data, cb) {
+            expect(json_data).toEqual(data);
+            expect(filename).toEqual('/tmp/1532854800000_def.json');
+            cb('I AM ERROR');
+        });
+
+        expect.assertions(3);
+        return sfdc.functions.writeCachedLog(log, data).then(function () {
+            expect(console.log).toHaveBeenCalledTimes(3); // eslint-disable-line no-console
+        });
+    });
+
+    test('Valid read', function () {
+        var log = {
+            Id: 'def',
+            LogDate: '2018-07-29T09:00:00.000Z'
+        };
+        global.config.cache = '/tmp/';
+        var data = [ 'a', 'b', 'c' ];
+
+        jsonfile.writeFile.mockImplementation(function (filename, json_data, cb) {
+            expect(json_data).toEqual(data);
+            expect(filename).toEqual('/tmp/1532854800000_def.json');
+            cb(undefined);
+        });
+
+        expect.assertions(2);
+        return sfdc.functions.writeCachedLog(log, data).then(function () {});
+    });
+});
+
+test('Write cached log deferred', function () {
+    var log = {
+        Id: 'def',
+        LogDate: '2018-07-29T09:00:00.000Z'
+    };
+    var data = [ 'a', 'b', 'c' ];
+    var deferred = Q.defer();
+
+    sfdc.functions.writeLogCachedLoggedDeferred(log, data, deferred);
+
+    return expect(deferred.promise).resolves.toBe(data);
 });
