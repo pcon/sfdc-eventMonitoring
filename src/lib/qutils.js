@@ -6,7 +6,7 @@ var Q = require('q');
  * @param {object[]} results Results from the Q
  * @return {object} The errors and the results
  */
-function splitResultValues(results) {
+var splitResultValues = function (results) {
     var returnObj = {
         values: [],
         errors: []
@@ -16,12 +16,12 @@ function splitResultValues(results) {
         if (result.state === 'fulfilled') {
             returnObj.values.push(result.value);
         } else {
-            returnObj.errors.push(result.reson);
+            returnObj.errors.push(result.reason);
         }
     });
 
     return returnObj;
-}
+};
 
 /**
  * Gets all the fulfilled values
@@ -37,9 +37,9 @@ var getResultValues = function (results) {
  * @param {object[]} results Results from the Q
  * @return {object[]} All of the errors
  */
-function getResultErrors(results) {
+var getResultErrors = function (results) {
     return splitResultValues(results).errors;
-}
+};
 
 /**
  * Handle settled promises
@@ -47,10 +47,10 @@ function getResultErrors(results) {
  * @param {function} func The function to run
  * @return {undefined}
  */
-function handleSettled(promises, func) {
+var handleSettled = function (promises, func) {
     Q.allSettled(promises)
         .then(func);
-}
+};
 
 /**
  * When all the promises are settled create an array of the values and push them to the value_array_field
@@ -114,6 +114,11 @@ var qutils = {
     allSettledPushArray: allSettledPushArray,
     allSettledPushValue: allSettledPushValue,
     allSettledRejectErrors: allSettledRejectErrors,
+    functions: {
+        getResultErrors: getResultErrors,
+        handleSettled: handleSettled,
+        splitResultValues: splitResultValues
+    },
     getResultValues: getResultValues,
     rejectResolve: rejectResolve
 };
