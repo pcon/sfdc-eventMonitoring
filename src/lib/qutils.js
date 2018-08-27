@@ -59,7 +59,7 @@ var handleSettled = function (promises, func) {
  * @returns {undefined}
  */
 var allSettledPushArray = function (deferred, promises) {
-    handleSettled(promises,function (results) {
+    handleSettled(promises, function (results) {
         deferred.resolve(getResultValues(results));
     });
 };
@@ -91,7 +91,7 @@ var allSettledPushValue = function (deferred, promises, grouping, value_array_fi
  */
 var allSettledRejectErrors = function (deferred, promises) {
     handleSettled(promises, function (results) {
-        qutils.rejectResolve(deferred, getResultErrors(results), undefined);
+        rejectResolve(deferred, getResultErrors(results), undefined);
     });
 };
 
