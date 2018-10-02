@@ -36,7 +36,7 @@ eventmonitoring --username user@example.com --password donthackme --token 123abc
 
 ### Logging
 Flags
-*   **--debug* - Enables debug logging
+*   **--debug** - Enables debug logging
 *   **--logformat=\[console,bunyan\]** - The log format to use
 *   **--logfile=\[pathtofile\]** - The logfile to output to. Only used with `--logformat=bunyan`
 
