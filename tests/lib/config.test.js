@@ -468,11 +468,11 @@ describe('Load helper', function () {
         global.config.helper = undefined;
         global.config.debug = true;
 
-        jest.spyOn(console, 'log').mockImplementationOnce(function () {});
+        jest.spyOn(console, 'debug').mockImplementationOnce(function () {});
 
         expect.assertions(1);
         return config.functions.loadHelper().then(function () {
-            expect(console.log).toHaveBeenCalledWith('No helper defined'); // eslint-disable-line no-console
+            expect(console.debug).toHaveBeenCalledWith('No helper defined'); // eslint-disable-line no-console
         });
     });
 
@@ -490,11 +490,11 @@ describe('Load helper', function () {
         global.config.helper = 'errorfile';
         global.config.debug = true;
 
-        jest.spyOn(console, 'log').mockImplementationOnce(function () {});
+        jest.spyOn(console, 'debug').mockImplementationOnce(function () {});
 
         expect.assertions(1);
         return config.functions.loadHelper().then(function () {
-            expect(console.log).toHaveBeenCalledWith('Unable to load "errorfile" (oh noes)'); // eslint-disable-line no-console
+            expect(console.debug).toHaveBeenCalledWith('Unable to load "errorfile" (oh noes)'); // eslint-disable-line no-console
         });
     });
 });

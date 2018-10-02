@@ -8,6 +8,7 @@ var utils = require('../../src/lib/utils.js');
 var errorCodes = require('../../src/lib/errorCodes.js');
 var sfdc = require('../../src/lib/sfdc.js');
 global.logger = require('../../src/lib/logger.js');
+global.printer = require('../../src/lib/printer.js');
 
 beforeEach(function () {
     jest.restoreAllMocks();

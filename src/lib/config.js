@@ -1,3 +1,4 @@
+var bunyan = require('bunyan');
 var ini = require('ini');
 var fs = require('fs');
 var lo = require('lodash');
@@ -6,6 +7,7 @@ var path = require('path');
 var process = require('process');
 var Q = require('q');
 
+var pkg = require('../../package.json');
 var errorCodes = require('./errorCodes.js');
 var logging = require('./logging.js');
 var statics_config = require('./statics/config.js');
@@ -114,6 +116,52 @@ var loadHelper = function () {
     }
 
     return deferred.promise;
+};
+
+/**
+ * Gets if the log format meets the expected format
+ * @param {string} expectedFormat The expected format
+ * @returns {boolean} If the logformat matches
+ */
+var isLogFormat = function (expectedFormat) {
+    return global.config.logformat === expectedFormat;
+};
+
+/**
+ * Gets if we are using bunyan logging
+ * @returns {boolean} If we are using bunyan
+ */
+var isBunyanLogging = function () {
+    return isLogFormat('bunyan');
+};
+
+/**
+ * Sets up the logger function
+ * @returns {undefined}
+ */
+var setupLogger = function () {
+    if (isBunyanLogging()) {
+        var stream = { level: 'info' };
+
+        if (global.config.debug) {
+            stream.level = 'debug';
+        }
+
+        if (global.config.logfile !== undefined) {
+            stream.path = global.config.logfile;
+        } else {
+            stream.stream = process.stdout;
+        }
+
+        global.loggerfunction = bunyan.createLogger({
+            name: pkg.name,
+            streams: [ stream ]
+        });
+
+        return;
+    }
+
+    global.loggerfunction = console;
 };
 
 /**
@@ -355,6 +403,7 @@ var config = {
     loginAndRunHandler: loginAndRunHandler,
     merge: merge,
     setupGlobals: setupGlobals,
+    setupLogger: setupLogger,
     yargs: {
         config: yargsConfig,
         generateOptions: yargsGenerateOptions,

@@ -169,6 +169,7 @@ function outputLogs(logs) {
  */
 function run(args) {
     conf.merge(args);
+    conf.setupLogger();
 
     sfdc.login()
         .then(queryLogs)

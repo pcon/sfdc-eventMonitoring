@@ -138,11 +138,11 @@ var printStats = function (stats) {
     ];
     var output_info = statics.report.generateOutputInfo(columns);
 
-    global.logger.log(chalk.bold('Total Size Usage: ') + formatter.prettybytes(stats.total));
-    global.logger.log(chalk.bold('      JSON Usage: ') + formatter.prettybytes(stats.json));
-    global.logger.log(chalk.bold('       CSV Usage: ') + formatter.prettybytes(stats.csv));
-    global.logger.log('\n');
-    global.logger.log(table(utils.generateTableData(lo.sortBy(lo.values(stats.by_date), 'date'), columns, output_info)));
+    global.printer.print(chalk.bold('Total Size Usage: ') + formatter.prettybytes(stats.total));
+    global.printer.print(chalk.bold('      JSON Usage: ') + formatter.prettybytes(stats.json));
+    global.printer.print(chalk.bold('       CSV Usage: ') + formatter.prettybytes(stats.csv));
+    global.printer.print('\n');
+    global.printer.print(table(utils.generateTableData(lo.sortBy(lo.values(stats.by_date), 'date'), columns, output_info)));
 
     deferred.resolve();
 

@@ -383,7 +383,7 @@ var generateTableData = function (rows, columns, output_info) {
  * @returns {undefined}
  */
 var printJSON = function (data) {
-    global.logger.log(JSON.stringify(data));
+    global.printer.print(JSON.stringify(data));
 };
 
 /**
@@ -400,9 +400,9 @@ var printFormattedData = function (data, columns, output_info) {
         printJSON(data);
     } else if (global.config.format === 'table') {
         if (lo.isEmpty(data)) {
-            global.logger.log('No data to display');
+            global.printer.print('No data to display');
         } else {
-            global.logger.log(table(generateTableData(data, columns, output_info)));
+            global.printer.print(table(generateTableData(data, columns, output_info)));
         }
     }
 

@@ -246,21 +246,21 @@ var sortAndLimitData = function (data) {
  */
 var printSummaryLine = function (data) {
     if (lo.isUndefined(data.info.username)) {
-        global.logger.log(chalk.bold('User Id: ') + data.info.userid);
+        global.printer.print(chalk.bold('User Id: ') + data.info.userid);
     } else {
-        global.logger.log(chalk.bold('Username: ') + data.info.username + ' (' + data.info.userid + ')');
+        global.printer.print(chalk.bold('Username: ') + data.info.username + ' (' + data.info.userid + ')');
     }
-    global.logger.log(chalk.bold('Total Logins: ') + data.counts.login);
+    global.printer.print(chalk.bold('Total Logins: ') + data.counts.login);
 
     var totalLogouts = data.counts.explicitLogout + data.counts.implicitLogout;
-    global.logger.log(
+    global.printer.print(
         chalk.bold('Total Logouts: ') + lo.padEnd(totalLogouts, 10) +
         chalk.bold('Explicit: ') + lo.padEnd(data.counts.explicitLogout, 10) +
         chalk.bold('Implicit: ') + data.counts.implicitLogout
     );
 
     if (data.averages.sessionLength !== 0) {
-        global.logger.log(chalk.bold('Average Session Length: ') + formatter.prettyms(data.averages.sessionLength));
+        global.printer.print(chalk.bold('Average Session Length: ') + formatter.prettyms(data.averages.sessionLength));
     }
 
     var table_data = [ [
@@ -287,10 +287,10 @@ var printSummaryLine = function (data) {
     });
 
     if (lo.size(table_data) > 1) {
-        global.logger.log(table(table_data));
+        global.printer.print(table(table_data));
     }
 
-    global.logger.log('');
+    global.printer.print('');
 };
 
 /**

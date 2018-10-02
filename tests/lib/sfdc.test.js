@@ -383,12 +383,12 @@ describe('Get cached log', function () {
             LogDate: '2018-07-29T09:00:00.000Z'
         };
 
-        jest.spyOn(console, 'log').mockImplementationOnce(function () {});
+        jest.spyOn(console, 'debug').mockImplementationOnce(function () {});
 
         expect.assertions(2);
         return sfdc.functions.getCachedLog(log).then(function (data) {
             expect(data).toBeUndefined();
-            expect(console.log).toHaveBeenCalledWith('No cache folder set'); // eslint-disable-line no-console
+            expect(console.debug).toHaveBeenCalledWith('No cache folder set'); // eslint-disable-line no-console
         });
     });
 
@@ -451,11 +451,11 @@ describe('Write cached log', function () {
         };
         var data = [];
 
-        jest.spyOn(console, 'log').mockImplementationOnce(function () {});
+        jest.spyOn(console, 'debug').mockImplementationOnce(function () {});
 
         expect.assertions(1);
         return sfdc.functions.writeCachedLog(log, data).then(function () {
-            expect(console.log).toHaveBeenCalledWith('No cache folder set'); // eslint-disable-line no-console
+            expect(console.debug).toHaveBeenCalledWith('No cache folder set'); // eslint-disable-line no-console
         });
     });
 
@@ -468,7 +468,7 @@ describe('Write cached log', function () {
         global.config.cache = '/tmp/';
         global.config.debug = true;
 
-        jest.spyOn(console, 'log').mockImplementation(function () {});
+        jest.spyOn(console, 'debug').mockImplementation(function () {});
 
         jsonfile.writeFile.mockImplementation(function (filename, json_data, cb) {
             expect(json_data).toEqual(data);
@@ -478,7 +478,7 @@ describe('Write cached log', function () {
 
         expect.assertions(3);
         return sfdc.functions.writeCachedLog(log, data).then(function () {
-            expect(console.log).toHaveBeenCalledTimes(3); // eslint-disable-line no-console
+            expect(console.debug).toHaveBeenCalledTimes(3); // eslint-disable-line no-console
         });
     });
 

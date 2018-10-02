@@ -39,6 +39,7 @@ function config(yargs) {
  * @returns {undefined}
  */
 function run(args) {
+    conf.setupLogger();
     conf.loginAndRunHandler(args, handlers, sfdc.login);
 }
 

@@ -29,6 +29,7 @@ function config(yargs) {
  */
 function run(args) {
     conf.merge(args);
+    conf.setupLogger();
     conf.checkHandlers(handlers, 'action');
 
     lo.get(handlers, global.config.action)();

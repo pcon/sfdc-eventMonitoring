@@ -34,6 +34,14 @@ eventmonitoring --username user@example.com --password donthackme --token 123abc
 *   **--start \[datetime\]** - The start date/time
 *   **--end \[datetime\]** - The end date/time
 
+### Logging
+Flags
+*   **--debug* - Enables debug logging
+*   **--logformat=\[console,bunyan\]** - The log format to use
+*   **--logfile=\[pathtofile\]** - The logfile to output to. Only used with `--logformat=bunyan`
+
+If you want to be able to produce debug logs and still be able to pipe the output from the command-line into another process, use `--logformat=bunyan` and `--logfile` options.  This will produce a log file that you can use with the [bunyan](https://github.com/trentm/node-bunyan) executable.
+
 ### Solenopsis
 The application support usage of [Solenopsis](http://solenopsis.org/Solenopsis/) style configuration files and locations.
 

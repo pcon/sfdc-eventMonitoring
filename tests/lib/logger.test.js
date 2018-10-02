@@ -6,10 +6,10 @@ describe('debug', function () {
 
         var message = 'testmessage';
 
-        jest.spyOn(console, 'log').mockImplementationOnce(function () {});
+        jest.spyOn(console, 'debug').mockImplementationOnce(function () {});
 
         logger.debug(message);
-        expect(console.log).toHaveBeenCalledWith(message); // eslint-disable-line no-console
+        expect(console.debug).toHaveBeenCalledWith(message); // eslint-disable-line no-console
     });
 
     test('Without debug flag', function () {

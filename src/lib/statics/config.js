@@ -49,6 +49,8 @@ module.exports = {
     interval: setChoices(generateConfig('The interval to use', 'string', undefined, 'hourly'), [ 'hourly', 'daily' ]),
     latest: generateConfig('Use the most recent data', 'boolean', undefined, true),
     limit: generateConfig('The number of results to limit to', 'number'),
+    logfile: generateConfig('The log file location to use', 'string'),
+    logformat: setChoices(generateConfig('The logging format to use', 'string', undefined, 'text'), [ 'text', 'bunyan' ]),
     maxversion: generateConfig('The max version to display', 'number'),
     password: generateConfig('The Salesforce password', 'string', 'p'),
     sandbox: generateConfig('The Salesforce instance is a sandbox', 'boolean'),

@@ -266,14 +266,14 @@ var printCounts = function (data) {
     var deferred = Q.defer();
 
     if (global.config.format === 'json') {
-        global.logger.log(JSON.stringify(data.grouping));
+        global.printer.print(JSON.stringify(data.grouping));
     } else if (global.config.format === 'table') {
         if (global.config.summary) {
-            global.logger.log(table(utils.generateTableData(data.grouping, SUMMARY_COLUMNS, SUMMARY_OUTPUT_INFO)));
+            global.printer.print(table(utils.generateTableData(data.grouping, SUMMARY_COLUMNS, SUMMARY_OUTPUT_INFO)));
         } else {
             lo.forEach(data.grouping, function (group) {
-                global.logger.log(formatGroupInfo(group));
-                global.logger.log(formatEndpointData(group));
+                global.printer.print(formatGroupInfo(group));
+                global.printer.print(formatEndpointData(group));
             });
         }
     }

@@ -16,6 +16,7 @@ var statics = require('./src/lib/statics.js');
 
 global.config = { url: undefined };
 global.logger = require('./src/lib/logger.js');
+global.printer = require('./src/lib/printer.js');
 
 var OPTIONS = {
     env: statics.CONFIG.env,
@@ -31,6 +32,8 @@ var OPTIONS = {
     end: statics.CONFIG.end,
     date: statics.CONFIG.date,
     helper: statics.CONFIG.helper,
+    logfile: statics.CONFIG.logfile,
+    logformat: statics.CONFIG.logformat,
     debug: statics.CONFIG.debug
 };
 

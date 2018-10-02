@@ -124,6 +124,7 @@ function filterAverages(data) {
  */
 function run(args) {
     conf.merge(args);
+    conf.setupLogger();
     conf.checkHandlers(handlers);
 
     conf.setupGlobals()
