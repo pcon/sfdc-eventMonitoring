@@ -393,7 +393,9 @@ var config = {
         getConfigPath: getConfigPath,
         getHomeParam: getHomeParam,
         getUserHome: getUserHome,
-        loadHelper: loadHelper
+        loadHelper: loadHelper,
+        isLogFormat: isLogFormat,
+        isBunyanLogging: isBunyanLogging
     },
     isJSON: isJSON,
     isTable: isTable,

@@ -23,6 +23,7 @@
     ]
   },
   "jest": {
+    "collectCoverage": true,
     "collectCoverageFrom": [
       "src/**/*.js",
       "eventmonitoring.js"

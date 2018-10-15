@@ -26,6 +26,7 @@ var pretendPlatform = require('pretend-platform');
 var moment = require('moment');
 var path = require('path');
 var Q = require('q');
+var bunyan = require('bunyan');
 
 var config = require('../../src/lib/config.js');
 var errorCodes = require('../../src/lib/errorCodes.js');
@@ -566,5 +567,108 @@ describe('Is Table', function () {
         global.config.format = 'json';
 
         expect(config.isTable()).not.toBeTruthy();
+    });
+});
+
+describe('Is log format', function () {
+    test('True', function () {
+        global.config.logformat = 'expected';
+
+        expect(config.functions.isLogFormat('expected')).toBeTruthy();
+    });
+
+    test('False', function () {
+        global.config.logformat = 'expected';
+
+        expect(config.functions.isLogFormat('unexpected')).not.toBeTruthy();
+    });
+});
+
+describe('Is bunyan logging', function () {
+    test('True', function () {
+        global.config.logformat = 'bunyan';
+
+        expect(config.functions.isBunyanLogging()).toBeTruthy();
+    });
+
+    test('False', function () {
+        global.config.logformat = 'somethingelse';
+
+        expect(config.functions.isBunyanLogging()).not.toBeTruthy();
+    });
+});
+
+describe('Setup logger', function () {
+    test('No logger set', function () {
+        global.config.logformat = 'notbunyan';
+
+        config.setupLogger();
+
+        expect(global.loggerfunction).toEqual(console);
+    });
+
+    test('Bunyan no file no debug', function () {
+        global.config.logformat = 'bunyan';
+
+        var expectedResults = {
+            name: 'sfdc-eventmonitoring',
+            streams: [
+                {
+                    level: 'info',
+                    stream: process.stdout
+                }
+            ]
+        };
+
+        jest.spyOn(bunyan, 'createLogger').mockImplementationOnce(function (config) {
+            expect(config).toEqual(expectedResults);
+        });
+        config.setupLogger();
+
+        expect.assertions(1);
+    });
+
+    test('Bunyan no file with debug', function () {
+        global.config.logformat = 'bunyan';
+        global.config.debug = true;
+
+        var expectedResults = {
+            name: 'sfdc-eventmonitoring',
+            streams: [
+                {
+                    level: 'debug',
+                    stream: process.stdout
+                }
+            ]
+        };
+
+        jest.spyOn(bunyan, 'createLogger').mockImplementationOnce(function (config) {
+            expect(config).toEqual(expectedResults);
+        });
+        config.setupLogger();
+
+        expect.assertions(1);
+    });
+
+    test('Bunyan with file', function () {
+        global.config.logformat = 'bunyan';
+        global.config.logfile = 'example.log';
+
+        var expectedResults = {
+            name: 'sfdc-eventmonitoring',
+            streams: [
+                {
+                    level: 'info',
+                    path: 'example.log'
+                }
+            ]
+        };
+
+        jest.spyOn(bunyan, 'createLogger').mockImplementationOnce(function (config) {
+            expect(config).toEqual(expectedResults);
+        });
+        config.setupLogger();
+
+        expect.assertions(1);
     });
 });
