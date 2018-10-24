@@ -97,15 +97,16 @@ function generateFilename(filename, type) {
 /**
  * Splits the logs and writes them to multiple files
  * @param {array} logs The logs to write
+ * @param {function} write_method The method to write the file
  * @returns {Promise} A promise for when the logs have been written
  */
-function splitLogsAndWrite(logs) {
+function splitLogsAndWrite(logs, write_method) {
     var deferred = Q.defer();
     var promises = [];
     var split_logs = utils.splitByField(logs, 'EVENT_TYPE');
 
     lo.forEach(split_logs, function (logs, type) {
-        promises.push(utils.writeJSONtoFile(logs, generateFilename(global.config.file, type)));
+        promises.push(write_method(logs, generateFilename(global.config.file, type)));
     });
 
     Q.allSettled(promises)
@@ -120,29 +121,32 @@ function splitLogsAndWrite(logs) {
 }
 
 /**
- * Handle writing JSON to a file
+ * Handle writing data to a file
  * @param {object[]} logs The logs
+ * @param {function} write_method The method to write the file
  * @returns {Promise} A promise for when the data has been outputted
  */
-function handleJSONFile(logs) {
+function handleFile(logs, write_method) {
     if (global.config.split) {
-        return splitLogsAndWrite(logs);
+        return splitLogsAndWrite(logs, write_method);
     }
 
-    return utils.writeJSONtoFile(logs, global.config.file);
+    return write_method(logs, global.config.file);
 }
 
 /**
  * Handle JSON logs
  * @param {object[]} logs The logs
+ * @param {function} file_method The method to write the file
+ * @param {function} console_method The method to write the console
  * @returns {Promise} A promise for when the data has been outputted
  */
-function handleJSON(logs) {
+function handle(logs, file_method, console_method) {
     if (global.config.file) {
-        return handleJSONFile(logs);
+        return handleFile(logs, file_method);
     }
 
-    return utils.outputJSONToConsole(logs);
+    return console_method(logs);
 }
 
 /**
@@ -152,7 +156,7 @@ function handleJSON(logs) {
  */
 function outputLogs(logs) {
     if (isJSON()) {
-        return handleJSON(logs);
+        return handle(logs, utils.writeJSONtoFile, utils.outputJSONToConsole);
     }
 
     var deferred = Q.defer();
