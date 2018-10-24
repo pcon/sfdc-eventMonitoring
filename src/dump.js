@@ -24,8 +24,7 @@ function config(yargs) {
     ]));
 
     options.format.default = 'json';
-    options.format.choices = [ 'json' ];
-    options.format.hidden = true;
+    options.format.choices = [ 'json', 'csv' ];
 
     options.type = {
         default: undefined,
@@ -54,6 +53,14 @@ function isJSON() {
 }
 
 /**
+ * Are we suppose to be returning csv
+ * @returns {boolean} If the requested format is csv
+ */
+function isCSV() {
+    return getFormat() === 'csv';
+}
+
+/**
  * Get all the logs that are requested
  * @returns {Promise} A promise for the event logs
  */
@@ -69,7 +76,7 @@ function queryLogs() {
  * @returns {Promise} A promise for all the log file contents
  */
 function downloadLogs(event_log_files) {
-    if (isJSON()) {
+    if (isJSON() || isCSV()) {
         return utils.fetchAndConvert(event_log_files);
     }
 
@@ -157,6 +164,10 @@ function handle(logs, file_method, console_method) {
 function outputLogs(logs) {
     if (isJSON()) {
         return handle(logs, utils.writeJSONtoFile, utils.outputJSONToConsole);
+    }
+
+    if (isCSV()) {
+        return handle(logs, utils.writeCSVtoFile, utils.outputCSVToConsole);
     }
 
     var deferred = Q.defer();

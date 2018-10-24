@@ -130,7 +130,7 @@ eventmonitoring cache clear --start 2018-07-18T00:00:00.000Z --end 2018-07-18T02
 This sub command dumps all the data to stdout or disk
 
 **Flags**
-*   **--format \[format\]** - json - The format the output should be displayed in
+*   **--format \[format\]** - json, csv - The format the output should be displayed in
 *   **--type \[type\]** - The event type to dump
 *   **--split** - Split the files based on event type
 *   **--file \[filename\]** - The filename to save the data to

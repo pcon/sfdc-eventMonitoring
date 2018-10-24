@@ -3,11 +3,14 @@ var lo = require('lodash');
 var jsonfile = require('jsonfile');
 var moment = require('moment');
 var Q = require('q');
+var createCsvWriter = require('csv-writer').createObjectCsvWriter;
+var createCsvStringifier = require('csv-writer').createObjectCsvStringifier;
 
 const { table } = require('table');
 
 var errorCodes = require('./errorCodes.js');
 var sfdc = require('./sfdc.js');
+var printer = require('./printer.js');
 
 /**
  * Trims a provided Id down to 15 characters
@@ -432,6 +435,63 @@ var writeJSONtoFile = function (data, filename) {
 };
 
 /**
+ * Generates the CSV header
+ * @param {object} data The data
+ * @return {object[]} The header information
+ */
+function generateCSVheader(data) {
+    var results = [];
+
+    lo.forEach(lo.keys(lo.head(data)), function (field_name) {
+        results.push({
+            id: field_name,
+            title: field_name
+        });
+    });
+
+    return results;
+}
+
+/**
+ * Write CSV data to a file
+ * @param {object} data The data
+ * @param {string} filename The file name
+ * @returns {Promise} A promise for when the file was written
+ */
+var writeCSVtoFile = function (data, filename) {
+    var deferred = Q.defer();
+    var csvWriter = createCsvWriter({
+        path: filename,
+        header: generateCSVheader(data)
+    });
+
+    csvWriter.writeRecords(data)
+        .then(function () {
+            deferred.resolve();
+        }).catch(function (error) {
+            deferred.reject(error);
+        });
+
+    return deferred.promise;
+};
+
+/**
+ * Output the logs to the console
+ * @param {array} data The data to output
+ * @returns {Promise} A promise for when the data has been outputted
+ */
+var outputCSVToConsole = function (data) {
+    var deferred = Q.defer();
+    var csvStringifier = createCsvStringifier({ header: generateCSVheader(data) });
+
+    printer.print(lo.trim(csvStringifier.getHeaderString()));
+    printer.print(csvStringifier.stringifyRecords(data));
+    deferred.resolve();
+
+    return deferred.promise;
+};
+
+/**
  * Splits data to a map by a field
  * @param {object} data The data
  * @param {string} field_name The field name
@@ -511,6 +571,7 @@ var utils = {
     limitArray: limitArray,
     limitNoPromise: limitNoPromise,
     limitResults: limitResults,
+    outputCSVToConsole: outputCSVToConsole,
     outputJSONToConsole: outputJSONToConsole,
     printJSON: printJSON,
     printFormattedData: printFormattedData,
@@ -524,6 +585,7 @@ var utils = {
     toTimestamp: toTimestamp,
     trimId: trimId,
     updateUserIdCriteria: updateUserIdCriteria,
+    writeCSVtoFile: writeCSVtoFile,
     writeJSONtoFile: writeJSONtoFile
 };
 
