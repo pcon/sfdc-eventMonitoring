@@ -21,6 +21,6 @@ lasttimestamp=`curl -s -H "Accept: application/json" -H "X-Query-Key: $NEWRELIC_
 	jq '.results[0].max'`
 
 eventmonitoring dump --type ApexCallout --format json -d --logformat=bunyan --logfile $LOG_FILE | \
-	jq --arg lasttimestamp $lasttimestamp -f jq_transform | \
+	jq --arg lasttimestamp $lasttimestamp -f jq_transform_apexCallouts | \
 	curl -d @- -X POST -H "Content-Type: application/json" -H "X-Insert-Key: $NEWRELIC_INSERT_KEY" \
 		https://insights-collector.newrelic.com/v1/accounts/$NEWRELIC_ACCOUNT_ID/events
