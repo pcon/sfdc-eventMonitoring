@@ -1,6 +1,6 @@
-# Send Apex Callouts to New Relic Insights
+# Send data to New Relic Insights
 
-This example script pulls the most recent `ApexCallout` records and pushes them to New Relic's Insight.  This is useful for reporting on outliers for callout load times or callout failures.
+These example scripts pull the most recent `ApexCallout` or `ApexSoap` records and push them to New Relic's Insight.  This is useful for reporting on outliers for callout load times or callout failures.
 
 ## Prerequisites
 1.  A [New Relic](https://newrelic.com) account with the Insights capabilities
@@ -12,8 +12,8 @@ This example script pulls the most recent `ApexCallout` records and pushes them 
 I found that this is most useful when run via cron and a wrapper script.
 
 1.  Create a directory for the script and `jq_transform` file to live in.  (eg `$HOME/eventmonitoring/scripts/apexcallouts/`)
-2.  Download the `insertApexCallouts.sh` and `jq_transform` file into that directory
-3.  Create a wrapper script `newrelic.sh` to call `insertApexCallouts.sh` inside your directory
+2.  Download the `insertApexCallouts.sh` or `insertApexSoap.sh` and the matching `jq_transform` file into that directory
+3.  Create a wrapper script `newrelic.sh` to call the script inside your directory
     ```bash
     export PATH="$PATH:$HOME/bin"
 
