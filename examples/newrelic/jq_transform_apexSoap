@@ -17,7 +17,7 @@ def fixurl(url): url | ltrimstr("\"") | rtrimstr("\"");
 	clientName: .CLIENT_NAME,
 	className: .CLASS_NAME,
 	methodName: .METHOD_NAME,
-	limitPercent: .LIMIT_USAGE_PERCENT,
+	limitPercent: .LIMIT_USAGE_PERCENT | tonumber,
 	query: .QUERY,
 	clientIP: .CLIENT_IP
 } | select(.timestamp > ($lasttimestamp | tonumber))]
