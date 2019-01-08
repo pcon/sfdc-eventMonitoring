@@ -27,7 +27,9 @@ lasttimestamp=`curl -s -H "Accept: application/json" -H "X-Query-Key: $NEWRELIC_
 	"https://insights-api.newrelic.com/v1/accounts/$NEWRELIC_ACCOUNT_ID/query?nrql=select+max(timestamp)+from+ApexCallout+since+6+hours+ago" | \
 	jq '.results[0].max'`
 
-eventmonitoring dump --type ApexCallout --format json -d --logformat=bunyan --logfile $LOG_FILE | \
+YESTERDAY=`date --date="yesterday" "+%Y-%m-%d"`
+
+eventmonitoring dump --type ApexCallout --format json -d --logformat=bunyan --logfile $LOG_FILE --start $YESTERDAY | \
 	jq --arg lasttimestamp $lasttimestamp -f jq_transform_apexCallouts > $TMP_FILE
 
 sh chunkAndInsert.sh $TMP_FILE
