@@ -91,7 +91,7 @@ var getFiles = function (start, end) {
         } else {
             lo.forEach(files, function (file) {
                 var m_date = moment.utc(parseInt(file.split('_')));
-                if (m_date.isBetween(start, end, null, '[]')) {
+                if (m_date.isBetween(start, end, 'day', '[]')) {
                     file_list.push(file);
                 }
             });

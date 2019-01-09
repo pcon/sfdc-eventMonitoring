@@ -22,7 +22,11 @@ var debug = function (message) {
         global.config !== undefined &&
         global.config.debug
     ) {
-        global.loggerfunction.debug(message);
+        if (global.loggerfunction === console) {
+            global.loggerfunction.info(message);
+        } else {
+            global.loggerfunction.debug(message);
+        }
     }
 };
 
