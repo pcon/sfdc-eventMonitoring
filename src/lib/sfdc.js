@@ -160,6 +160,31 @@ var query = function (query_string) {
 };
 
 /**
+ * Makes a bulk query
+ * @param {string} query_string The query
+ * @returns {Promise} A promise for the results
+ */
+var bulkquery = function (query_string) {
+    var deferred = Q.defer();
+    var errors = [];
+    var records = [];
+
+    global.sfdc_conn.bulk.pollInterval = 5000;
+    global.sfdc_conn.bulk.pollTimeout = 60000;
+
+    global.sfdc_conn.bulk.query(query_string)
+        .on('record', function (record) {
+            records.push(record);
+        }).on('error', function (error) {
+            errors.push(error);
+        }).on('finish', function () {
+            qutils.rejectResolve(deferred, errors, records);
+        });
+
+    return deferred.promise;
+};
+
+/**
  * Generates a file name based on a log
  * @param {object} log The log file to generate a name for
  * @param {string} extension The file extension
@@ -385,7 +410,8 @@ var sfdc = {
     },
     login: login,
     logout: logout,
-    query: query
+    query: query,
+    bulkquery: bulkquery
 };
 
 module.exports = sfdc;

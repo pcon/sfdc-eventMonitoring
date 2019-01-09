@@ -40,7 +40,7 @@ var printResults = function (data) {
 var run = function () {
     'use strict';
 
-    sfdc.query(queries.utils.userdump())
+    sfdc.bulkquery(queries.utils.userdump())
         .then(modifyData)
         .then(printResults)
         .catch(logging.logError);
