@@ -13,6 +13,7 @@ var dump = require('./src/dump.js');
 var login = require('./src/login.js');
 var report = require('./src/report.js');
 var statics = require('./src/lib/statics.js');
+var utils = require('./src/utils.js');
 
 global.config = { url: undefined };
 global.logger = require('./src/lib/logger.js');
@@ -58,6 +59,7 @@ var run = function () {
         .command('dump', 'Dump data', dump.config, dump.run)
         .command('login [type]', 'Login information', login.config, login.run)
         .command('report [type]', 'Display a report', report.config, report.run)
+        .command('utils [type]', 'Utility methods', utils.config, utils.run)
         .argv;
 
     deferred.resolve();

@@ -58,7 +58,11 @@ var formatCriteria = function (criteria) {
  */
 var buildSimpleQuery = function (fields, object_name, criteria, order_by, limit) {
     var final_criteria = formatCriteria(criteria);
-    var query = 'select ' + lo.join(fields, ', ') + ' from ' + object_name + ' where ' + final_criteria;
+    var query = 'select ' + lo.join(fields, ', ') + ' from ' + object_name;
+
+    if (!lo.isEmpty(final_criteria)) {
+        query += ' where ' + final_criteria;
+    }
 
     if (order_by !== undefined) {
         query += ' order by ' + order_by;
@@ -247,7 +251,16 @@ var reportVisualforce = function () {
     return getAllLogs('VisualforceRequest');
 };
 
+/**
+ * Gets information about all users
+ * @returns {string} The query
+ */
+var utilsUserdump = function () {
+    return buildSimpleQuery(USER_FIELDS, USER);
+};
+
 var queries = {
+    constants: {USER_FIELDS: USER_FIELDS},
     show: {
         apiusage: showAPIUsage,
         logins: showLogins
@@ -273,7 +286,8 @@ var queries = {
         apextrigger: reportApexTrigger,
         report: reportReport,
         visualforce: reportVisualforce
-    }
+    },
+    utils: {userdump: utilsUserdump}
 };
 
 module.exports = queries;
