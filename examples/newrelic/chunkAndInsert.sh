@@ -37,7 +37,7 @@ do
 	END=$[$START + CHUNK_SIZE]
 	cat $FILE | \
 		jq ".[$START:$END]" | \
-		curl -s -d @- -X POST -H "Content-Type: application/json" -H "X-Insert-Key: $NEWRELIC_INSERT_KEY" \
+		curl -d @- -X POST -H "Content-Type: application/json" -H "X-Insert-Key: $NEWRELIC_INSERT_KEY" \
 			https://insights-collector.newrelic.com/v1/accounts/$NEWRELIC_ACCOUNT_ID/events
 	START=$END
 done

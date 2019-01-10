@@ -21,6 +21,7 @@ I found that this is most useful when run via cron and a wrapper script.
     export NEWRELIC_INSERT_KEY="xxxxx"
     export NEWRELIC_QUERY_KEY="yyyyy"
     export LOG_FILE="/path/to/logfile.log"
+    export USER_TMP="/path/to/usermap.json"
 
     sh insertApexCallouts.sh > /dev/null
     ```

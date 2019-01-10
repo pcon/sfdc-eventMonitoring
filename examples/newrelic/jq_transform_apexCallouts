@@ -1,5 +1,6 @@
 def totimestamp(td): td[:19] + "Z" | fromdate * 1000;
 def fixurl(url): url | ltrimstr("\"") | rtrimstr("\"");
+def getusername(id): $usermap[0][id];
 
 [.[] | {
 	eventType: .EVENT_TYPE,
@@ -7,6 +8,7 @@ def fixurl(url): url | ltrimstr("\"") | rtrimstr("\"");
 	requestId: .REQUEST_ID,
 	sessionId: .SESSION_KEY,
 	userId: .USER_ID,
+	username: getusername(.USER_ID),
 	success: .SUCCESS,
 	url: fixurl(.URL),
 	uri: .URI,
