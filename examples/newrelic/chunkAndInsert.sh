@@ -24,20 +24,28 @@ then
 	{ echo >&2 "$FILE does not exist.  Aborting."; exit 1;}
 fi
 
+if [ ! -s $FILE ]
+then
+	{ echo >&2 "$FILE is empty.  Aborting."; exit 1;}
+fi
+
 CHUNK_SIZE=1500
 START=0
 
-echo "$FILE"
 RECORD_SIZE=`cat $FILE | jq 'length'`
 
-echo "$RECORD_SIZE"
+if [ -z "$RECORD_SIZE" ]
+then
+	echo "RECORD_SIZE is empty"
+	exit 1
+fi
 
 while [ $START -lt $RECORD_SIZE ]
 do
 	END=$[$START + CHUNK_SIZE]
 	cat $FILE | \
 		jq ".[$START:$END]" | \
-		curl -d @- -X POST -H "Content-Type: application/json" -H "X-Insert-Key: $NEWRELIC_INSERT_KEY" \
-			https://insights-collector.newrelic.com/v1/accounts/$NEWRELIC_ACCOUNT_ID/events
+		curl -s -d @- -X POST -H "Content-Type: application/json" -H "X-Insert-Key: $NEWRELIC_INSERT_KEY" \
+			https://insights-collector.newrelic.com/v1/accounts/$NEWRELIC_ACCOUNT_ID/events | jq .
 	START=$END
 done

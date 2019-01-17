@@ -1,6 +1,7 @@
 def totimestamp(td): td[:19] + "Z" | fromdate * 1000;
 def fixurl(url): url | ltrimstr("\"") | rtrimstr("\"");
 def getusername(id): $usermap[0][id];
+def tonumbercustom: try tonumber catch null;
 
 [.[] | {
 	eventType: .EVENT_TYPE,
@@ -14,7 +15,7 @@ def getusername(id): $usermap[0][id];
 	uri: .URI,
 	type: .TYPE,
 	method: .METHOD,
-	time: .TIME | tonumber,
-	requestSize: .REQUEST_SIZE | tonumber,
-	responseSize: .RESPONSE_SIZE | tonumber
+	time: .TIME | tonumbercustom,
+	requestSize: .REQUEST_SIZE | tonumbercustom,
+	responseSize: .RESPONSE_SIZE | tonumbercustom
 } | select(.timestamp > ($lasttimestamp | tonumber))]
