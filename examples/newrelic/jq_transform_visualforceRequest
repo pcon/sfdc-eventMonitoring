@@ -1,0 +1,34 @@
+def totimestamp(td): td[:19] + "Z" | fromdate * 1000;
+def fixurl(url): url | ltrimstr("\"") | rtrimstr("\"");
+def getusername(id): $usermap[0][id];
+def tonumbercustom: try tonumber catch null;
+def toboolean(str): if str == "1" then true else false end;
+
+[.[] | {
+	eventType: .EVENT_TYPE,
+	timestamp: totimestamp(.TIMESTAMP_DERIVED),
+	requestId: .REQUEST_ID,
+	sessionId: .SESSION_KEY,
+	userId: .USER_ID,
+	username: getusername(.USER_ID),
+	runTime: .RUN_TIME | tonumbercustom,
+	cpuTime: .CPU_TIME | tonumbercustom,
+	dbTotalTime: .DB_TOTAL_TIME | tonumbercustom,
+	uri: .URI,
+	requestStatus: .REQUEST_STATUS,
+	pageName: .PAGE_NAME,
+	requestType: .REQUEST_TYPE,
+	isFirstRequest: toboolean(.IS_FIRST_REQUEST),
+	query: .QUERY,
+	httpMethod: .HTTP_METHOD,
+	userAgent: .USER_AGENT,
+	requestSize: .REQUEST_SIZE | tonumbercustom,
+	responseSize: .RESPONSE_SIZE | tonumbercustom,
+	viewStateSize: .VIEW_STATE_SIZE | tonumbercustom,
+	controllerType: .CONTROLLER_TYPE,
+	managedPackageNamespace: .MANAGED_PACKAGE_NAMESPACE,
+	isAjaxRequest: toboolean(.IS_AJAX_REQUEST),
+	dbBlocks: .DB_BLOCKS | tonumbercustom,
+	dbCpuTime: .DB_CPU_TIME | tonumbercustom,
+	clientIP: .CLIENT_IP
+} | select(.timestamp > ($lasttimestamp | tonumber))]

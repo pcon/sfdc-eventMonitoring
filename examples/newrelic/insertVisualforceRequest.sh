@@ -21,7 +21,7 @@ checkVariable "TMP_FILE"
 checkVariable "USER_TMP"
 
 lasttimestamp=`curl -s -H "Accept: application/json" -H "X-Query-Key: $NEWRELIC_QUERY_KEY" \
-	"https://insights-api.newrelic.com/v1/accounts/$NEWRELIC_ACCOUNT_ID/query?nrql=select+max(timestamp)+from+RestApi+since+6+hours+ago" | \
+	"https://insights-api.newrelic.com/v1/accounts/$NEWRELIC_ACCOUNT_ID/query?nrql=select+max(timestamp)+from+VisualforceRequest+since+6+hours+ago" | \
 	jq '.results[0].max'`
 
 YESTERDAY=`date --date="yesterday" "+%Y-%m-%d"`
@@ -31,8 +31,8 @@ then
 	eventmonitoring utils userdump | jq '. | map({(.Id[:15]): .Username}) | add' > $USER_TMP
 fi
 
-eventmonitoring dump --type RestAPI --format json -d --logformat=bunyan --logfile $LOG_FILE --start $YESTERDAY | \
-	jq --slurpfile usermap $USER_TMP --arg lasttimestamp $lasttimestamp -f jq_transform_restApi > $TMP_FILE
+eventmonitoring dump --type VisualforceRequest --format json -d --logformat=bunyan --logfile $LOG_FILE --start $YESTERDAY | \
+	jq --slurpfile usermap $USER_TMP --arg lasttimestamp $lasttimestamp -f jq_transform_visualforceRequest > $TMP_FILE
 
 sh chunkAndInsert.sh $TMP_FILE
-rm $TMP_FILE
+#rm $TMP_FILE

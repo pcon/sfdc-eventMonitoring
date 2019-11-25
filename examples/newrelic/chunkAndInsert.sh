@@ -29,10 +29,12 @@ then
 	{ echo >&2 "$FILE is empty.  Aborting."; exit 1;}
 fi
 
-CHUNK_SIZE=1500
+CHUNK_SIZE=1250
 START=0
 
 RECORD_SIZE=`cat $FILE | jq 'length'`
+
+echo "Chunking and inserting $RECORD_SIZE records"
 
 if [ -z "$RECORD_SIZE" ]
 then
@@ -43,6 +45,7 @@ fi
 while [ $START -lt $RECORD_SIZE ]
 do
 	END=$[$START + CHUNK_SIZE]
+	echo "   [$START:$END]"
 	cat $FILE | \
 		jq ".[$START:$END]" | \
 		curl -s -d @- -X POST -H "Content-Type: application/json" -H "X-Insert-Key: $NEWRELIC_INSERT_KEY" \
